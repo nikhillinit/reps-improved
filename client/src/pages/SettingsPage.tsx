@@ -5,7 +5,14 @@
 
 import { useState } from "react";
 import { Settings, Trash2, Database, Download, Upload } from "lucide-react";
-import { loadStore, saveStore, resetStore, seedQAData } from "@/lib/store";
+import {
+  exportStore,
+  importStoreFromJson,
+  loadStore,
+  resetStore,
+  saveStore,
+  seedQAData,
+} from "@/lib/store";
 import { CONTENT_ARCHETYPES as ARCHETYPES } from "@/lib/content/catalog";
 import { toast } from "sonner";
 
@@ -44,7 +51,7 @@ export default function SettingsPage() {
   };
 
   const handleExport = () => {
-    const json = JSON.stringify(store, null, 2);
+    const json = exportStore();
     const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -64,13 +71,18 @@ export default function SettingsPage() {
       if (!file) return;
       const reader = new FileReader();
       reader.onload = ev => {
-        try {
-          const parsed = JSON.parse(ev.target?.result as string);
-          saveStore(parsed);
-          setStore(parsed);
+        const result = importStoreFromJson(String(ev.target?.result ?? ""));
+        if (!result.ok || !result.store) {
+          toast.error(result.errors[0] ?? "Invalid backup file.");
+          return;
+        }
+        setStore(result.store);
+        if (result.warnings.length > 0) {
+          toast.warning(
+            `Data imported with ${result.warnings.length} quarantined record(s).`
+          );
+        } else {
           toast.success("Data imported successfully.");
-        } catch {
-          toast.error("Invalid backup file.");
         }
       };
       reader.readAsText(file);
@@ -290,7 +302,7 @@ export default function SettingsPage() {
             lineHeight: 1.8,
           }}
         >
-          <div>REPS v2.0 — OPNS-430 Exam Drill (Improved)</div>
+          <div>REPS v3.0 — OPNS-430 Exam Drill (Improved)</div>
           <div>6 archetypes · SRS scheduling · localStorage persistence</div>
           <div style={{ marginTop: 8, color: "oklch(0.30 0.01 265)" }}>
             Improved from exam-drill.replit.app
