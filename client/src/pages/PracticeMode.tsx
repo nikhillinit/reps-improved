@@ -93,6 +93,7 @@ export default function PracticeMode() {
     const attempt: PracticeAttempt = {
       id: nanoid(),
       archetypeId: card.archetypeId,
+      problemItemId: stem?.id,
       stemId: stem?.id,
       rating,
       rootCauseIds: rating !== "correct" ? selectedRootCauses : [],

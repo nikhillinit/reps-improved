@@ -60,6 +60,7 @@ export default function RouterMode() {
     const isCorrect = archetypeId === stem.correctId;
     const attempt: RouterAttempt = {
       id: nanoid(),
+      routerStemId: stem.id,
       stem: stem.stem,
       correctArchetypeId: stem.correctId,
       selectedArchetypeId: archetypeId,
