@@ -5,9 +5,22 @@
 
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Zap, Shuffle, AlertTriangle, Trophy, BookOpen, TrendingUp } from "lucide-react";
-import { loadStore, getDueCards, getAccuracy, getOpenErrors, type RepsStore } from "@/lib/store";
-import { ARCHETYPES } from "@/lib/archetypes";
+import {
+  Zap,
+  Shuffle,
+  AlertTriangle,
+  Trophy,
+  BookOpen,
+  TrendingUp,
+} from "lucide-react";
+import {
+  loadStore,
+  getDueCards,
+  getAccuracy,
+  getOpenErrors,
+  type RepsStore,
+} from "@/lib/store";
+import { CONTENT_ARCHETYPES as ARCHETYPES } from "@/lib/content/catalog";
 
 export default function Dashboard() {
   const [, navigate] = useLocation();
@@ -19,7 +32,7 @@ export default function Dashboard() {
 
   const dueCards = getDueCards(store.cards);
   const todayReps = store.practiceAttempts.filter(
-    (a) => a.timestamp > Date.now() - 86400000
+    a => a.timestamp > Date.now() - 86400000
   ).length;
   const openErrors = getOpenErrors(store.practiceAttempts, store.cards);
 
@@ -31,10 +44,11 @@ export default function Dashboard() {
   });
 
   // Sort archetypes by accuracy ascending (weakest first)
-  const archetypeStats = ARCHETYPES.map((arch) => ({
+  const archetypeStats = ARCHETYPES.map(arch => ({
     arch,
     accuracy: getAccuracy(store.practiceAttempts, arch.id),
-    attempts: store.practiceAttempts.filter((a) => a.archetypeId === arch.id).length,
+    attempts: store.practiceAttempts.filter(a => a.archetypeId === arch.id)
+      .length,
   })).sort((a, b) => {
     if (a.attempts === 0 && b.attempts === 0) return 0;
     if (a.attempts === 0) return 1;
@@ -42,7 +56,7 @@ export default function Dashboard() {
     return a.accuracy - b.accuracy;
   });
 
-  const weakest = archetypeStats.filter((s) => s.attempts > 0).slice(0, 3);
+  const weakest = archetypeStats.filter(s => s.attempts > 0).slice(0, 3);
 
   return (
     <div>
@@ -99,10 +113,14 @@ export default function Dashboard() {
               cursor: "pointer",
               transition: "background 150ms ease-out, transform 80ms ease-out",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "oklch(0.65 0.14 65)")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "oklch(0.78 0.17 65)")}
-            onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.97)")}
-            onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
+            onMouseEnter={e =>
+              (e.currentTarget.style.background = "oklch(0.65 0.14 65)")
+            }
+            onMouseLeave={e =>
+              (e.currentTarget.style.background = "oklch(0.78 0.17 65)")
+            }
+            onMouseDown={e => (e.currentTarget.style.transform = "scale(0.97)")}
+            onMouseUp={e => (e.currentTarget.style.transform = "scale(1)")}
           >
             <Zap size={16} />
             Start Practice
@@ -123,7 +141,9 @@ export default function Dashboard() {
           value={dueCards.length}
           label="Cards Due"
           accent={dueCards.length > 0}
-          sub={dueCards.length > 0 ? "Start your session now" : "All caught up!"}
+          sub={
+            dueCards.length > 0 ? "Start your session now" : "All caught up!"
+          }
         />
         <StatCard value={todayReps} label="Today's Reps" />
         <StatCard
@@ -190,7 +210,7 @@ export default function Dashboard() {
               >
                 WEAKEST:
               </span>
-              {weakest.map((s) => (
+              {weakest.map(s => (
                 <span
                   key={s.arch.id}
                   style={{
@@ -249,8 +269,8 @@ function StatCard({
   const valueColor = danger
     ? "oklch(0.62 0.22 25)"
     : accent
-    ? "oklch(0.78 0.17 65)"
-    : "oklch(0.91 0.005 265)";
+      ? "oklch(0.78 0.17 65)"
+      : "oklch(0.91 0.005 265)";
 
   return (
     <div className="stat-card">
@@ -307,13 +327,13 @@ function QuickAction({
         transition: "border-color 150ms ease-out, background 150ms ease-out",
         opacity: disabled ? 0.5 : 1,
       }}
-      onMouseEnter={(e) => {
+      onMouseEnter={e => {
         if (!disabled) {
           e.currentTarget.style.borderColor = "oklch(0.78 0.17 65 / 0.5)";
           e.currentTarget.style.background = "oklch(0.78 0.17 65 / 0.06)";
         }
       }}
-      onMouseLeave={(e) => {
+      onMouseLeave={e => {
         e.currentTarget.style.borderColor = "oklch(0.28 0.01 265)";
         e.currentTarget.style.background = "oklch(0.17 0.012 265)";
       }}
@@ -342,10 +362,10 @@ function ArchetypeCard({
     attempts === 0
       ? "oklch(0.40 0.01 265)"
       : accuracy >= 80
-      ? "oklch(0.72 0.14 185)"
-      : accuracy >= 60
-      ? "oklch(0.78 0.17 65)"
-      : "oklch(0.62 0.22 25)";
+        ? "oklch(0.72 0.14 185)"
+        : accuracy >= 60
+          ? "oklch(0.78 0.17 65)"
+          : "oklch(0.62 0.22 25)";
 
   return (
     <div
@@ -393,7 +413,14 @@ function ArchetypeCard({
         )}
       </div>
 
-      <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 4 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "baseline",
+          gap: 6,
+          marginBottom: 4,
+        }}
+      >
         <span
           className="accuracy-display"
           style={{ color: accuracyColor, fontSize: 24 }}
@@ -429,11 +456,11 @@ function ArchetypeCard({
           transition: "color 150ms, border-color 150ms",
           marginTop: 8,
         }}
-        onMouseEnter={(e) => {
+        onMouseEnter={e => {
           e.currentTarget.style.color = "oklch(0.78 0.17 65)";
           e.currentTarget.style.borderColor = "oklch(0.78 0.17 65 / 0.4)";
         }}
-        onMouseLeave={(e) => {
+        onMouseLeave={e => {
           e.currentTarget.style.color = "oklch(0.55 0.01 265)";
           e.currentTarget.style.borderColor = "oklch(0.28 0.01 265)";
         }}

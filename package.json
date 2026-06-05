@@ -8,7 +8,10 @@
     "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "NODE_ENV=production node dist/index.js",
     "preview": "vite preview --host",
+    "test": "vitest run",
     "check": "tsc --noEmit",
+    "validate:content": "tsx scripts/validate-content.ts",
+    "verify:content": "tsx scripts/verify-content.ts",
     "format": "prettier --write ."
   },
   "dependencies": {
