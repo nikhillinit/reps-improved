@@ -109,12 +109,36 @@ export interface StoreImportResult {
   errors: string[];
 }
 
+export interface RemediationItem {
+  id: string;
+  archetypeId: string;
+  problemItemId?: string;
+  latestAttempt: PracticeAttempt;
+  card?: Card;
+  dueAt: number;
+}
+
+export type PracticeQueuePriority = "due-patch" | "due-card" | "new-weak";
+
+export interface PracticeQueueItem {
+  card: Card;
+  priority: PracticeQueuePriority;
+  dueAt: number;
+  problemItemId?: string;
+  remediationItem?: RemediationItem;
+}
+
 interface NormalizeResult {
   ok: boolean;
   store: RepsStore;
   warnings: string[];
   errors: string[];
 }
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+export const INCORRECT_REMEDIATION_DELAY_MS = 20 * 60 * 1000;
+export const PARTIAL_REMEDIATION_DELAY_MS = 4 * 60 * 60 * 1000;
 
 const defaultSettings: StoreSettings = {
   retrieveFirst: true,
@@ -809,29 +833,234 @@ export function resetStore(): void {
   localStorage.removeItem(LEGACY_STORE_KEY);
 }
 
-// SRS scheduling (simplified SM-2)
+export function remediationDelayMs(rating: Rating): number | undefined {
+  if (rating === "incorrect") return INCORRECT_REMEDIATION_DELAY_MS;
+  if (rating === "partial") return PARTIAL_REMEDIATION_DELAY_MS;
+  return undefined;
+}
+
+function intervalDaysFromMs(delayMs: number): number {
+  return delayMs / DAY_MS;
+}
+
+// SRS scheduling (simplified SM-2, with short remediation windows for misses)
 export function scheduleCard(card: Card, rating: Rating): Card {
-  const updated = { ...card, reps: card.reps + 1 };
   if (rating === "incorrect") {
-    updated.lapses += 1;
-    updated.interval = 1;
-    updated.easeFactor = Math.max(1.3, card.easeFactor - 0.2);
-  } else if (rating === "partial") {
-    updated.interval = Math.max(1, Math.floor(card.interval * 1.2));
-    updated.easeFactor = Math.max(1.3, card.easeFactor - 0.1);
-  } else {
-    if (card.reps === 0) updated.interval = 1;
-    else if (card.reps === 1) updated.interval = 3;
-    else updated.interval = Math.round(card.interval * card.easeFactor);
-    updated.easeFactor = Math.min(3.0, card.easeFactor + 0.1);
+    return {
+      ...card,
+      reps: card.reps + 1,
+      lapses: card.lapses + 1,
+      interval: intervalDaysFromMs(INCORRECT_REMEDIATION_DELAY_MS),
+      easeFactor: Math.max(1.3, card.easeFactor - 0.2),
+      dueAt: Date.now() + INCORRECT_REMEDIATION_DELAY_MS,
+    };
   }
-  updated.dueAt = Date.now() + updated.interval * 24 * 60 * 60 * 1000;
-  return updated;
+
+  if (rating === "partial") {
+    return {
+      ...card,
+      reps: card.reps + 1,
+      interval: intervalDaysFromMs(PARTIAL_REMEDIATION_DELAY_MS),
+      easeFactor: Math.max(1.3, card.easeFactor - 0.1),
+      dueAt: Date.now() + PARTIAL_REMEDIATION_DELAY_MS,
+    };
+  }
+
+  const interval =
+    card.reps === 0
+      ? 1
+      : card.reps === 1
+        ? 3
+        : Math.round(card.interval * card.easeFactor);
+
+  return {
+    ...card,
+    reps: card.reps + 1,
+    interval,
+    easeFactor: Math.min(3.0, card.easeFactor + 0.1),
+    dueAt: Date.now() + interval * DAY_MS,
+  };
 }
 
 export function getDueCards(cards: Card[]): Card[] {
   const now = Date.now();
   return cards.filter(c => c.dueAt <= now);
+}
+
+function remediationKey(archetypeId: string, problemItemId?: string): string {
+  return `${archetypeId}::${problemItemId ?? "__archetype__"}`;
+}
+
+function problemItemIdForAttempt(attempt: PracticeAttempt): string | undefined {
+  return attempt.problemItemId ?? attempt.stemId;
+}
+
+function compareDueThenRecent(
+  a: { dueAt: number; latestAttempt?: PracticeAttempt },
+  b: { dueAt: number; latestAttempt?: PracticeAttempt }
+): number {
+  if (a.dueAt !== b.dueAt) return a.dueAt - b.dueAt;
+  return (b.latestAttempt?.timestamp ?? 0) - (a.latestAttempt?.timestamp ?? 0);
+}
+
+function findRemediationCard(
+  cards: Card[],
+  archetypeId: string,
+  problemItemId?: string
+): Card | undefined {
+  const eligibleCards = cards.filter(
+    card => card.cardType === "practice" && card.archetypeId === archetypeId
+  );
+
+  const exactCards = eligibleCards.filter(card =>
+    problemItemId ? card.problemItemId === problemItemId : !card.problemItemId
+  );
+  if (exactCards.length > 0) {
+    return [...exactCards].sort((a, b) => a.dueAt - b.dueAt)[0];
+  }
+
+  return [...eligibleCards]
+    .filter(card => !card.problemItemId)
+    .sort((a, b) => a.dueAt - b.dueAt)[0];
+}
+
+function getOpenErrorItemsFromParts(
+  attempts: PracticeAttempt[],
+  cards: Card[]
+): RemediationItem[] {
+  const latestByItem = attempts.reduce<Record<string, PracticeAttempt>>(
+    (latest, attempt) => {
+      const problemItemId = problemItemIdForAttempt(attempt);
+      const key = remediationKey(attempt.archetypeId, problemItemId);
+      const current = latest[key];
+      if (!current || attempt.timestamp > current.timestamp) {
+        return { ...latest, [key]: attempt };
+      }
+      return latest;
+    },
+    {}
+  );
+
+  return Object.values(latestByItem)
+    .filter(attempt => attempt.rating !== "correct")
+    .map(latestAttempt => {
+      const problemItemId = problemItemIdForAttempt(latestAttempt);
+      const card = findRemediationCard(
+        cards,
+        latestAttempt.archetypeId,
+        problemItemId
+      );
+      const fallbackDelay = remediationDelayMs(latestAttempt.rating) ?? 0;
+      return {
+        id: remediationKey(latestAttempt.archetypeId, problemItemId),
+        archetypeId: latestAttempt.archetypeId,
+        ...(problemItemId ? { problemItemId } : {}),
+        latestAttempt,
+        ...(card ? { card } : {}),
+        dueAt: card?.dueAt ?? latestAttempt.timestamp + fallbackDelay,
+      };
+    })
+    .sort(compareDueThenRecent);
+}
+
+export function getOpenErrorItems(store: RepsStore): RemediationItem[] {
+  return getOpenErrorItemsFromParts(store.practiceAttempts, store.cards);
+}
+
+export function getDuePatchItems(
+  store: RepsStore,
+  now: number = Date.now()
+): RemediationItem[] {
+  return getOpenErrorItems(store)
+    .filter(item => item.dueAt <= now)
+    .sort(compareDueThenRecent);
+}
+
+function shuffleBucket<T>(items: T[], random: () => number): T[] {
+  return [...items]
+    .map(item => ({ item, order: random() }))
+    .sort((a, b) => a.order - b.order)
+    .map(({ item }) => item);
+}
+
+function practiceAttemptMatch(attempt: PracticeAttempt, card: Card): boolean {
+  if (attempt.archetypeId !== card.archetypeId) return false;
+  if (!card.problemItemId) return true;
+  return problemItemIdForAttempt(attempt) === card.problemItemId;
+}
+
+function weaknessScore(store: RepsStore, card: Card): number {
+  const attempts = store.practiceAttempts.filter(attempt =>
+    practiceAttemptMatch(attempt, card)
+  );
+  if (attempts.length === 0) return -1;
+  const correct = attempts.filter(
+    attempt => attempt.rating === "correct"
+  ).length;
+  return correct / attempts.length;
+}
+
+export function getPracticeQueueItems(
+  store: RepsStore,
+  count: number,
+  now: number = Date.now(),
+  random: () => number = Math.random
+): PracticeQueueItem[] {
+  const duePatchItems = getDuePatchItems(store, now)
+    .filter(item => item.card)
+    .map(item => ({
+      card: item.card as Card,
+      priority: "due-patch" as const,
+      dueAt: item.dueAt,
+      ...(item.problemItemId ? { problemItemId: item.problemItemId } : {}),
+      remediationItem: item,
+    }));
+  const duePatchCardIds = new Set(duePatchItems.map(item => item.card.id));
+
+  const dueCards = store.cards
+    .filter(
+      card =>
+        card.cardType === "practice" &&
+        card.dueAt <= now &&
+        isEligibleArchetypeId(card.archetypeId) &&
+        !duePatchCardIds.has(card.id)
+    )
+    .map(card => ({
+      card,
+      priority: "due-card" as const,
+      dueAt: card.dueAt,
+      ...(card.problemItemId ? { problemItemId: card.problemItemId } : {}),
+    }));
+  const dueCardIds = new Set([
+    ...Array.from(duePatchCardIds),
+    ...dueCards.map(item => item.card.id),
+  ]);
+
+  const coverageCards = store.cards
+    .filter(
+      card =>
+        card.cardType === "practice" &&
+        isEligibleArchetypeId(card.archetypeId) &&
+        !dueCardIds.has(card.id)
+    )
+    .sort((a, b) => {
+      const weaknessDiff = weaknessScore(store, a) - weaknessScore(store, b);
+      if (weaknessDiff !== 0) return weaknessDiff;
+      const repsDiff = a.reps - b.reps;
+      return repsDiff !== 0 ? repsDiff : a.dueAt - b.dueAt;
+    })
+    .map(card => ({
+      card,
+      priority: "new-weak" as const,
+      dueAt: card.dueAt,
+      ...(card.problemItemId ? { problemItemId: card.problemItemId } : {}),
+    }));
+
+  return [
+    ...shuffleBucket(duePatchItems, random),
+    ...shuffleBucket(dueCards, random),
+    ...coverageCards,
+  ].slice(0, count);
 }
 
 export function getAccuracy(
@@ -850,19 +1079,7 @@ export function getOpenErrors(
   attempts: PracticeAttempt[],
   cards: Card[]
 ): number {
-  void cards;
-  const incorrectArchetypes = new Set(
-    attempts.filter(a => a.rating === "incorrect").map(a => a.archetypeId)
-  );
-  let openCount = 0;
-  for (const arcId of Array.from(incorrectArchetypes)) {
-    const arcAttempts = attempts
-      .filter(a => a.archetypeId === arcId)
-      .sort((a, b) => a.timestamp - b.timestamp);
-    const lastAttempt = arcAttempts[arcAttempts.length - 1];
-    if (lastAttempt && lastAttempt.rating === "incorrect") openCount++;
-  }
-  return openCount;
+  return getOpenErrorItemsFromParts(attempts, cards).length;
 }
 
 // Seed QA data

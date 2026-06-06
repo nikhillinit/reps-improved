@@ -4,7 +4,7 @@
    ============================================================ */
 
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useRoute } from "wouter";
 import {
   Zap,
   CheckCircle2,
@@ -16,16 +16,22 @@ import {
 import {
   CONTENT_ARCHETYPES as ARCHETYPES,
   CONTENT_ARCHETYPE_MAP as ARCHETYPE_MAP,
+  CONTENT_PRACTICE_ITEM_MAP,
   CONTENT_PRACTICE_ITEMS_BY_ARCHETYPE,
   isEligibleArchetypeId,
 } from "@/lib/content/catalog";
 import {
+  getDuePatchItems,
+  getOpenErrorItems,
+  getPracticeQueueItems,
   loadStore,
   saveStore,
   scheduleCard,
-  type PracticeAttempt,
   type Card,
+  type PracticeAttempt,
+  type PracticeQueuePriority,
   type Rating,
+  type RepsStore,
 } from "@/lib/store";
 import { nanoid } from "nanoid";
 
@@ -34,10 +40,152 @@ type Phase = "setup" | "drill" | "result";
 interface DrillCard {
   card: Card;
   stemIdx: number;
+  priority: PracticeQueuePriority;
+}
+
+interface PracticeTarget {
+  archetypeId: string;
+  problemItemId?: string;
+}
+
+const COVERAGE_DELAY_MS = 24 * 60 * 60 * 1000;
+
+function createPracticeCard(
+  archetypeId: string,
+  now: number,
+  options: { problemItemId?: string; dueAt?: number } = {}
+): Card | undefined {
+  const arch = ARCHETYPE_MAP[archetypeId];
+  if (!arch) return undefined;
+
+  const dueAt = options.dueAt ?? now + COVERAGE_DELAY_MS;
+  return {
+    id: nanoid(),
+    archetypeId,
+    ...(options.problemItemId ? { problemItemId: options.problemItemId } : {}),
+    cardType: "practice",
+    dueAt,
+    interval: Math.max(0, (dueAt - now) / COVERAGE_DELAY_MS),
+    easeFactor: 2.5,
+    reps: 0,
+    lapses: 0,
+    verificationStatus: arch.verificationStatus,
+  };
+}
+
+function hasPracticeCard(
+  cards: Card[],
+  archetypeId: string,
+  problemItemId?: string
+): boolean {
+  return cards.some(
+    card =>
+      card.cardType === "practice" &&
+      card.archetypeId === archetypeId &&
+      (problemItemId ? card.problemItemId === problemItemId : true)
+  );
+}
+
+function ensurePracticeCards(
+  store: RepsStore,
+  now: number,
+  target?: PracticeTarget
+): RepsStore {
+  const openItems = getOpenErrorItems(store);
+  const remediationCards = openItems
+    .filter(
+      item =>
+        item.problemItemId &&
+        !hasPracticeCard(store.cards, item.archetypeId, item.problemItemId)
+    )
+    .map(item =>
+      createPracticeCard(item.archetypeId, now, {
+        problemItemId: item.problemItemId,
+        dueAt: item.dueAt,
+      })
+    )
+    .filter((card): card is Card => Boolean(card));
+
+  const cardsAfterRemediation = [...store.cards, ...remediationCards];
+  const targetCard =
+    target &&
+    !hasPracticeCard(
+      cardsAfterRemediation,
+      target.archetypeId,
+      target.problemItemId
+    )
+      ? createPracticeCard(target.archetypeId, now, {
+          problemItemId: target.problemItemId,
+          dueAt: now,
+        })
+      : undefined;
+
+  const existingCards = [
+    ...cardsAfterRemediation,
+    ...(targetCard ? [targetCard] : []),
+  ];
+  const representedArchetypes = new Set(
+    existingCards
+      .filter(card => card.cardType === "practice")
+      .map(card => card.archetypeId)
+  );
+  const coverageCards = ARCHETYPES.filter(
+    arch => !representedArchetypes.has(arch.id)
+  )
+    .map(arch => createPracticeCard(arch.id, now))
+    .filter((card): card is Card => Boolean(card));
+
+  const cardsToAdd = [
+    ...remediationCards,
+    ...(targetCard ? [targetCard] : []),
+    ...coverageCards,
+  ];
+  if (cardsToAdd.length === 0) return store;
+
+  const updated = { ...store, cards: [...store.cards, ...cardsToAdd] };
+  saveStore(updated);
+  return updated;
+}
+
+function stemIndexForQueueItem(card: Card, problemItemId?: string): number {
+  const stems = CONTENT_PRACTICE_ITEMS_BY_ARCHETYPE[card.archetypeId] ?? [];
+  const requestedProblemItemId = problemItemId ?? card.problemItemId;
+  if (requestedProblemItemId) {
+    const exactIndex = stems.findIndex(
+      stem => stem.id === requestedProblemItemId
+    );
+    if (exactIndex >= 0) return exactIndex;
+  }
+  return Math.floor(Math.random() * (stems.length || 1));
+}
+
+function sortTargetFirst(
+  queue: ReturnType<typeof getPracticeQueueItems>,
+  target?: PracticeTarget
+): ReturnType<typeof getPracticeQueueItems> {
+  if (!target) return queue;
+
+  return [...queue].sort((a, b) => {
+    const aMatches =
+      a.card.archetypeId === target.archetypeId &&
+      (!target.problemItemId ||
+        a.problemItemId === target.problemItemId ||
+        a.card.problemItemId === target.problemItemId);
+    const bMatches =
+      b.card.archetypeId === target.archetypeId &&
+      (!target.problemItemId ||
+        b.problemItemId === target.problemItemId ||
+        b.card.problemItemId === target.problemItemId);
+    if (aMatches === bMatches) return 0;
+    return aMatches ? -1 : 1;
+  });
 }
 
 export default function PracticeMode() {
   const [, navigate] = useLocation();
+  const [, routeParams] = useRoute<{ archetypeId: string }>(
+    "/practice/:archetypeId"
+  );
   const [phase, setPhase] = useState<Phase>("setup");
   const [queue, setQueue] = useState<DrillCard[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -45,34 +193,19 @@ export default function PracticeMode() {
   const [attempts, setAttempts] = useState<PracticeAttempt[]>([]);
   const [selectedRootCauses, setSelectedRootCauses] = useState<string[]>([]);
   const [startTime, setStartTime] = useState(Date.now());
+  const [autoStartedTarget, setAutoStartedTarget] = useState(false);
 
-  const startSession = (count: number) => {
-    const store = loadStore();
-    let cards = store.cards.filter(
-      c => c.dueAt <= Date.now() && isEligibleArchetypeId(c.archetypeId)
+  const startSession = (count: number, target?: PracticeTarget) => {
+    const now = Date.now();
+    const store = ensurePracticeCards(loadStore(), now, target);
+    const queueLimit = target ? Math.max(store.cards.length, count) : count;
+    const prioritized = sortTargetFirst(
+      getPracticeQueueItems(store, queueLimit, now),
+      target
     );
-    // If no due cards, create cards for all archetypes
-    if (cards.length === 0) {
-      const newCards: Card[] = ARCHETYPES.map(arch => ({
-        id: nanoid(),
-        archetypeId: arch.id,
-        cardType: "practice" as const,
-        dueAt: Date.now(),
-        interval: 1,
-        easeFactor: 2.5,
-        reps: 0,
-        lapses: 0,
-        verificationStatus: arch.verificationStatus,
-      }));
-      const updated = { ...store, cards: [...store.cards, ...newCards] };
-      saveStore(updated);
-      cards = newCards;
-    }
-    const shuffled = cards.sort(() => Math.random() - 0.5).slice(0, count);
-    const drillQueue: DrillCard[] = shuffled.map(card => {
-      const stems = CONTENT_PRACTICE_ITEMS_BY_ARCHETYPE[card.archetypeId] ?? [];
-      const stemIdx = Math.floor(Math.random() * (stems.length || 1));
-      return { card, stemIdx };
+    const drillQueue: DrillCard[] = prioritized.slice(0, count).map(item => {
+      const stemIdx = stemIndexForQueueItem(item.card, item.problemItemId);
+      return { card: item.card, stemIdx, priority: item.priority };
     });
     setQueue(drillQueue);
     setCurrentIdx(0);
@@ -82,6 +215,30 @@ export default function PracticeMode() {
     setStartTime(Date.now());
     setPhase("drill");
   };
+
+  useEffect(() => {
+    const archetypeId = routeParams?.archetypeId;
+    if (
+      autoStartedTarget ||
+      phase !== "setup" ||
+      !archetypeId ||
+      !isEligibleArchetypeId(archetypeId)
+    ) {
+      return;
+    }
+
+    const problemItemId =
+      new URLSearchParams(window.location.search).get("problemItemId") ??
+      undefined;
+    const target =
+      problemItemId &&
+      CONTENT_PRACTICE_ITEM_MAP[problemItemId]?.archetypeId === archetypeId
+        ? { archetypeId, problemItemId }
+        : { archetypeId };
+
+    setAutoStartedTarget(true);
+    startSession(1, target);
+  }, [autoStartedTarget, phase, routeParams?.archetypeId]);
 
   const handleReveal = () => setRevealed(true);
 
@@ -101,7 +258,10 @@ export default function PracticeMode() {
       mode: "practice",
       timeSpent: Date.now() - startTime,
     };
-    const updatedCard = scheduleCard(card, rating);
+    const updatedCard = scheduleCard(
+      { ...card, ...(stem?.id ? { problemItemId: stem.id } : {}) },
+      rating
+    );
     const store = loadStore();
     const updatedCards = store.cards.map(c =>
       c.id === card.id ? updatedCard : c
@@ -443,6 +603,7 @@ function SetupScreen({ onStart }: { onStart: (count: number) => void }) {
   const [count, setCount] = useState(10);
   const store = loadStore();
   const dueCount = store.cards.filter(c => c.dueAt <= Date.now()).length;
+  const duePatchCount = getDuePatchItems(store).length;
   return (
     <div>
       <div style={{ marginBottom: 28 }}>
@@ -502,16 +663,21 @@ function SetupScreen({ onStart }: { onStart: (count: number) => void }) {
             </button>
           ))}
         </div>
-        {dueCount > 0 && (
+        {(duePatchCount > 0 || dueCount > 0) && (
           <div
             style={{
               fontFamily: "'IBM Plex Sans', sans-serif",
               fontSize: 12,
-              color: "oklch(0.72 0.14 185)",
+              color:
+                duePatchCount > 0
+                  ? "oklch(0.62 0.22 25)"
+                  : "oklch(0.72 0.14 185)",
               marginTop: 10,
             }}
           >
-            ✓ {dueCount} cards due today
+            {duePatchCount > 0
+              ? `${duePatchCount} patch${duePatchCount > 1 ? "es" : ""} due now`
+              : `✓ ${dueCount} cards due today`}
           </div>
         )}
       </div>

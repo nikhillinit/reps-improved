@@ -6,12 +6,20 @@ import {
 } from "./content/catalog";
 import {
   LEGACY_STORE_KEY,
+  INCORRECT_REMEDIATION_DELAY_MS,
+  PARTIAL_REMEDIATION_DELAY_MS,
   STORE_KEY,
   exportStore,
+  getDuePatchItems,
+  getOpenErrorItems,
+  getPracticeQueueItems,
   importStoreFromJson,
   loadStore,
   resetStore,
+  scheduleCard,
   saveStore,
+  type Card,
+  type PracticeAttempt,
   type RepsStore,
 } from "./store";
 
@@ -33,6 +41,61 @@ function installLocalStorage() {
   };
 
   vi.stubGlobal("localStorage", storage);
+}
+
+function makeStore(overrides: Partial<RepsStore> = {}): RepsStore {
+  return {
+    version: 3,
+    cards: [],
+    practiceAttempts: [],
+    routerAttempts: [],
+    routerDiagnostics: [],
+    settings: {
+      retrieveFirst: true,
+      timerDefault: 60,
+      hideTimer: false,
+    },
+    quarantinedRecords: [],
+    lastUpdated: 1_700_000_000_000,
+    ...overrides,
+  };
+}
+
+function makeCard(
+  id: string,
+  item: (typeof CONTENT_PRACTICE_ITEMS)[number],
+  dueAt: number
+): Card {
+  return {
+    id,
+    archetypeId: item.archetypeId,
+    problemItemId: item.id,
+    cardType: "practice",
+    dueAt,
+    interval: 1,
+    easeFactor: 2.5,
+    reps: 0,
+    lapses: 0,
+    verificationStatus: item.verificationStatus,
+  };
+}
+
+function makeAttempt(
+  id: string,
+  item: (typeof CONTENT_PRACTICE_ITEMS)[number],
+  rating: PracticeAttempt["rating"],
+  timestamp: number
+): PracticeAttempt {
+  return {
+    id,
+    archetypeId: item.archetypeId,
+    problemItemId: item.id,
+    stemId: item.id,
+    rating,
+    rootCauseIds: [],
+    timestamp,
+    mode: "practice",
+  };
 }
 
 describe("store v3 persistence", () => {
@@ -348,5 +411,78 @@ describe("store v3 persistence", () => {
     expect(exported.cards).toEqual([]);
     expect(localStorage.getItem(STORE_KEY)).toBe(beforeExport);
     expect(loadStore().cards[0]).toMatchObject({ id: "current_card" });
+  });
+
+  it("schedules misses into short remediation windows while preserving correct SRS", () => {
+    const item = CONTENT_PRACTICE_ITEMS[0];
+    const now = Date.now();
+    const card = makeCard("schedule_card", item, now);
+
+    const incorrect = scheduleCard(card, "incorrect");
+    const partial = scheduleCard(card, "partial");
+    const correct = scheduleCard(card, "correct");
+
+    expect(incorrect.dueAt).toBe(now + INCORRECT_REMEDIATION_DELAY_MS);
+    expect(incorrect.interval).toBeCloseTo(
+      INCORRECT_REMEDIATION_DELAY_MS / 86400000
+    );
+    expect(partial.dueAt).toBe(now + PARTIAL_REMEDIATION_DELAY_MS);
+    expect(partial.interval).toBeCloseTo(
+      PARTIAL_REMEDIATION_DELAY_MS / 86400000
+    );
+    expect(correct.dueAt).toBe(now + 86400000);
+    expect(correct.interval).toBe(1);
+  });
+
+  it("derives open remediation items and closes them after a later correct attempt", () => {
+    const item = CONTENT_PRACTICE_ITEMS[0];
+    const now = Date.now();
+    const miss = makeAttempt("miss", item, "incorrect", now - 1000);
+    const card = makeCard("patch_card", item, now);
+    const store = makeStore({
+      cards: [card],
+      practiceAttempts: [miss],
+    });
+
+    expect(getOpenErrorItems(store)).toMatchObject([
+      {
+        id: `${item.archetypeId}::${item.id}`,
+        archetypeId: item.archetypeId,
+        problemItemId: item.id,
+        dueAt: now,
+      },
+    ]);
+    expect(getDuePatchItems(store, now)).toHaveLength(1);
+
+    const corrected = makeAttempt("corrected", item, "correct", now);
+    const closedStore = makeStore({
+      cards: [card],
+      practiceAttempts: [miss, corrected],
+    });
+
+    expect(getOpenErrorItems(closedStore)).toEqual([]);
+    expect(getDuePatchItems(closedStore, now)).toEqual([]);
+  });
+
+  it("prioritizes due remediation patches before ordinary due cards", () => {
+    const patchItem = CONTENT_PRACTICE_ITEMS[0];
+    const ordinaryItem =
+      CONTENT_PRACTICE_ITEMS.find(
+        item => item.archetypeId !== patchItem.archetypeId
+      ) ?? CONTENT_PRACTICE_ITEMS[1];
+    const now = Date.now();
+    const patchCard = makeCard("patch_card", patchItem, now);
+    const ordinaryDueCard = makeCard("ordinary_card", ordinaryItem, now - 10);
+    const miss = makeAttempt("miss", patchItem, "incorrect", now - 1000);
+    const store = makeStore({
+      cards: [ordinaryDueCard, patchCard],
+      practiceAttempts: [miss],
+    });
+
+    const queue = getPracticeQueueItems(store, 2, now, () => 0.5);
+
+    expect(queue.map(item => item.priority)).toEqual(["due-patch", "due-card"]);
+    expect(queue[0].card.id).toBe("patch_card");
+    expect(queue[0].problemItemId).toBe(patchItem.id);
   });
 });
