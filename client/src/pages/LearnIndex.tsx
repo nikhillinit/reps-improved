@@ -20,7 +20,7 @@ export default function LearnIndex() {
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 22,
             fontWeight: 700,
-            color: "oklch(0.91 0.005 265)",
+            color: "oklch(0.21 0 0)",
             letterSpacing: "-0.01em",
           }}
         >
@@ -28,9 +28,9 @@ export default function LearnIndex() {
         </h1>
         <p
           style={{
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 14,
-            color: "oklch(0.55 0.01 265)",
+            color: "oklch(0.28 0 0)",
             marginTop: 4,
           }}
         >
@@ -61,8 +61,8 @@ export default function LearnIndex() {
                 alignItems: "center",
                 gap: 14,
                 padding: "16px 18px",
-                background: "oklch(0.17 0.012 265)",
-                border: "1px solid oklch(0.28 0.01 265)",
+                background: "oklch(1 0 0)",
+                border: "1px solid oklch(0.90 0.013 78)",
                 borderRadius: 4,
                 cursor: "pointer",
                 textAlign: "left",
@@ -74,24 +74,24 @@ export default function LearnIndex() {
                   width: 36,
                   height: 36,
                   borderRadius: 4,
-                  background: "oklch(0.78 0.17 65 / 0.1)",
-                  border: "1px solid oklch(0.78 0.17 65 / 0.2)",
+                  background: "oklch(0.21 0 0 / 0.07)",
+                  border: "1px solid oklch(0.21 0 0 / 0.08)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   flexShrink: 0,
                 }}
               >
-                <BookOpen size={16} style={{ color: "oklch(0.78 0.17 65)" }} />
+                <BookOpen size={16} style={{ color: "oklch(0.21 0 0)" }} />
               </div>
 
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div
                   style={{
-                    fontFamily: "'IBM Plex Sans', sans-serif",
+                    fontFamily: "'Inter', system-ui, sans-serif",
                     fontSize: 14,
                     fontWeight: 600,
-                    color: "oklch(0.91 0.005 265)",
+                    color: "oklch(0.21 0 0)",
                     marginBottom: 2,
                   }}
                 >
@@ -99,9 +99,9 @@ export default function LearnIndex() {
                 </div>
                 <div
                   style={{
-                    fontFamily: "'IBM Plex Sans', sans-serif",
+                    fontFamily: "'Inter', system-ui, sans-serif",
                     fontSize: 12,
-                    color: "oklch(0.40 0.01 265)",
+                    color: "oklch(0.51 0 0)",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
@@ -127,10 +127,10 @@ export default function LearnIndex() {
                       fontWeight: 700,
                       color:
                         accuracy >= 80
-                          ? "oklch(0.72 0.14 185)"
+                          ? "oklch(0.44 0.15 150)"
                           : accuracy >= 60
-                            ? "oklch(0.78 0.17 65)"
-                            : "oklch(0.62 0.22 25)",
+                            ? "oklch(0.48 0.16 68)"
+                            : "oklch(0.38 0.20 22)",
                     }}
                   >
                     {accuracy}%
@@ -139,12 +139,12 @@ export default function LearnIndex() {
                 {arch.verificationStatus === "verified" && (
                   <CheckCircle2
                     size={14}
-                    style={{ color: "oklch(0.72 0.14 185)" }}
+                    style={{ color: "oklch(0.44 0.15 150)" }}
                   />
                 )}
                 <ChevronRight
                   size={14}
-                  style={{ color: "oklch(0.35 0.01 265)" }}
+                  style={{ color: "oklch(0.69 0 0)" }}
                 />
               </div>
             </button>

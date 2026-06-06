@@ -128,13 +128,13 @@ export default function MockMode() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <Trophy size={16} style={{ color: "oklch(0.78 0.17 65)" }} />
+          <Trophy size={16} style={{ color: "oklch(0.21 0 0)" }} />
           <h1
             style={{
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 18,
               fontWeight: 700,
-              color: "oklch(0.91 0.005 265)",
+              color: "oklch(0.21 0 0)",
             }}
           >
             Mock Exam
@@ -149,7 +149,7 @@ export default function MockMode() {
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 14,
               fontWeight: 700,
-              color: isLowTime ? "oklch(0.62 0.22 25)" : "oklch(0.78 0.17 65)",
+              color: isLowTime ? "oklch(0.38 0.20 22)" : "oklch(0.21 0 0)",
             }}
           >
             <Clock size={14} />
@@ -159,7 +159,7 @@ export default function MockMode() {
             style={{
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 12,
-              color: "oklch(0.40 0.01 265)",
+              color: "oklch(0.51 0 0)",
             }}
           >
             {currentIdx + 1}/{questions.length}
@@ -171,7 +171,7 @@ export default function MockMode() {
       <div
         style={{
           height: 3,
-          background: "oklch(0.22 0.01 265)",
+          background: "oklch(0.90 0.013 78)",
           borderRadius: 2,
           marginBottom: 28,
           overflow: "hidden",
@@ -181,7 +181,7 @@ export default function MockMode() {
           style={{
             height: "100%",
             width: `${progress}%`,
-            background: "oklch(0.78 0.17 65)",
+            background: "oklch(0.21 0 0)",
             borderRadius: 2,
             transition: "width 300ms ease-out",
           }}
@@ -191,8 +191,8 @@ export default function MockMode() {
       {/* Question */}
       <div
         style={{
-          background: "oklch(0.17 0.012 265)",
-          border: "1px solid oklch(0.28 0.01 265)",
+          background: "oklch(1 0 0)",
+          border: "1px solid oklch(0.90 0.013 78)",
           borderRadius: 4,
           padding: 24,
           marginBottom: 16,
@@ -204,9 +204,9 @@ export default function MockMode() {
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 10,
               padding: "2px 6px",
-              border: "1px solid oklch(0.28 0.01 265)",
+              border: "1px solid oklch(0.90 0.013 78)",
               borderRadius: 2,
-              color: "oklch(0.40 0.01 265)",
+              color: "oklch(0.51 0 0)",
             }}
           >
             Q{currentIdx + 1}
@@ -216,9 +216,9 @@ export default function MockMode() {
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 10,
               padding: "2px 6px",
-              border: "1px solid oklch(0.28 0.01 265)",
+              border: "1px solid oklch(0.90 0.013 78)",
               borderRadius: 2,
-              color: "oklch(0.40 0.01 265)",
+              color: "oklch(0.51 0 0)",
             }}
           >
             {isRouter ? "IDENTIFY" : "SOLVE"}
@@ -226,9 +226,9 @@ export default function MockMode() {
         </div>
         <p
           style={{
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 16,
-            color: "oklch(0.88 0.005 265)",
+            color: "oklch(0.21 0 0)",
             lineHeight: 1.75,
           }}
         >
@@ -255,14 +255,14 @@ export default function MockMode() {
                 style={{
                   padding: "10px 14px",
                   background: isSelected
-                    ? "oklch(0.78 0.17 65 / 0.1)"
-                    : "oklch(0.17 0.012 265)",
-                  border: `1px solid ${isSelected ? "oklch(0.78 0.17 65)" : "oklch(0.28 0.01 265)"}`,
+                    ? "oklch(0.21 0 0 / 0.07)"
+                    : "oklch(1 0 0)",
+                  border: `1px solid ${isSelected ? "oklch(0.21 0 0)" : "oklch(0.90 0.013 78)"}`,
                   borderRadius: 4,
                   color: isSelected
-                    ? "oklch(0.91 0.005 265)"
-                    : "oklch(0.65 0.01 265)",
-                  fontFamily: "'IBM Plex Sans', sans-serif",
+                    ? "oklch(0.21 0 0)"
+                    : "oklch(0.28 0 0)",
+                  fontFamily: "'Inter', system-ui, sans-serif",
                   fontSize: 13,
                   fontWeight: 500,
                   cursor: "pointer",
@@ -287,10 +287,10 @@ export default function MockMode() {
             gap: 8,
             padding: "10px 18px",
             background: "transparent",
-            border: "1px solid oklch(0.35 0.01 265)",
+            border: "1px solid oklch(0.90 0.013 78)",
             borderRadius: 4,
-            color: "oklch(0.55 0.01 265)",
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            color: "oklch(0.28 0 0)",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 13,
             cursor: "pointer",
             marginBottom: 16,
@@ -302,9 +302,9 @@ export default function MockMode() {
       {!isRouter && revealed && (
         <div
           style={{
-            background: "oklch(0.17 0.012 265)",
-            border: "1px solid oklch(0.72 0.14 185 / 0.3)",
-            borderLeft: "3px solid oklch(0.72 0.14 185)",
+            background: "oklch(1 0 0)",
+            border: "1px solid oklch(0.44 0.15 150 / 0.15)",
+            borderLeft: "3px solid oklch(0.44 0.15 150)",
             borderRadius: "0 4px 4px 0",
             padding: 20,
             marginBottom: 16,
@@ -312,7 +312,7 @@ export default function MockMode() {
         >
           <div
             className="formula-display"
-            style={{ borderLeftColor: "oklch(0.72 0.14 185)" }}
+            style={{ borderLeftColor: "oklch(0.44 0.15 150)" }}
           >
             {q.answer}
           </div>
@@ -327,20 +327,20 @@ export default function MockMode() {
           alignItems: "center",
           gap: 6,
           padding: "10px 20px",
-          background: "oklch(0.78 0.17 65)",
+          background: "oklch(0.21 0 0)",
           border: "none",
           borderRadius: 4,
-          color: "oklch(0.13 0.01 265)",
-          fontFamily: "'IBM Plex Sans', sans-serif",
+          color: "oklch(1 0 0)",
+          fontFamily: "'Inter', system-ui, sans-serif",
           fontSize: 13,
           fontWeight: 600,
           cursor: "pointer",
         }}
         onMouseEnter={e =>
-          (e.currentTarget.style.background = "oklch(0.65 0.14 65)")
+          (e.currentTarget.style.background = "oklch(0.14 0 0)")
         }
         onMouseLeave={e =>
-          (e.currentTarget.style.background = "oklch(0.78 0.17 65)")
+          (e.currentTarget.style.background = "oklch(0.21 0 0)")
         }
       >
         {currentIdx >= questions.length - 1 ? "Finish Exam" : "Next →"}
@@ -358,7 +358,7 @@ function SetupScreen({ onStart }: { onStart: () => void }) {
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 22,
             fontWeight: 700,
-            color: "oklch(0.91 0.005 265)",
+            color: "oklch(0.21 0 0)",
             marginBottom: 8,
           }}
         >
@@ -366,9 +366,9 @@ function SetupScreen({ onStart }: { onStart: () => void }) {
         </h1>
         <p
           style={{
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 14,
-            color: "oklch(0.55 0.01 265)",
+            color: "oklch(0.28 0 0)",
           }}
         >
           12 questions (6 router + 6 practice) under a 20-minute timer.
@@ -377,8 +377,8 @@ function SetupScreen({ onStart }: { onStart: () => void }) {
       </div>
       <div
         style={{
-          background: "oklch(0.17 0.012 265)",
-          border: "1px solid oklch(0.28 0.01 265)",
+          background: "oklch(1 0 0)",
+          border: "1px solid oklch(0.90 0.013 78)",
           borderRadius: 4,
           padding: 20,
           marginBottom: 24,
@@ -404,7 +404,7 @@ function SetupScreen({ onStart }: { onStart: () => void }) {
                 style={{
                   fontFamily: "'JetBrains Mono', monospace",
                   fontSize: 10,
-                  color: "oklch(0.78 0.17 65)",
+                  color: "oklch(0.21 0 0)",
                   marginTop: 2,
                 }}
               >
@@ -413,19 +413,19 @@ function SetupScreen({ onStart }: { onStart: () => void }) {
               <div>
                 <div
                   style={{
-                    fontFamily: "'IBM Plex Sans', sans-serif",
+                    fontFamily: "'Inter', system-ui, sans-serif",
                     fontSize: 13,
                     fontWeight: 600,
-                    color: "oklch(0.85 0.005 265)",
+                    color: "oklch(0.21 0 0)",
                   }}
                 >
                   {title}
                 </div>
                 <div
                   style={{
-                    fontFamily: "'IBM Plex Sans', sans-serif",
+                    fontFamily: "'Inter', system-ui, sans-serif",
                     fontSize: 12,
-                    color: "oklch(0.45 0.01 265)",
+                    color: "oklch(0.51 0 0)",
                   }}
                 >
                   {desc}
@@ -442,15 +442,21 @@ function SetupScreen({ onStart }: { onStart: () => void }) {
           alignItems: "center",
           gap: 8,
           padding: "12px 24px",
-          background: "oklch(0.78 0.17 65)",
+          background: "oklch(0.21 0 0)",
           border: "none",
           borderRadius: 4,
-          color: "oklch(0.13 0.01 265)",
-          fontFamily: "'IBM Plex Sans', sans-serif",
+          color: "oklch(1 0 0)",
+          fontFamily: "'Inter', system-ui, sans-serif",
           fontSize: 14,
           fontWeight: 700,
           cursor: "pointer",
         }}
+        onMouseEnter={e =>
+          (e.currentTarget.style.background = "oklch(0.14 0 0)")
+        }
+        onMouseLeave={e =>
+          (e.currentTarget.style.background = "oklch(0.21 0 0)")
+        }
       >
         <Trophy size={16} />
         Start Mock Exam
@@ -480,7 +486,7 @@ function ResultScreen({
           fontFamily: "'JetBrains Mono', monospace",
           fontSize: 22,
           fontWeight: 700,
-          color: "oklch(0.91 0.005 265)",
+          color: "oklch(0.21 0 0)",
           marginBottom: 24,
         }}
       >
@@ -501,7 +507,7 @@ function ResultScreen({
           <div className="stat-label">Attempted</div>
         </div>
         <div className="stat-card">
-          <div className="stat-value" style={{ color: "oklch(0.72 0.14 185)" }}>
+          <div className="stat-value" style={{ color: "oklch(0.44 0.15 150)" }}>
             {routerCorrect}/{routerQs.length}
           </div>
           <div className="stat-label">Router Correct</div>
@@ -515,15 +521,21 @@ function ResultScreen({
         onClick={onDone}
         style={{
           padding: "10px 20px",
-          background: "oklch(0.78 0.17 65)",
+          background: "oklch(0.21 0 0)",
           border: "none",
           borderRadius: 4,
-          color: "oklch(0.13 0.01 265)",
-          fontFamily: "'IBM Plex Sans', sans-serif",
+          color: "oklch(1 0 0)",
+          fontFamily: "'Inter', system-ui, sans-serif",
           fontSize: 13,
           fontWeight: 600,
           cursor: "pointer",
         }}
+        onMouseEnter={e =>
+          (e.currentTarget.style.background = "oklch(0.14 0 0)")
+        }
+        onMouseLeave={e =>
+          (e.currentTarget.style.background = "oklch(0.21 0 0)")
+        }
       >
         Back to Dashboard
       </button>

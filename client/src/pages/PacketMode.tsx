@@ -37,7 +37,7 @@ export default function PacketMode() {
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 22,
             fontWeight: 700,
-            color: "oklch(0.91 0.005 265)",
+            color: "oklch(0.21 0 0)",
             marginBottom: 4,
           }}
         >
@@ -45,9 +45,9 @@ export default function PacketMode() {
         </h1>
         <p
           style={{
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 14,
-            color: "oklch(0.55 0.01 265)",
+            color: "oklch(0.28 0 0)",
           }}
         >
           Generate a printable reference packet for exam day. Select archetypes
@@ -62,8 +62,8 @@ export default function PacketMode() {
         <div>
           <div
             style={{
-              background: "oklch(0.17 0.012 265)",
-              border: "1px solid oklch(0.28 0.01 265)",
+              background: "oklch(1 0 0)",
+              border: "1px solid oklch(0.90 0.013 78)",
               borderRadius: 4,
               padding: 16,
               marginBottom: 12,
@@ -85,9 +85,9 @@ export default function PacketMode() {
                     background: "transparent",
                     border: "none",
                     color: selected.has(arch.id)
-                      ? "oklch(0.85 0.005 265)"
-                      : "oklch(0.40 0.01 265)",
-                    fontFamily: "'IBM Plex Sans', sans-serif",
+                      ? "oklch(0.21 0 0)"
+                      : "oklch(0.51 0 0)",
+                    fontFamily: "'Inter', system-ui, sans-serif",
                     fontSize: 13,
                     cursor: "pointer",
                     textAlign: "left",
@@ -98,7 +98,7 @@ export default function PacketMode() {
                   {selected.has(arch.id) ? (
                     <CheckSquare
                       size={13}
-                      style={{ color: "oklch(0.78 0.17 65)", flexShrink: 0 }}
+                      style={{ color: "oklch(0.21 0 0)", flexShrink: 0 }}
                     />
                   ) : (
                     <Square size={13} style={{ flexShrink: 0 }} />
@@ -111,8 +111,8 @@ export default function PacketMode() {
 
           <div
             style={{
-              background: "oklch(0.17 0.012 265)",
-              border: "1px solid oklch(0.28 0.01 265)",
+              background: "oklch(1 0 0)",
+              border: "1px solid oklch(0.90 0.013 78)",
               borderRadius: 4,
               padding: 16,
               marginBottom: 12,
@@ -140,9 +140,9 @@ export default function PacketMode() {
                   background: "transparent",
                   border: "none",
                   color: sections[key]
-                    ? "oklch(0.85 0.005 265)"
-                    : "oklch(0.40 0.01 265)",
-                  fontFamily: "'IBM Plex Sans', sans-serif",
+                    ? "oklch(0.21 0 0)"
+                    : "oklch(0.51 0 0)",
+                  fontFamily: "'Inter', system-ui, sans-serif",
                   fontSize: 13,
                   cursor: "pointer",
                   textAlign: "left",
@@ -153,7 +153,7 @@ export default function PacketMode() {
                 {sections[key] ? (
                   <CheckSquare
                     size={13}
-                    style={{ color: "oklch(0.78 0.17 65)", flexShrink: 0 }}
+                    style={{ color: "oklch(0.21 0 0)", flexShrink: 0 }}
                   />
                 ) : (
                   <Square size={13} style={{ flexShrink: 0 }} />
@@ -170,17 +170,23 @@ export default function PacketMode() {
               alignItems: "center",
               gap: 8,
               padding: "10px 16px",
-              background: "oklch(0.78 0.17 65)",
+              background: "oklch(0.21 0 0)",
               border: "none",
               borderRadius: 4,
-              color: "oklch(0.13 0.01 265)",
-              fontFamily: "'IBM Plex Sans', sans-serif",
+              color: "oklch(1 0 0)",
+              fontFamily: "'Inter', system-ui, sans-serif",
               fontSize: 13,
               fontWeight: 600,
               cursor: "pointer",
               width: "100%",
               justifyContent: "center",
             }}
+            onMouseEnter={e =>
+              (e.currentTarget.style.background = "oklch(0.14 0 0)")
+            }
+            onMouseLeave={e =>
+              (e.currentTarget.style.background = "oklch(0.21 0 0)")
+            }
           >
             <Download size={14} />
             Print / Export PDF
@@ -190,8 +196,8 @@ export default function PacketMode() {
         {/* Preview */}
         <div
           style={{
-            background: "oklch(0.17 0.012 265)",
-            border: "1px solid oklch(0.28 0.01 265)",
+            background: "oklch(1 0 0)",
+            border: "1px solid oklch(0.90 0.013 78)",
             borderRadius: 4,
             padding: 24,
             maxHeight: "70vh",
@@ -203,7 +209,7 @@ export default function PacketMode() {
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 16,
               fontWeight: 700,
-              color: "oklch(0.78 0.17 65)",
+              color: "oklch(0.21 0 0)",
               marginBottom: 4,
             }}
           >
@@ -213,7 +219,7 @@ export default function PacketMode() {
             style={{
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 10,
-              color: "oklch(0.40 0.01 265)",
+              color: "oklch(0.51 0 0)",
               marginBottom: 24,
               letterSpacing: "0.08em",
             }}
@@ -233,7 +239,7 @@ export default function PacketMode() {
                 paddingBottom: 28,
                 borderBottom:
                   i < selected.size - 1
-                    ? "1px solid oklch(0.22 0.01 265)"
+                    ? "1px solid oklch(0.90 0.013 78)"
                     : "none",
               }}
             >
@@ -242,17 +248,17 @@ export default function PacketMode() {
                   fontFamily: "'JetBrains Mono', monospace",
                   fontSize: 14,
                   fontWeight: 700,
-                  color: "oklch(0.78 0.17 65)",
+                  color: "oklch(0.21 0 0)",
                   marginBottom: 12,
                 }}
               >
                 {i + 1}. {arch.shortName}
                 <span
                   style={{
-                    fontFamily: "'IBM Plex Sans', sans-serif",
+                    fontFamily: "'Inter', system-ui, sans-serif",
                     fontSize: 12,
                     fontWeight: 400,
-                    color: "oklch(0.45 0.01 265)",
+                    color: "oklch(0.51 0 0)",
                     marginLeft: 10,
                   }}
                 >
@@ -266,7 +272,7 @@ export default function PacketMode() {
                     style={{
                       fontFamily: "'JetBrains Mono', monospace",
                       fontSize: 10,
-                      color: "oklch(0.40 0.01 265)",
+                      color: "oklch(0.51 0 0)",
                       letterSpacing: "0.08em",
                       marginBottom: 6,
                     }}
@@ -304,7 +310,7 @@ export default function PacketMode() {
                     style={{
                       fontFamily: "'JetBrains Mono', monospace",
                       fontSize: 10,
-                      color: "oklch(0.40 0.01 265)",
+                      color: "oklch(0.51 0 0)",
                       letterSpacing: "0.08em",
                       marginBottom: 4,
                     }}
@@ -313,9 +319,9 @@ export default function PacketMode() {
                   </div>
                   <div
                     style={{
-                      fontFamily: "'IBM Plex Sans', sans-serif",
+                      fontFamily: "'Inter', system-ui, sans-serif",
                       fontSize: 12,
-                      color: "oklch(0.65 0.01 265)",
+                      color: "oklch(0.28 0 0)",
                       lineHeight: 1.6,
                     }}
                   >
@@ -330,7 +336,7 @@ export default function PacketMode() {
                     style={{
                       fontFamily: "'JetBrains Mono', monospace",
                       fontSize: 10,
-                      color: "oklch(0.62 0.22 25)",
+                      color: "oklch(0.38 0.20 22)",
                       letterSpacing: "0.08em",
                       marginBottom: 6,
                     }}
@@ -344,9 +350,9 @@ export default function PacketMode() {
                       <div
                         key={i}
                         style={{
-                          fontFamily: "'IBM Plex Sans', sans-serif",
+                          fontFamily: "'Inter', system-ui, sans-serif",
                           fontSize: 12,
-                          color: "oklch(0.60 0.01 265)",
+                          color: "oklch(0.28 0 0)",
                         }}
                       >
                         ⚠ {t}

@@ -143,13 +143,13 @@ export default function RouterMode() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <Shuffle size={16} style={{ color: "oklch(0.78 0.17 65)" }} />
+          <Shuffle size={16} style={{ color: "oklch(0.21 0 0)" }} />
           <h1
             style={{
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 18,
               fontWeight: 700,
-              color: "oklch(0.91 0.005 265)",
+              color: "oklch(0.21 0 0)",
             }}
           >
             Router
@@ -159,7 +159,7 @@ export default function RouterMode() {
           style={{
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 12,
-            color: "oklch(0.40 0.01 265)",
+            color: "oklch(0.51 0 0)",
           }}
         >
           {session.currentIdx + 1} / {session.stems.length}
@@ -170,7 +170,7 @@ export default function RouterMode() {
       <div
         style={{
           height: 3,
-          background: "oklch(0.22 0.01 265)",
+          background: "oklch(0.90 0.013 78)",
           borderRadius: 2,
           marginBottom: 28,
           overflow: "hidden",
@@ -180,7 +180,7 @@ export default function RouterMode() {
           style={{
             height: "100%",
             width: `${progress}%`,
-            background: "oklch(0.78 0.17 65)",
+            background: "oklch(0.21 0 0)",
             borderRadius: 2,
             transition: "width 300ms ease-out",
           }}
@@ -190,8 +190,8 @@ export default function RouterMode() {
       {/* Stem */}
       <div
         style={{
-          background: "oklch(0.17 0.012 265)",
-          border: "1px solid oklch(0.28 0.01 265)",
+          background: "oklch(1 0 0)",
+          border: "1px solid oklch(0.90 0.013 78)",
           borderRadius: 4,
           padding: 24,
           marginBottom: 20,
@@ -202,9 +202,9 @@ export default function RouterMode() {
         </div>
         <p
           style={{
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 16,
-            color: "oklch(0.88 0.005 265)",
+            color: "oklch(0.21 0 0)",
             lineHeight: 1.75,
           }}
         >
@@ -224,23 +224,23 @@ export default function RouterMode() {
         {ARCHETYPES.map((arch, i) => {
           const isSelected = selected === arch.id;
           const isCorrect = arch.id === stem.correctId;
-          let borderColor = "oklch(0.28 0.01 265)";
-          let bg = "oklch(0.17 0.012 265)";
-          let textColor = "oklch(0.75 0.01 265)";
+          let borderColor = "oklch(0.90 0.013 78)";
+          let bg = "oklch(1 0 0)";
+          let textColor = "oklch(0.28 0 0)";
           if (showFeedback) {
             if (isCorrect) {
-              borderColor = "oklch(0.72 0.14 185)";
-              bg = "oklch(0.72 0.14 185 / 0.08)";
-              textColor = "oklch(0.85 0.005 265)";
+              borderColor = "oklch(0.44 0.15 150)";
+              bg = "oklch(0.44 0.15 150 / 0.10)";
+              textColor = "oklch(0.21 0 0)";
             } else if (isSelected && !isCorrect) {
-              borderColor = "oklch(0.62 0.22 25)";
-              bg = "oklch(0.62 0.22 25 / 0.08)";
-              textColor = "oklch(0.85 0.005 265)";
+              borderColor = "oklch(0.38 0.20 22)";
+              bg = "oklch(0.38 0.20 22 / 0.08)";
+              textColor = "oklch(0.21 0 0)";
             }
           } else if (isSelected) {
-            borderColor = "oklch(0.78 0.17 65)";
-            bg = "oklch(0.78 0.17 65 / 0.08)";
-            textColor = "oklch(0.91 0.005 265)";
+            borderColor = "oklch(0.21 0 0)";
+            bg = "oklch(0.21 0 0 / 0.06)";
+            textColor = "oklch(0.21 0 0)";
           }
           return (
             <button
@@ -256,7 +256,7 @@ export default function RouterMode() {
                 border: `1px solid ${borderColor}`,
                 borderRadius: 4,
                 color: textColor,
-                fontFamily: "'IBM Plex Sans', sans-serif",
+                fontFamily: "'Inter', system-ui, sans-serif",
                 fontSize: 14,
                 fontWeight: 500,
                 cursor: showFeedback ? "default" : "pointer",
@@ -266,15 +266,15 @@ export default function RouterMode() {
               onMouseEnter={e => {
                 if (!showFeedback) {
                   e.currentTarget.style.borderColor =
-                    "oklch(0.78 0.17 65 / 0.5)";
+                    "oklch(0.21 0 0 / 0.28)";
                   e.currentTarget.style.background =
-                    "oklch(0.78 0.17 65 / 0.05)";
+                    "oklch(0.21 0 0 / 0.05)";
                 }
               }}
               onMouseLeave={e => {
                 if (!showFeedback && !isSelected) {
-                  e.currentTarget.style.borderColor = "oklch(0.28 0.01 265)";
-                  e.currentTarget.style.background = "oklch(0.17 0.012 265)";
+                  e.currentTarget.style.borderColor = "oklch(0.90 0.013 78)";
+                  e.currentTarget.style.background = "oklch(1 0 0)";
                 }
               }}
             >
@@ -282,7 +282,7 @@ export default function RouterMode() {
                 style={{
                   fontFamily: "'JetBrains Mono', monospace",
                   fontSize: 11,
-                  color: "oklch(0.35 0.01 265)",
+                  color: "oklch(0.69 0 0)",
                   minWidth: 16,
                 }}
               >
@@ -292,13 +292,13 @@ export default function RouterMode() {
               {showFeedback && isCorrect && (
                 <CheckCircle2
                   size={14}
-                  style={{ color: "oklch(0.72 0.14 185)", flexShrink: 0 }}
+                  style={{ color: "oklch(0.44 0.15 150)", flexShrink: 0 }}
                 />
               )}
               {showFeedback && isSelected && !isCorrect && (
                 <XCircle
                   size={14}
-                  style={{ color: "oklch(0.62 0.22 25)", flexShrink: 0 }}
+                  style={{ color: "oklch(0.38 0.20 22)", flexShrink: 0 }}
                 />
               )}
             </button>
@@ -309,8 +309,8 @@ export default function RouterMode() {
       {showFeedback && correctArch && (
         <div
           style={{
-            background: "oklch(0.17 0.012 265)",
-            border: "1px solid oklch(0.28 0.01 265)",
+            background: "oklch(1 0 0)",
+            border: "1px solid oklch(0.90 0.013 78)",
             borderRadius: 4,
             padding: 18,
             marginBottom: 20,
@@ -351,17 +351,17 @@ export default function RouterMode() {
                   <div
                     key={confuser.id}
                     style={{
-                      fontFamily: "'IBM Plex Sans', sans-serif",
+                      fontFamily: "'Inter', system-ui, sans-serif",
                       fontSize: 13,
                       lineHeight: 1.6,
-                      color: "oklch(0.68 0.01 265)",
-                      background: "oklch(0.13 0.01 265)",
-                      border: "1px solid oklch(0.24 0.01 265)",
+                      color: "oklch(0.28 0 0)",
+                      background: "oklch(0.97 0.003 87)",
+                      border: "1px solid oklch(0.90 0.013 78)",
                       borderRadius: 4,
                       padding: "10px 12px",
                     }}
                   >
-                    <strong style={{ color: "oklch(0.82 0.005 265)" }}>
+                    <strong style={{ color: "oklch(0.21 0 0)" }}>
                       Not {confuser.shortName}:
                     </strong>{" "}
                     that bucket requires {confuser.derivedCondition}. This stem
@@ -388,13 +388,13 @@ export default function RouterMode() {
               <>
                 <CheckCircle2
                   size={16}
-                  style={{ color: "oklch(0.72 0.14 185)" }}
+                  style={{ color: "oklch(0.44 0.15 150)" }}
                 />
                 <span
                   style={{
-                    fontFamily: "'IBM Plex Sans', sans-serif",
+                    fontFamily: "'Inter', system-ui, sans-serif",
                     fontSize: 14,
-                    color: "oklch(0.72 0.14 185)",
+                    color: "oklch(0.44 0.15 150)",
                     fontWeight: 600,
                   }}
                 >
@@ -403,12 +403,12 @@ export default function RouterMode() {
               </>
             ) : (
               <>
-                <XCircle size={16} style={{ color: "oklch(0.62 0.22 25)" }} />
+                <XCircle size={16} style={{ color: "oklch(0.38 0.20 22)" }} />
                 <span
                   style={{
-                    fontFamily: "'IBM Plex Sans', sans-serif",
+                    fontFamily: "'Inter', system-ui, sans-serif",
                     fontSize: 14,
-                    color: "oklch(0.62 0.22 25)",
+                    color: "oklch(0.38 0.20 22)",
                     fontWeight: 600,
                   }}
                 >
@@ -425,20 +425,20 @@ export default function RouterMode() {
               alignItems: "center",
               gap: 6,
               padding: "8px 18px",
-              background: "oklch(0.78 0.17 65)",
+              background: "oklch(0.21 0 0)",
               border: "none",
               borderRadius: 4,
-              color: "oklch(0.13 0.01 265)",
-              fontFamily: "'IBM Plex Sans', sans-serif",
+              color: "oklch(1 0 0)",
+              fontFamily: "'Inter', system-ui, sans-serif",
               fontSize: 13,
               fontWeight: 600,
               cursor: "pointer",
             }}
             onMouseEnter={e =>
-              (e.currentTarget.style.background = "oklch(0.65 0.14 65)")
+              (e.currentTarget.style.background = "oklch(0.14 0 0)")
             }
             onMouseLeave={e =>
-              (e.currentTarget.style.background = "oklch(0.78 0.17 65)")
+              (e.currentTarget.style.background = "oklch(0.21 0 0)")
             }
           >
             {session.currentIdx >= session.stems.length - 1
@@ -462,8 +462,8 @@ function RouterFeedbackFact({
   return (
     <div
       style={{
-        background: "oklch(0.13 0.01 265)",
-        border: "1px solid oklch(0.24 0.01 265)",
+        background: "oklch(0.97 0.003 87)",
+        border: "1px solid oklch(0.90 0.013 78)",
         borderRadius: 4,
         padding: 12,
       }}
@@ -472,7 +472,7 @@ function RouterFeedbackFact({
         style={{
           fontFamily: "'JetBrains Mono', monospace",
           fontSize: 10,
-          color: "oklch(0.43 0.01 265)",
+          color: "oklch(0.51 0 0)",
           textTransform: "uppercase",
           letterSpacing: 0,
           marginBottom: 6,
@@ -482,10 +482,10 @@ function RouterFeedbackFact({
       </div>
       <div
         style={{
-          fontFamily: "'IBM Plex Sans', sans-serif",
+          fontFamily: "'Inter', system-ui, sans-serif",
           fontSize: 13,
           lineHeight: 1.5,
-          color: "oklch(0.78 0.01 265)",
+          color: "oklch(0.28 0 0)",
         }}
       >
         {value}
@@ -503,7 +503,7 @@ function SetupScreen({ onStart }: { onStart: () => void }) {
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 22,
             fontWeight: 700,
-            color: "oklch(0.91 0.005 265)",
+            color: "oklch(0.21 0 0)",
             marginBottom: 8,
           }}
         >
@@ -511,9 +511,9 @@ function SetupScreen({ onStart }: { onStart: () => void }) {
         </h1>
         <p
           style={{
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 14,
-            color: "oklch(0.55 0.01 265)",
+            color: "oklch(0.28 0 0)",
           }}
         >
           8 randomized stems. Identify the correct archetype for each. No hints
@@ -522,8 +522,8 @@ function SetupScreen({ onStart }: { onStart: () => void }) {
       </div>
       <div
         style={{
-          background: "oklch(0.17 0.012 265)",
-          border: "1px solid oklch(0.28 0.01 265)",
+          background: "oklch(1 0 0)",
+          border: "1px solid oklch(0.90 0.013 78)",
           borderRadius: 4,
           padding: 20,
           marginBottom: 24,
@@ -547,20 +547,20 @@ function SetupScreen({ onStart }: { onStart: () => void }) {
           alignItems: "center",
           gap: 8,
           padding: "12px 24px",
-          background: "oklch(0.78 0.17 65)",
+          background: "oklch(0.21 0 0)",
           border: "none",
           borderRadius: 4,
-          color: "oklch(0.13 0.01 265)",
-          fontFamily: "'IBM Plex Sans', sans-serif",
+          color: "oklch(1 0 0)",
+          fontFamily: "'Inter', system-ui, sans-serif",
           fontSize: 14,
           fontWeight: 700,
           cursor: "pointer",
         }}
         onMouseEnter={e =>
-          (e.currentTarget.style.background = "oklch(0.65 0.14 65)")
+          (e.currentTarget.style.background = "oklch(0.14 0 0)")
         }
         onMouseLeave={e =>
-          (e.currentTarget.style.background = "oklch(0.78 0.17 65)")
+          (e.currentTarget.style.background = "oklch(0.21 0 0)")
         }
       >
         <Shuffle size={16} />
@@ -594,7 +594,7 @@ function ResultScreen({
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 22,
             fontWeight: 700,
-            color: "oklch(0.91 0.005 265)",
+            color: "oklch(0.21 0 0)",
             marginBottom: 4,
           }}
         >
@@ -615,10 +615,10 @@ function ResultScreen({
             style={{
               color:
                 pct >= 80
-                  ? "oklch(0.72 0.14 185)"
+                  ? "oklch(0.44 0.15 150)"
                   : pct >= 60
-                    ? "oklch(0.78 0.17 65)"
-                    : "oklch(0.62 0.22 25)",
+                    ? "oklch(0.48 0.16 68)"
+                    : "oklch(0.38 0.20 22)",
             }}
           >
             {pct}%
@@ -638,8 +638,8 @@ function ResultScreen({
       </div>
       <div
         style={{
-          background: "oklch(0.17 0.012 265)",
-          border: "1px solid oklch(0.28 0.01 265)",
+          background: "oklch(1 0 0)",
+          border: "1px solid oklch(0.90 0.013 78)",
           borderRadius: 4,
           padding: 16,
           marginBottom: 24,
@@ -657,16 +657,16 @@ function ResultScreen({
                 alignItems: "flex-start",
                 gap: 10,
                 padding: "8px 12px",
-                background: "oklch(0.13 0.01 265)",
+                background: "oklch(0.97 0.003 87)",
                 borderRadius: 3,
-                border: `1px solid ${a.isCorrect ? "oklch(0.72 0.14 185 / 0.2)" : "oklch(0.62 0.22 25 / 0.2)"}`,
+                border: `1px solid ${a.isCorrect ? "oklch(0.44 0.15 150 / 0.15)" : "oklch(0.38 0.20 22 / 0.13)"}`,
               }}
             >
               {a.isCorrect ? (
                 <CheckCircle2
                   size={14}
                   style={{
-                    color: "oklch(0.72 0.14 185)",
+                    color: "oklch(0.44 0.15 150)",
                     flexShrink: 0,
                     marginTop: 2,
                   }}
@@ -675,7 +675,7 @@ function ResultScreen({
                 <XCircle
                   size={14}
                   style={{
-                    color: "oklch(0.62 0.22 25)",
+                    color: "oklch(0.38 0.20 22)",
                     flexShrink: 0,
                     marginTop: 2,
                   }}
@@ -684,9 +684,9 @@ function ResultScreen({
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div
                   style={{
-                    fontFamily: "'IBM Plex Sans', sans-serif",
+                    fontFamily: "'Inter', system-ui, sans-serif",
                     fontSize: 12,
-                    color: "oklch(0.65 0.01 265)",
+                    color: "oklch(0.28 0 0)",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
@@ -699,7 +699,7 @@ function ResultScreen({
                     style={{
                       fontFamily: "'JetBrains Mono', monospace",
                       fontSize: 11,
-                      color: "oklch(0.62 0.22 25)",
+                      color: "oklch(0.38 0.20 22)",
                       marginTop: 2,
                     }}
                   >
@@ -728,20 +728,20 @@ function ResultScreen({
             alignItems: "center",
             gap: 6,
             padding: "10px 20px",
-            background: "oklch(0.78 0.17 65)",
+            background: "oklch(0.21 0 0)",
             border: "none",
             borderRadius: 4,
-            color: "oklch(0.13 0.01 265)",
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            color: "oklch(1 0 0)",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 13,
             fontWeight: 600,
             cursor: "pointer",
           }}
           onMouseEnter={e =>
-            (e.currentTarget.style.background = "oklch(0.65 0.14 65)")
+            (e.currentTarget.style.background = "oklch(0.14 0 0)")
           }
           onMouseLeave={e =>
-            (e.currentTarget.style.background = "oklch(0.78 0.17 65)")
+            (e.currentTarget.style.background = "oklch(0.21 0 0)")
           }
         >
           <RotateCcw size={14} />
@@ -752,10 +752,10 @@ function ResultScreen({
           style={{
             padding: "10px 20px",
             background: "transparent",
-            border: "1px solid oklch(0.28 0.01 265)",
+            border: "1px solid oklch(0.90 0.013 78)",
             borderRadius: 4,
-            color: "oklch(0.55 0.01 265)",
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            color: "oklch(0.28 0 0)",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 13,
             cursor: "pointer",
           }}
