@@ -34,21 +34,21 @@ export default function LearnIndex() {
             marginTop: 4,
           }}
         >
-          Step through each archetype: recognize → formula → worked example → cold solve → trap box.
+          Step through each archetype: recognize → formula → worked example →
+          cold solve → trap box.
         </p>
       </div>
 
       <div
+        className="responsive-grid"
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(2, 1fr)",
           gap: 10,
         }}
       >
-        {ARCHETYPES.map((arch) => {
+        {ARCHETYPES.map(arch => {
           const accuracy = getAccuracy(store.practiceAttempts, arch.id);
           const attempts = store.practiceAttempts.filter(
-            (a) => a.archetypeId === arch.id
+            a => a.archetypeId === arch.id
           ).length;
 
           return (
@@ -111,7 +111,14 @@ export default function LearnIndex() {
                 </div>
               </div>
 
-              <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  flexShrink: 0,
+                }}
+              >
                 {attempts > 0 && (
                   <span
                     style={{
@@ -122,8 +129,8 @@ export default function LearnIndex() {
                         accuracy >= 80
                           ? "oklch(0.72 0.14 185)"
                           : accuracy >= 60
-                          ? "oklch(0.78 0.17 65)"
-                          : "oklch(0.62 0.22 25)",
+                            ? "oklch(0.78 0.17 65)"
+                            : "oklch(0.62 0.22 25)",
                     }}
                   >
                     {accuracy}%

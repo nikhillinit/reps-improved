@@ -4,7 +4,10 @@
    ============================================================ */
 
 export type Rating = "correct" | "incorrect" | "partial";
-export type VerificationStatus = "verified" | "unverified" | "ai-generated-unverified";
+export type VerificationStatus =
+  | "verified"
+  | "unverified"
+  | "ai-generated-unverified";
 
 export interface RootCause {
   id: string;
@@ -77,6 +80,7 @@ export interface RepsStore {
   cards: Card[];
   practiceAttempts: PracticeAttempt[];
   routerAttempts: RouterAttempt[];
+  dismissedErrorIds: string[];
   settings: {
     retrieveFirst: boolean;
     timerDefault: number;
@@ -91,6 +95,7 @@ const defaultStore: RepsStore = {
   cards: [],
   practiceAttempts: [],
   routerAttempts: [],
+  dismissedErrorIds: [],
   settings: {
     retrieveFirst: true,
     timerDefault: 60,
@@ -112,7 +117,10 @@ export function loadStore(): RepsStore {
 
 export function saveStore(store: RepsStore): void {
   try {
-    localStorage.setItem(STORE_KEY, JSON.stringify({ ...store, lastUpdated: Date.now() }));
+    localStorage.setItem(
+      STORE_KEY,
+      JSON.stringify({ ...store, lastUpdated: Date.now() })
+    );
   } catch (e) {
     console.error("Failed to save store", e);
   }
@@ -144,37 +152,109 @@ export function scheduleCard(card: Card, rating: Rating): Card {
 
 export function getDueCards(cards: Card[]): Card[] {
   const now = Date.now();
-  return cards.filter((c) => c.dueAt <= now);
+  return cards.filter(c => c.dueAt <= now);
 }
 
-export function getAccuracy(attempts: PracticeAttempt[], archetypeId?: string): number {
+export function getAccuracy(
+  attempts: PracticeAttempt[],
+  archetypeId?: string
+): number {
   const filtered = archetypeId
-    ? attempts.filter((a) => a.archetypeId === archetypeId)
+    ? attempts.filter(a => a.archetypeId === archetypeId)
     : attempts;
   if (filtered.length === 0) return 0;
-  const correct = filtered.filter((a) => a.rating === "correct").length;
+  const correct = filtered.filter(a => a.rating === "correct").length;
   return Math.round((correct / filtered.length) * 100);
 }
 
-export function getOpenErrors(attempts: PracticeAttempt[], cards: Card[]): number {
-  const incorrectArchetypes = new Set(
-    attempts.filter((a) => a.rating === "incorrect").map((a) => a.archetypeId)
-  );
-  const resolvedArchetypes = new Set(
-    attempts
-      .filter((a) => a.rating === "correct")
-      .map((a) => a.archetypeId)
-  );
-  // An error is "open" if there's an incorrect attempt with no subsequent correct attempt
-  let openCount = 0;
-  for (const arcId of Array.from(incorrectArchetypes)) {
-    const arcAttempts = attempts
-      .filter((a) => a.archetypeId === arcId)
+export interface OpenErrorItem {
+  archetypeId: string;
+  lastIncorrectAttempt: PracticeAttempt;
+}
+
+export function getOpenErrorItems(
+  attempts: PracticeAttempt[],
+  dismissedErrorIds: readonly string[] = []
+): OpenErrorItem[] {
+  const dismissed = new Set(dismissedErrorIds);
+  const archetypeIds = new Set(attempts.map(attempt => attempt.archetypeId));
+
+  return Array.from(archetypeIds).flatMap(archetypeId => {
+    const archetypeAttempts = attempts
+      .filter(attempt => attempt.archetypeId === archetypeId)
       .sort((a, b) => a.timestamp - b.timestamp);
-    const lastAttempt = arcAttempts[arcAttempts.length - 1];
-    if (lastAttempt && lastAttempt.rating === "incorrect") openCount++;
-  }
-  return openCount;
+
+    const lastCorrectAt =
+      [...archetypeAttempts]
+        .reverse()
+        .find(attempt => attempt.rating === "correct")?.timestamp ?? -Infinity;
+
+    const lastIncorrectAttempt = [...archetypeAttempts]
+      .reverse()
+      .find(
+        attempt =>
+          attempt.rating === "incorrect" &&
+          attempt.timestamp > lastCorrectAt &&
+          !dismissed.has(attempt.id)
+      );
+
+    return lastIncorrectAttempt ? [{ archetypeId, lastIncorrectAttempt }] : [];
+  });
+}
+
+export function getOpenErrors(
+  attempts: PracticeAttempt[],
+  _cards: Card[],
+  dismissedErrorIds: readonly string[] = []
+): number {
+  return getOpenErrorItems(attempts, dismissedErrorIds).length;
+}
+
+export function dismissOpenError(
+  store: RepsStore,
+  attemptId: string
+): RepsStore {
+  if (store.dismissedErrorIds.includes(attemptId)) return store;
+  return {
+    ...store,
+    dismissedErrorIds: [...store.dismissedErrorIds, attemptId],
+  };
+}
+
+export function getTodayReps(store: RepsStore, now = Date.now()): number {
+  const since = now - 24 * 60 * 60 * 1000;
+  return (
+    store.practiceAttempts.filter(attempt => attempt.timestamp > since).length +
+    store.routerAttempts.filter(attempt => attempt.timestamp > since).length
+  );
+}
+
+export function getRouterAccuracy(
+  attempts: RouterAttempt[],
+  archetypeId?: string
+): number {
+  const filtered = archetypeId
+    ? attempts.filter(attempt => attempt.correctArchetypeId === archetypeId)
+    : attempts;
+  if (filtered.length === 0) return 0;
+  const correct = filtered.filter(attempt => attempt.isCorrect).length;
+  return Math.round((correct / filtered.length) * 100);
+}
+
+export function getWeakestStats<
+  T extends { attempts: number; accuracy: number },
+>(stats: T[], minAttempts = 1, maxItems = 3): T[] {
+  const eligible = stats.filter(stat => stat.attempts >= minAttempts);
+  if (eligible.length === 0) return [];
+
+  const accuracies = eligible.map(stat => stat.accuracy);
+  const lowest = Math.min(...accuracies);
+  const highest = Math.max(...accuracies);
+  if (lowest >= 100 || lowest === highest) return [];
+
+  return eligible
+    .filter(stat => stat.accuracy === lowest)
+    .slice(0, maxItems);
 }
 
 // Seed QA data
@@ -200,7 +280,7 @@ export function seedQAData(archetypes: Archetype[]): RepsStore {
       id: `qa_incorrect_${arch.id}`,
       archetypeId: arch.id,
       rating: "incorrect",
-      rootCauseIds: arch.rootCauses.slice(0, 2).map((rc) => rc.id),
+      rootCauseIds: arch.rootCauses.slice(0, 2).map(rc => rc.id),
       timestamp: now - (archetypes.length - i) * 1800000,
       mode: "practice",
     });
@@ -221,9 +301,9 @@ export function seedQAData(archetypes: Archetype[]): RepsStore {
 
   const updated: RepsStore = {
     ...store,
-    cards: [...store.cards.filter((c) => !c.id.startsWith("qa_")), ...newCards],
+    cards: [...store.cards.filter(c => !c.id.startsWith("qa_")), ...newCards],
     practiceAttempts: [
-      ...store.practiceAttempts.filter((a) => !a.id.startsWith("qa_")),
+      ...store.practiceAttempts.filter(a => !a.id.startsWith("qa_")),
       ...newAttempts,
     ],
     lastUpdated: now,

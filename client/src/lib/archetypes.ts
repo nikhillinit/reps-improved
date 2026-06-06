@@ -314,7 +314,7 @@ export const ARCHETYPE_MAP: Record<string, Archetype> = Object.fromEntries(
 );
 
 // Router stems for practice
-export const ROUTER_STEMS = [
+const LEGACY_ROUTER_STEMS = [
   { id: "rs1", stem: "A factory orders raw materials at $50/order. Annual demand is 4,000 units. Holding cost is $2/unit/year. How many units should they order at a time?", correctId: "eoq" },
   { id: "rs2", stem: "A retailer wants to ensure a 95% service level. Daily demand has mean 80 and std dev 12. Lead time is 9 days. How much safety stock is needed?", correctId: "safety_stock" },
   { id: "rs3", stem: "A fashion retailer buys winter coats once per season. Cost is $60, selling price $120, salvage $20. Demand is normally distributed. What is the optimal order quantity approach?", correctId: "newsvendor" },
@@ -327,4 +327,251 @@ export const ROUTER_STEMS = [
   { id: "rs10", stem: "A control chart shows a process with all points within 3-sigma limits but trending upward. Is the process in control?", correctId: "spc" },
   { id: "rs11", stem: "A company runs two parallel promotions on its website to see which drives more signups. They track signups per visitor. What analysis framework applies?", correctId: "experimentation" },
   { id: "rs12", stem: "An e-commerce company has 4 regional fulfillment centers. They are considering whether pooling inventory would reduce their safety stock costs.", correctId: "risk_pooling" },
+];
+export type RouterStemKind = "direct" | "near-miss" | "conceptual-trap";
+
+export interface RouterStem {
+  id: string;
+  stem: string;
+  correctId: string;
+  kind: RouterStemKind;
+  confuserIds?: string[];
+}
+
+// Router stems for practice: 3 direct, 2 near-miss, 1 conceptual trap per P0 archetype.
+export const ROUTER_STEMS: RouterStem[] = [
+  {
+    id: "router_eoq_direct_1",
+    stem: "A plant uses 12,000 identical fasteners per year. Every purchase order costs $80 to place, and annual holding cost is $3 per fastener. What model tells them how many to order each time?",
+    correctId: "eoq",
+    kind: "direct",
+  },
+  {
+    id: "router_eoq_direct_2",
+    stem: "Demand is constant and known. The manager wants to balance setup cost against inventory carrying cost for repeated replenishment orders.",
+    correctId: "eoq",
+    kind: "direct",
+  },
+  {
+    id: "router_eoq_direct_3",
+    stem: "A distributor can reorder the same SKU whenever needed. Ordering costs are fixed per order, holding costs are annual per unit, and demand is stable.",
+    correctId: "eoq",
+    kind: "direct",
+  },
+  {
+    id: "router_eoq_near_miss_1",
+    stem: "The buyer can place another replenishment order next week if inventory runs low; demand is steady enough to annualize. Which inventory model applies?",
+    correctId: "eoq",
+    kind: "near-miss",
+    confuserIds: ["newsvendor"],
+  },
+  {
+    id: "router_eoq_near_miss_2",
+    stem: "The question asks for the order quantity, not the trigger level. Demand is known and repeated, and lead-time variability is not part of the setup.",
+    correctId: "eoq",
+    kind: "near-miss",
+    confuserIds: ["safety_stock"],
+  },
+  {
+    id: "router_eoq_conceptual_1",
+    stem: "At the optimal repeated order quantity, annual ordering cost and annual holding cost should be roughly equal. Which bucket is being sanity-checked?",
+    correctId: "eoq",
+    kind: "conceptual-trap",
+    confuserIds: ["newsvendor"],
+  },
+  {
+    id: "router_safety_direct_1",
+    stem: "Daily demand has mean 80 and standard deviation 12. Lead time is 9 days, and the company wants a 95% service level before triggering reorder.",
+    correctId: "safety_stock",
+    kind: "direct",
+  },
+  {
+    id: "router_safety_direct_2",
+    stem: "A retailer needs the inventory position that should trigger a new order when demand during lead time is uncertain.",
+    correctId: "safety_stock",
+    kind: "direct",
+  },
+  {
+    id: "router_safety_direct_3",
+    stem: "The problem gives mean demand, demand standard deviation, lead time, and a z-score target. It asks for buffer stock and reorder point.",
+    correctId: "safety_stock",
+    kind: "direct",
+  },
+  {
+    id: "router_safety_near_miss_1",
+    stem: "The order quantity may be fixed elsewhere, but this question asks when to reorder under lead-time demand uncertainty.",
+    correctId: "safety_stock",
+    kind: "near-miss",
+    confuserIds: ["eoq"],
+  },
+  {
+    id: "router_safety_near_miss_2",
+    stem: "The firm is not deciding a one-time seasonal buy. It can replenish, and the service-level target is about stockouts during lead time.",
+    correctId: "safety_stock",
+    kind: "near-miss",
+    confuserIds: ["newsvendor"],
+  },
+  {
+    id: "router_safety_conceptual_1",
+    stem: "A classmate multiplies daily demand standard deviation by lead time instead of by the square root of lead time. Which topic's trap is this?",
+    correctId: "safety_stock",
+    kind: "conceptual-trap",
+    confuserIds: ["spc"],
+  },
+  {
+    id: "router_pooling_direct_1",
+    stem: "Four regional warehouses face independent demand. The company is evaluating whether one pooled inventory location would reduce total safety stock.",
+    correctId: "risk_pooling",
+    kind: "direct",
+  },
+  {
+    id: "router_pooling_direct_2",
+    stem: "A common component is stocked separately for several products today. The manager asks how aggregation changes demand variability.",
+    correctId: "risk_pooling",
+    kind: "direct",
+  },
+  {
+    id: "router_pooling_direct_3",
+    stem: "The problem compares separate safety stock across locations with centralized safety stock for independent streams.",
+    correctId: "risk_pooling",
+    kind: "direct",
+  },
+  {
+    id: "router_pooling_near_miss_1",
+    stem: "The company is combining inventory buffers, not customer service lines or interchangeable servers. The question asks for safety-stock reduction.",
+    correctId: "risk_pooling",
+    kind: "near-miss",
+    confuserIds: ["safety_stock"],
+  },
+  {
+    id: "router_pooling_near_miss_2",
+    stem: "The setup mentions multiple locations and independent demand variance, but no one-shot purchase and no salvage value.",
+    correctId: "risk_pooling",
+    kind: "near-miss",
+    confuserIds: ["newsvendor"],
+  },
+  {
+    id: "router_pooling_conceptual_1",
+    stem: "For n identical independent demand streams, aggregation scales uncertainty by square root of n, not by n. Which bucket is being tested?",
+    correctId: "risk_pooling",
+    kind: "conceptual-trap",
+    confuserIds: ["safety_stock"],
+  },
+  {
+    id: "router_newsvendor_direct_1",
+    stem: "A bakery bakes croissants once each morning. Unsold units have little value, and there is no reorder before demand is realized.",
+    correctId: "newsvendor",
+    kind: "direct",
+  },
+  {
+    id: "router_newsvendor_direct_2",
+    stem: "The buyer chooses one seasonal order before uncertain demand is known. The problem gives selling price, cost, and salvage value.",
+    correctId: "newsvendor",
+    kind: "direct",
+  },
+  {
+    id: "router_newsvendor_direct_3",
+    stem: "A concert venue decides how many programs to print before event demand is observed. Leftovers are discounted after the show.",
+    correctId: "newsvendor",
+    kind: "direct",
+  },
+  {
+    id: "router_newsvendor_near_miss_1",
+    stem: "Demand is uncertain and the order is one-shot. The issue is overage versus underage cost, not repeated setup versus holding cost.",
+    correctId: "newsvendor",
+    kind: "near-miss",
+    confuserIds: ["eoq"],
+  },
+  {
+    id: "router_newsvendor_near_miss_2",
+    stem: "The problem asks how many to buy once before the season, not when to reorder during lead time.",
+    correctId: "newsvendor",
+    kind: "near-miss",
+    confuserIds: ["safety_stock"],
+  },
+  {
+    id: "router_newsvendor_conceptual_1",
+    stem: "A high lost-margin penalty means the optimal quantity should be above the mean rather than equal to it. Which model uses that critical-ratio logic?",
+    correctId: "newsvendor",
+    kind: "conceptual-trap",
+    confuserIds: ["eoq"],
+  },
+  {
+    id: "router_experiment_direct_1",
+    stem: "A product team randomly assigns users to a new checkout button or the current button and compares conversion rates with a p-value.",
+    correctId: "experimentation",
+    kind: "direct",
+  },
+  {
+    id: "router_experiment_direct_2",
+    stem: "The manager asks whether an intervention caused a change, with treatment and control groups measured on the same outcome metric.",
+    correctId: "experimentation",
+    kind: "direct",
+  },
+  {
+    id: "router_experiment_direct_3",
+    stem: "The prompt gives alpha, power, variance, and minimum detectable effect for a proposed randomized test.",
+    correctId: "experimentation",
+    kind: "direct",
+  },
+  {
+    id: "router_experiment_near_miss_1",
+    stem: "The metric is compared between randomized groups after a deliberate intervention; it is not a time-series control chart.",
+    correctId: "experimentation",
+    kind: "near-miss",
+    confuserIds: ["spc"],
+  },
+  {
+    id: "router_experiment_near_miss_2",
+    stem: "Users in treatment might slow a shared warehouse for control users, so the design concern is interference across experiment arms.",
+    correctId: "experimentation",
+    kind: "near-miss",
+    confuserIds: ["risk_pooling"],
+  },
+  {
+    id: "router_experiment_conceptual_1",
+    stem: "A result can be statistically significant but too small to matter operationally. Which bucket teaches that distinction?",
+    correctId: "experimentation",
+    kind: "conceptual-trap",
+    confuserIds: ["spc"],
+  },
+  {
+    id: "router_spc_direct_1",
+    stem: "A product has USL = 100, LSL = 80, process mean = 92, and process sigma = 3. The question asks whether the process is capable.",
+    correctId: "spc",
+    kind: "direct",
+  },
+  {
+    id: "router_spc_direct_2",
+    stem: "A control chart tracks repeated measurements over time and asks whether points outside three-sigma limits show instability.",
+    correctId: "spc",
+    kind: "direct",
+  },
+  {
+    id: "router_spc_direct_3",
+    stem: "The prompt asks for Cp and Cpk from specification limits, process mean, and process standard deviation.",
+    correctId: "spc",
+    kind: "direct",
+  },
+  {
+    id: "router_spc_near_miss_1",
+    stem: "The data are repeated process measurements against control or specification limits, not a randomized treatment-versus-control intervention.",
+    correctId: "spc",
+    kind: "near-miss",
+    confuserIds: ["experimentation"],
+  },
+  {
+    id: "router_spc_near_miss_2",
+    stem: "The problem asks whether the process can meet customer specs, not whether there is enough inventory during replenishment lead time.",
+    correctId: "spc",
+    kind: "near-miss",
+    confuserIds: ["safety_stock"],
+  },
+  {
+    id: "router_spc_conceptual_1",
+    stem: "A classmate uses sigma divided by square root of n for capability against specs. Which bucket contains the sigma-versus-standard-error trap?",
+    correctId: "spc",
+    kind: "conceptual-trap",
+    confuserIds: ["experimentation"],
+  },
 ];
