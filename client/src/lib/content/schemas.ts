@@ -82,10 +82,20 @@ export const ProblemItemSchema = z.object({
 
 export type ProblemItem = z.infer<typeof ProblemItemSchema>;
 
+export const RouterStemKindSchema = z.enum([
+  "direct",
+  "near-miss",
+  "conceptual-trap",
+]);
+
+export type RouterStemKind = z.infer<typeof RouterStemKindSchema>;
+
 export const RouterStemSchema = z.object({
   id: StableIdSchema,
   stem: RequiredTextSchema,
   correctId: StableIdSchema,
+  kind: RouterStemKindSchema.optional(),
+  confuserIds: z.array(StableIdSchema).optional(),
   semanticQa: SemanticQaSchema,
 });
 

@@ -28,6 +28,7 @@ function Router() {
         <Route path="/learn" component={LearnIndex} />
         <Route path="/learn/:id" component={LearnSheet} />
         <Route path="/router" component={RouterMode} />
+        <Route path="/practice/:archetypeId" component={PracticeMode} />
         <Route path="/practice" component={PracticeMode} />
         <Route path="/mock" component={MockMode} />
         <Route path="/review" component={ReviewMode} />

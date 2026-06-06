@@ -40,9 +40,8 @@ export default function LearnIndex() {
       </div>
 
       <div
+        className="responsive-grid"
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(2, 1fr)",
           gap: 10,
         }}
       >

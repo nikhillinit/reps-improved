@@ -13,6 +13,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import {
+  CONTENT_ARCHETYPE_MAP as ARCHETYPE_MAP,
   CONTENT_ARCHETYPES as ARCHETYPES,
   CONTENT_ROUTER_STEMS as ROUTER_STEMS,
 } from "@/lib/content/catalog";
@@ -123,6 +124,12 @@ export default function RouterMode() {
 
   const stem = session.stems[session.currentIdx];
   const progress = (session.currentIdx / session.stems.length) * 100;
+  const correctArch = ARCHETYPE_MAP[stem.correctId];
+  const confuserIds = new Set(stem.confuserIds ?? []);
+  if (selected && selected !== stem.correctId) confuserIds.add(selected);
+  const confuserArches = Array.from(confuserIds)
+    .map(id => ARCHETYPE_MAP[id])
+    .filter((arch): arch is (typeof ARCHETYPES)[number] => Boolean(arch));
 
   return (
     <div>
@@ -299,6 +306,74 @@ export default function RouterMode() {
         })}
       </div>
 
+      {showFeedback && correctArch && (
+        <div
+          style={{
+            background: "oklch(0.17 0.012 265)",
+            border: "1px solid oklch(0.28 0.01 265)",
+            borderRadius: 4,
+            padding: 18,
+            marginBottom: 20,
+          }}
+        >
+          <div className="section-label" style={{ marginBottom: 12 }}>
+            WHY THIS BUCKET
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+              gap: 10,
+              marginBottom: confuserArches.length > 0 ? 16 : 0,
+            }}
+          >
+            <RouterFeedbackFact
+              label="Derived condition"
+              value={correctArch.derivedCondition}
+            />
+            <RouterFeedbackFact
+              label="First formula"
+              value={correctArch.formula}
+            />
+            <RouterFeedbackFact
+              label="Top trap"
+              value={correctArch.trapNotes[0] ?? "No trap note available."}
+            />
+          </div>
+
+          {confuserArches.length > 0 && (
+            <div>
+              <div className="section-label" style={{ marginBottom: 8 }}>
+                WHY NOT THE CONFUSER
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {confuserArches.map(confuser => (
+                  <div
+                    key={confuser.id}
+                    style={{
+                      fontFamily: "'IBM Plex Sans', sans-serif",
+                      fontSize: 13,
+                      lineHeight: 1.6,
+                      color: "oklch(0.68 0.01 265)",
+                      background: "oklch(0.13 0.01 265)",
+                      border: "1px solid oklch(0.24 0.01 265)",
+                      borderRadius: 4,
+                      padding: "10px 12px",
+                    }}
+                  >
+                    <strong style={{ color: "oklch(0.82 0.005 265)" }}>
+                      Not {confuser.shortName}:
+                    </strong>{" "}
+                    that bucket requires {confuser.derivedCondition}. This stem
+                    points to {correctArch.derivedCondition}.
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Feedback + Next */}
       {showFeedback && (
         <div
@@ -373,6 +448,48 @@ export default function RouterMode() {
           </button>
         </div>
       )}
+    </div>
+  );
+}
+
+function RouterFeedbackFact({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div
+      style={{
+        background: "oklch(0.13 0.01 265)",
+        border: "1px solid oklch(0.24 0.01 265)",
+        borderRadius: 4,
+        padding: 12,
+      }}
+    >
+      <div
+        style={{
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: 10,
+          color: "oklch(0.43 0.01 265)",
+          textTransform: "uppercase",
+          letterSpacing: 0,
+          marginBottom: 6,
+        }}
+      >
+        {label}
+      </div>
+      <div
+        style={{
+          fontFamily: "'IBM Plex Sans', sans-serif",
+          fontSize: 13,
+          lineHeight: 1.5,
+          color: "oklch(0.78 0.01 265)",
+        }}
+      >
+        {value}
+      </div>
     </div>
   );
 }
