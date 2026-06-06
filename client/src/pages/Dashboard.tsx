@@ -1,6 +1,6 @@
 /* ============================================================
-   REPS — Dashboard
-   Terminal Precision: Stats + P0 archetypes + quick actions
+   REPS — Dashboard  v2.1
+   Mobile-first · Touch-optimised · Keyboard shortcuts
    ============================================================ */
 
 import { useState, useEffect } from "react";
@@ -11,7 +11,7 @@ import {
   AlertTriangle,
   Trophy,
   BookOpen,
-  TrendingUp,
+  ChevronRight,
 } from "lucide-react";
 import {
   loadStore,
@@ -21,10 +21,12 @@ import {
   type RepsStore,
 } from "@/lib/store";
 import { CONTENT_ARCHETYPES as ARCHETYPES } from "@/lib/content/catalog";
+import { useIsMobile } from "@/hooks/useMobile";
 
 export default function Dashboard() {
   const [, navigate] = useLocation();
   const [store, setStore] = useState<RepsStore>(loadStore());
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     setStore(loadStore());
@@ -36,54 +38,30 @@ export default function Dashboard() {
   ).length;
   const openErrors = getOpenErrors(store.practiceAttempts, store.cards);
 
-  // Keyboard shortcuts for Quick Actions
+  // Keyboard shortcuts for Quick Actions (desktop only)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore when focus is inside an input, textarea, or select
       const tag = (e.target as HTMLElement).tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
-      // Ignore modifier combos (Ctrl+R would be browser refresh, etc.)
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-
       switch (e.key.toLowerCase()) {
-        case "r":
-          e.preventDefault();
-          navigate("/router");
-          break;
-        case "p":
-          e.preventDefault();
-          navigate("/practice");
-          break;
-        case "e":
-          if (openErrors > 0) {
-            e.preventDefault();
-            navigate("/review");
-          }
-          break;
-        case "m":
-          e.preventDefault();
-          navigate("/mock");
-          break;
+        case "r": e.preventDefault(); navigate("/router"); break;
+        case "p": e.preventDefault(); navigate("/practice"); break;
+        case "e": if (openErrors > 0) { e.preventDefault(); navigate("/review"); } break;
+        case "m": e.preventDefault(); navigate("/mock"); break;
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [navigate, openErrors]);
 
   const now = new Date();
-  const dateStr = now.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  const dateStr = now.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
-  // Sort archetypes by accuracy ascending (weakest first)
   const archetypeStats = ARCHETYPES.map(arch => ({
     arch,
     accuracy: getAccuracy(store.practiceAttempts, arch.id),
-    attempts: store.practiceAttempts.filter(a => a.archetypeId === arch.id)
-      .length,
+    attempts: store.practiceAttempts.filter(a => a.archetypeId === arch.id).length,
   })).sort((a, b) => {
     if (a.attempts === 0 && b.attempts === 0) return 0;
     if (a.attempts === 0) return 1;
@@ -91,187 +69,129 @@ export default function Dashboard() {
     return a.accuracy - b.accuracy;
   });
 
-  const weakest = archetypeStats.filter(s => s.attempts > 0).slice(0, 3);
-
   return (
     <div>
-      {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          marginBottom: 32,
-        }}
-      >
-        <div>
-          <h1
-            style={{
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: 28,
-              fontWeight: 700,
-              color: "oklch(0.21 0 0)",
-              letterSpacing: "-0.02em",
-              lineHeight: 1,
-            }}
-          >
+      {/* ── Header ── */}
+      <div style={{ marginBottom: isMobile ? 20 : 28 }}>
+        {/* Only show big REPS_ on desktop; mobile has it in the top bar */}
+        {!isMobile && (
+          <h1 style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: 26,
+            fontWeight: 700,
+            color: "var(--foreground)",
+            letterSpacing: "-0.02em",
+            lineHeight: 1,
+            marginBottom: 4,
+          }}>
             REPS_
           </h1>
-          <div
-            style={{
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: 12,
-              color: "oklch(0.51 0 0)",
-              marginTop: 4,
-            }}
-          >
-            {dateStr}
-          </div>
-        </div>
-
-        {/* Due cards CTA */}
-        {dueCards.length > 0 && (
-          <button
-            onClick={() => navigate("/practice")}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              padding: "10px 20px",
-              background: "oklch(0.21 0 0)",
-              color: "oklch(1 0 0)",
-              border: "none",
-              borderRadius: 4,
-              fontFamily: "'Inter', system-ui, sans-serif",
-              fontSize: 14,
-              fontWeight: 600,
-              cursor: "pointer",
-              transition: "background 150ms ease-out, transform 80ms ease-out",
-            }}
-            onMouseEnter={e =>
-              (e.currentTarget.style.background = "oklch(0.14 0 0)")
-            }
-            onMouseLeave={e =>
-              (e.currentTarget.style.background = "oklch(0.21 0 0)")
-            }
-            onMouseDown={e => (e.currentTarget.style.transform = "scale(0.97)")}
-            onMouseUp={e => (e.currentTarget.style.transform = "scale(1)")}
-          >
-            <Zap size={16} />
-            Start Practice
-          </button>
         )}
+        <div style={{
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: 11,
+          color: "var(--muted-foreground)",
+        }}>
+          {dateStr}
+        </div>
       </div>
 
-      {/* Stats row */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: 12,
-          marginBottom: 32,
-        }}
-      >
+      {/* ── Due cards banner ── */}
+      {dueCards.length > 0 && (
+        <button
+          onClick={() => navigate("/practice")}
+          className="btn-primary amber fade-in"
+          style={{ width: "100%", marginBottom: 16, justifyContent: "space-between" }}
+        >
+          <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Zap size={16} aria-hidden="true" />
+            {dueCards.length} card{dueCards.length !== 1 ? "s" : ""} due — start practice
+          </span>
+          <ChevronRight size={16} aria-hidden="true" />
+        </button>
+      )}
+
+      {/* ── Stats row ── */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(3, 1fr)",
+        gap: 10,
+        marginBottom: 24,
+      }}>
         <StatCard
           value={dueCards.length}
           label="Cards Due"
+          sub={dueCards.length > 0 ? "Practice now" : "All caught up!"}
           accent={dueCards.length > 0}
-          sub={
-            dueCards.length > 0 ? "Start your session now" : "All caught up!"
-          }
         />
-        <StatCard value={todayReps} label="Today's Reps" />
+        <StatCard value={todayReps} label="Today's Reps" sub={todayReps > 0 ? "Keep going!" : "Start drilling"} />
         <StatCard
           value={openErrors}
           label="Open Errors"
+          sub={openErrors > 0 ? "Patch queue" : "Clean slate"}
           danger={openErrors > 0}
-          sub={openErrors > 0 ? "Patch queue has items" : "No open errors"}
         />
       </div>
 
-      {/* Quick Actions */}
-      <div style={{ marginBottom: 32 }}>
-        <div className="section-label" style={{ marginBottom: 12 }}>
-          QUICK ACTIONS
-        </div>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+      {/* ── Quick Actions ── */}
+      <div style={{ marginBottom: 28 }}>
+        <div className="section-label" style={{ marginBottom: 10 }}>QUICK ACTIONS</div>
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4, auto)",
+          gap: 8,
+          justifyContent: isMobile ? undefined : "start",
+        }}>
           <QuickAction
-            icon={<Shuffle size={14} />}
+            icon={<Shuffle size={15} aria-hidden="true" />}
             label="5-min Router"
             shortcut="R"
             onClick={() => navigate("/router")}
+            isMobile={isMobile}
           />
           <QuickAction
-            icon={<Zap size={14} />}
+            icon={<Zap size={15} aria-hidden="true" />}
             label="10-q Practice"
             shortcut="P"
             onClick={() => navigate("/practice")}
+            isMobile={isMobile}
           />
           <QuickAction
-            icon={<AlertTriangle size={14} />}
+            icon={<AlertTriangle size={15} aria-hidden="true" />}
             label="Patch Errors"
             shortcut="E"
             onClick={() => navigate("/review")}
             disabled={openErrors === 0}
+            isMobile={isMobile}
           />
           <QuickAction
-            icon={<Trophy size={14} />}
+            icon={<Trophy size={15} aria-hidden="true" />}
             label="Mock Scan"
             shortcut="M"
             onClick={() => navigate("/mock")}
+            isMobile={isMobile}
           />
         </div>
       </div>
 
-      {/* P0 Archetypes */}
+      {/* ── P0 Archetypes ── */}
       <div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 12,
-          }}
-        >
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 10,
+          flexWrap: "wrap",
+          gap: 8,
+        }}>
           <div className="section-label">P0 ARCHETYPES</div>
-          {weakest.length > 0 && (
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span
-                style={{
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: 10,
-                  color: "oklch(0.51 0 0)",
-                }}
-              >
-                WEAKEST:
-              </span>
-              {weakest.map(s => (
-                <span
-                  key={s.arch.id}
-                  style={{
-                    fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: 10,
-                    padding: "2px 6px",
-                    border: "1px solid oklch(0.38 0.20 22 / 0.28)",
-                    borderRadius: 3,
-                    color: "oklch(0.38 0.20 22)",
-                    background: "oklch(0.38 0.20 22 / 0.08)",
-                  }}
-                >
-                  {s.arch.shortName}
-                </span>
-              ))}
-            </div>
-          )}
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: 10,
-          }}
-        >
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(3, 1fr)",
+          gap: 10,
+        }}>
           {archetypeStats.map(({ arch, accuracy, attempts }) => (
             <ArchetypeCard
               key={arch.id}
@@ -288,40 +208,26 @@ export default function Dashboard() {
   );
 }
 
-function StatCard({
-  value,
-  label,
-  sub,
-  accent,
-  danger,
-}: {
-  value: number;
-  label: string;
-  sub?: string;
-  accent?: boolean;
-  danger?: boolean;
+function StatCard({ value, label, sub, accent, danger }: {
+  value: number; label: string; sub?: string; accent?: boolean; danger?: boolean;
 }) {
   const valueColor = danger
-    ? "oklch(0.38 0.20 22)"
+    ? "var(--color-error)"
     : accent
-      ? "oklch(0.21 0 0)"
-      : "oklch(0.21 0 0)";
+      ? "var(--primary)"
+      : "var(--foreground)";
 
   return (
     <div className="stat-card">
-      <div className="stat-value" style={{ color: valueColor }}>
-        {value}
-      </div>
+      <div className="stat-value" style={{ color: valueColor, fontSize: 24 }}>{value}</div>
       <div className="stat-label">{label}</div>
       {sub && (
-        <div
-          style={{
-            fontFamily: "'Inter', system-ui, sans-serif",
-            fontSize: 12,
-            color: "oklch(0.51 0 0)",
-            marginTop: 4,
-          }}
-        >
+        <div style={{
+          fontFamily: "'IBM Plex Sans', sans-serif",
+          fontSize: 11,
+          color: "var(--muted-foreground)",
+          marginTop: 3,
+        }}>
           {sub}
         </div>
       )}
@@ -329,178 +235,145 @@ function StatCard({
   );
 }
 
-function QuickAction({
-  icon,
-  label,
-  shortcut,
-  onClick,
-  disabled,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  shortcut: string;
-  onClick: () => void;
-  disabled?: boolean;
+function QuickAction({ icon, label, shortcut, onClick, disabled, isMobile }: {
+  icon: React.ReactNode; label: string; shortcut: string;
+  onClick: () => void; disabled?: boolean; isMobile?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
       disabled={disabled}
+      className="btn-secondary"
       style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        padding: "8px 14px",
-        background: "oklch(1 0 0)",
-        border: "1px solid oklch(0.90 0.013 78)",
-        borderRadius: 4,
-        color: disabled ? "oklch(0.69 0 0)" : "oklch(0.21 0 0)",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        fontSize: 13,
-        fontWeight: 500,
+        justifyContent: isMobile ? "center" : "flex-start",
+        opacity: disabled ? 0.45 : 1,
         cursor: disabled ? "not-allowed" : "pointer",
-        transition: "border-color 150ms ease-out, background 150ms ease-out",
-        opacity: disabled ? 0.5 : 1,
-      }}
-      onMouseEnter={e => {
-        if (!disabled) {
-          e.currentTarget.style.borderColor = "oklch(0.21 0 0 / 0.28)";
-          e.currentTarget.style.background = "oklch(0.21 0 0 / 0.06)";
-        }
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.borderColor = "oklch(0.90 0.013 78)";
-        e.currentTarget.style.background = "oklch(1 0 0)";
+        minHeight: 48,
+        flexDirection: isMobile ? "column" : "row",
+        gap: isMobile ? 4 : 8,
+        padding: isMobile ? "10px 8px" : "10px 14px",
+        fontSize: 13,
       }}
     >
       {icon}
-      <span>› {label}</span>
-      <span className="kbd-badge">{shortcut}</span>
+      <span style={{ fontWeight: 500 }}>{label}</span>
+      {!isMobile && <span className="kbd-badge" style={{ marginLeft: "auto" }}>{shortcut}</span>}
     </button>
   );
 }
 
-function ArchetypeCard({
-  name,
-  accuracy,
-  attempts,
-  status,
-  onLearn,
-}: {
-  name: string;
-  accuracy: number;
-  attempts: number;
-  status: string;
-  onLearn: () => void;
+function ArchetypeCard({ name, accuracy, attempts, status, onLearn }: {
+  name: string; accuracy: number; attempts: number; status: string; onLearn: () => void;
 }) {
   const accuracyColor =
     attempts === 0
-      ? "oklch(0.51 0 0)"
+      ? "var(--muted-foreground)"
       : accuracy >= 80
-        ? "oklch(0.44 0.15 150)"
+        ? "var(--color-correct)"
         : accuracy >= 60
-          ? "oklch(0.48 0.16 68)"
-          : "oklch(0.38 0.20 22)";
+          ? "var(--color-warn)"
+          : "var(--color-error)";
+
+  // Accuracy bar width
+  const barWidth = attempts === 0 ? 0 : accuracy;
 
   return (
     <div
       className="card-interactive"
       style={{
-        background: "oklch(1 0 0)",
-        border: "1px solid oklch(0.90 0.013 78)",
-        borderRadius: 4,
-        padding: "16px",
+        background: "var(--card)",
+        border: "1px solid var(--border)",
+        borderRadius: 6,
+        padding: 14,
+        display: "flex",
+        flexDirection: "column",
+        gap: 8,
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          marginBottom: 10,
-        }}
-      >
-        <div
-          style={{
-            fontFamily: "'Inter', system-ui, sans-serif",
-            fontSize: 13,
-            fontWeight: 600,
-            color: "oklch(0.21 0 0)",
-          }}
-        >
+      {/* Title row */}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 4 }}>
+        <div style={{
+          fontFamily: "'IBM Plex Sans', sans-serif",
+          fontSize: 13,
+          fontWeight: 600,
+          color: "var(--foreground)",
+          lineHeight: 1.3,
+        }}>
           {name}
         </div>
         {status === "verified" && (
-          <span
-            style={{
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: 9,
-              padding: "2px 5px",
-              border: "1px solid oklch(0.44 0.15 150 / 0.22)",
-              borderRadius: 2,
-              color: "oklch(0.44 0.15 150)",
-              background: "oklch(0.44 0.15 150 / 0.10)",
-              letterSpacing: "0.06em",
-            }}
-          >
-            VERIFIED
+          <span style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: 8,
+            padding: "2px 5px",
+            border: "1px solid var(--color-correct-border)",
+            borderRadius: 2,
+            color: "var(--color-correct)",
+            background: "var(--color-correct-bg)",
+            letterSpacing: "0.06em",
+            flexShrink: 0,
+          }}>
+            ✓
           </span>
         )}
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "baseline",
-          gap: 6,
-          marginBottom: 4,
-        }}
-      >
-        <span
-          className="accuracy-display"
-          style={{ color: accuracyColor, fontSize: 24 }}
-        >
-          {attempts === 0 ? "—" : `${accuracy}%`}
-        </span>
-        <span
-          style={{
+      {/* Accuracy */}
+      <div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 5, marginBottom: 4 }}>
+          <span className="accuracy-display" style={{ color: accuracyColor, fontSize: 20 }}>
+            {attempts === 0 ? "—" : `${accuracy}%`}
+          </span>
+          <span style={{
             fontFamily: "'JetBrains Mono', monospace",
-            fontSize: 10,
-            color: "oklch(0.51 0 0)",
-          }}
-        >
-          {attempts === 0 ? "no attempts" : "accuracy"}
-        </span>
+            fontSize: 9,
+            color: "var(--muted-foreground)",
+          }}>
+            {attempts === 0 ? "no attempts" : `${attempts} reps`}
+          </span>
+        </div>
+        {/* Accuracy bar */}
+        <div style={{ height: 3, background: "var(--border)", borderRadius: 2, overflow: "hidden" }}>
+          <div style={{
+            height: "100%",
+            width: `${barWidth}%`,
+            background: accuracyColor,
+            borderRadius: 2,
+            transition: "width 400ms ease-out",
+          }} />
+        </div>
       </div>
 
+      {/* Learn button */}
       <button
         onClick={onLearn}
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 6,
-          padding: "5px 10px",
+          gap: 5,
+          padding: "6px 10px",
           background: "transparent",
-          border: "1px solid oklch(0.90 0.013 78)",
-          borderRadius: 3,
-          color: "oklch(0.28 0 0)",
-          fontFamily: "'Inter', system-ui, sans-serif",
-          fontSize: 11,
+          border: "1px solid var(--border)",
+          borderRadius: 4,
+          color: "var(--muted-foreground)",
+          fontFamily: "'IBM Plex Sans', sans-serif",
+          fontSize: 12,
           fontWeight: 500,
           cursor: "pointer",
           transition: "color 150ms, border-color 150ms",
-          marginTop: 8,
+          minHeight: 32,
+          alignSelf: "flex-start",
         }}
         onMouseEnter={e => {
-          e.currentTarget.style.color = "oklch(0.21 0 0)";
-          e.currentTarget.style.borderColor = "oklch(0.21 0 0 / 0.22)";
+          e.currentTarget.style.color = "var(--foreground)";
+          e.currentTarget.style.borderColor = "var(--foreground)";
         }}
         onMouseLeave={e => {
-          e.currentTarget.style.color = "oklch(0.28 0 0)";
-          e.currentTarget.style.borderColor = "oklch(0.90 0.013 78)";
+          e.currentTarget.style.color = "var(--muted-foreground)";
+          e.currentTarget.style.borderColor = "var(--border)";
         }}
       >
-        <BookOpen size={11} />
+        <BookOpen size={11} aria-hidden="true" />
         Learn
       </button>
     </div>

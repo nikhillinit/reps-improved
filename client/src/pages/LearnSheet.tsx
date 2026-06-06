@@ -58,7 +58,7 @@ export default function LearnSheet() {
     return (
       <div
         style={{
-          color: "oklch(0.38 0.20 22)",
+          color: "var(--color-error)",
           fontFamily: "'JetBrains Mono', monospace",
         }}
       >
@@ -66,7 +66,7 @@ export default function LearnSheet() {
         <button
           onClick={() => navigate("/learn")}
           style={{
-            color: "oklch(0.21 0 0)",
+            color: "var(--foreground)",
             background: "none",
             border: "none",
             cursor: "pointer",
@@ -98,29 +98,29 @@ export default function LearnSheet() {
             gap: 4,
             background: "none",
             border: "none",
-            color: "oklch(0.51 0 0)",
+            color: "var(--muted-foreground)",
             fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 13,
             cursor: "pointer",
             padding: "4px 0",
           }}
           onMouseEnter={e =>
-            (e.currentTarget.style.color = "oklch(0.21 0 0)")
+            (e.currentTarget.style.color = "var(--foreground)")
           }
           onMouseLeave={e =>
-            (e.currentTarget.style.color = "oklch(0.51 0 0)")
+            (e.currentTarget.style.color = "var(--muted-foreground)")
           }
         >
           <ChevronLeft size={14} />
           Learn
         </button>
-        <span style={{ color: "oklch(0.69 0 0)" }}>/</span>
+        <span style={{ color: "var(--muted-foreground)" }}>/</span>
         <h1
           style={{
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 18,
             fontWeight: 700,
-            color: "oklch(0.21 0 0)",
+            color: "var(--foreground)",
           }}
         >
           {arch.shortName}
@@ -133,7 +133,7 @@ export default function LearnSheet() {
               padding: "2px 6px",
               border: "1px solid oklch(0.44 0.15 150 / 0.22)",
               borderRadius: 2,
-              color: "oklch(0.44 0.15 150)",
+              color: "var(--color-correct)",
               background: "oklch(0.44 0.15 150 / 0.10)",
               letterSpacing: "0.06em",
             }}
@@ -161,7 +161,7 @@ export default function LearnSheet() {
             style={{
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 11,
-              color: "oklch(0.21 0 0)",
+              color: "var(--foreground)",
               fontWeight: 600,
             }}
           >
@@ -171,7 +171,7 @@ export default function LearnSheet() {
             style={{
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 11,
-              color: "oklch(0.51 0 0)",
+              color: "var(--muted-foreground)",
             }}
           >
             {currentStep + 1} / {STEPS.length}
@@ -211,7 +211,7 @@ export default function LearnSheet() {
           alignItems: "center",
           marginTop: 32,
           paddingTop: 20,
-          borderTop: "1px solid oklch(0.90 0.013 78)",
+          borderTop: "1px solid var(--border)",
         }}
       >
         <button
@@ -223,12 +223,12 @@ export default function LearnSheet() {
             gap: 6,
             padding: "8px 16px",
             background: "transparent",
-            border: "1px solid oklch(0.90 0.013 78)",
+            border: "1px solid var(--border)",
             borderRadius: 4,
             color:
               currentStep === 0
-                ? "oklch(0.69 0 0)"
-                : "oklch(0.28 0 0)",
+                ? "var(--muted-foreground)"
+                : "var(--foreground)",
             fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 13,
             cursor: currentStep === 0 ? "not-allowed" : "pointer",
@@ -243,7 +243,7 @@ export default function LearnSheet() {
             style={{
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 10,
-              color: "oklch(0.69 0 0)",
+              color: "var(--muted-foreground)",
             }}
           >
             navigate
@@ -255,7 +255,7 @@ export default function LearnSheet() {
             style={{
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 10,
-              color: "oklch(0.69 0 0)",
+              color: "var(--muted-foreground)",
             }}
           >
             reveal
@@ -269,7 +269,7 @@ export default function LearnSheet() {
               alignItems: "center",
               gap: 6,
               padding: "8px 16px",
-              background: "oklch(0.21 0 0)",
+              background: "var(--foreground)",
               border: "none",
               borderRadius: 4,
               color: "oklch(1 0 0)",
@@ -279,10 +279,10 @@ export default function LearnSheet() {
               cursor: "pointer",
             }}
             onMouseEnter={e =>
-              (e.currentTarget.style.background = "oklch(0.14 0 0)")
+              (e.currentTarget.style.background = "var(--foreground)")
             }
             onMouseLeave={e =>
-              (e.currentTarget.style.background = "oklch(0.21 0 0)")
+              (e.currentTarget.style.background = "var(--foreground)")
             }
           >
             Next Step
@@ -318,8 +318,8 @@ function RecognizeStep({ arch }: { arch: Archetype }) {
   return (
     <div
       style={{
-        background: "oklch(1 0 0)",
-        border: "1px solid oklch(0.90 0.013 78)",
+        background: "var(--card)",
+        border: "1px solid var(--border)",
         borderRadius: 4,
         padding: 24,
       }}
@@ -356,11 +356,11 @@ function RecognizeStep({ arch }: { arch: Archetype }) {
           style={{
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 13,
-            color: "oklch(0.28 0 0)",
-            background: "oklch(0.97 0.003 87)",
+            color: "var(--foreground)",
+            background: "var(--muted)",
             padding: "10px 14px",
             borderRadius: 3,
-            border: "1px solid oklch(0.90 0.013 78)",
+            border: "1px solid var(--border)",
           }}
         >
           {arch.derivedCondition as string}
@@ -374,8 +374,8 @@ function FormulaStep({ arch }: { arch: Archetype }) {
   return (
     <div
       style={{
-        background: "oklch(1 0 0)",
-        border: "1px solid oklch(0.90 0.013 78)",
+        background: "var(--card)",
+        border: "1px solid var(--border)",
         borderRadius: 4,
         padding: 24,
       }}
@@ -402,7 +402,7 @@ function FormulaStep({ arch }: { arch: Archetype }) {
                     fontFamily: "'JetBrains Mono', monospace",
                     fontSize: 13,
                     fontWeight: 600,
-                    color: "oklch(0.21 0 0)",
+                    color: "var(--foreground)",
                     minWidth: 60,
                     flexShrink: 0,
                   }}
@@ -413,7 +413,7 @@ function FormulaStep({ arch }: { arch: Archetype }) {
                   style={{
                     fontFamily: "'Inter', system-ui, sans-serif",
                     fontSize: 13,
-                    color: "oklch(0.28 0 0)",
+                    color: "var(--foreground)",
                   }}
                 >
                   {desc}
@@ -445,8 +445,8 @@ function WorkedExampleStep({
     <div>
       <div
         style={{
-          background: "oklch(1 0 0)",
-          border: "1px solid oklch(0.90 0.013 78)",
+          background: "var(--card)",
+          border: "1px solid var(--border)",
           borderRadius: 4,
           padding: 24,
           marginBottom: 12,
@@ -459,7 +459,7 @@ function WorkedExampleStep({
           style={{
             fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 15,
-            color: "oklch(0.21 0 0)",
+            color: "var(--foreground)",
             lineHeight: 1.7,
           }}
         >
@@ -475,20 +475,20 @@ function WorkedExampleStep({
             gap: 8,
             padding: "10px 18px",
             background: "transparent",
-            border: "1px solid oklch(0.90 0.013 78)",
+            border: "1px solid var(--border)",
             borderRadius: 4,
-            color: "oklch(0.28 0 0)",
+            color: "var(--foreground)",
             fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 13,
             cursor: "pointer",
           }}
           onMouseEnter={e => {
-            e.currentTarget.style.borderColor = "oklch(0.21 0 0 / 0.28)";
-            e.currentTarget.style.color = "oklch(0.21 0 0)";
+            e.currentTarget.style.borderColor = "var(--ring)";
+            e.currentTarget.style.color = "var(--foreground)";
           }}
           onMouseLeave={e => {
-            e.currentTarget.style.borderColor = "oklch(0.90 0.013 78)";
-            e.currentTarget.style.color = "oklch(0.28 0 0)";
+            e.currentTarget.style.borderColor = "var(--border)";
+            e.currentTarget.style.color = "var(--foreground)";
           }}
         >
           <Eye size={14} />
@@ -500,7 +500,7 @@ function WorkedExampleStep({
       ) : (
         <div
           style={{
-            background: "oklch(1 0 0)",
+            background: "var(--card)",
             border: "1px solid oklch(0.44 0.15 150 / 0.15)",
             borderLeft: "3px solid oklch(0.44 0.15 150)",
             borderRadius: "0 4px 4px 0",
@@ -509,7 +509,7 @@ function WorkedExampleStep({
         >
           <div
             className="section-label"
-            style={{ marginBottom: 10, color: "oklch(0.44 0.15 150)" }}
+            style={{ marginBottom: 10, color: "var(--color-correct)" }}
           >
             SOLUTION
           </div>
@@ -532,7 +532,7 @@ function WorkedExampleStep({
                 style={{
                   fontFamily: "'Inter', system-ui, sans-serif",
                   fontSize: 13,
-                  color: "oklch(0.28 0 0)",
+                  color: "var(--foreground)",
                   marginBottom: 6,
                   lineHeight: 1.6,
                 }}
@@ -570,7 +570,7 @@ function ColdSolveStep({
   const stem = stems[0];
   if (!stem)
     return (
-      <div style={{ color: "oklch(0.51 0 0)" }}>
+      <div style={{ color: "var(--muted-foreground)" }}>
         No practice stem available.
       </div>
     );
@@ -578,8 +578,8 @@ function ColdSolveStep({
     <div>
       <div
         style={{
-          background: "oklch(1 0 0)",
-          border: "1px solid oklch(0.90 0.013 78)",
+          background: "var(--card)",
+          border: "1px solid var(--border)",
           borderRadius: 4,
           padding: 24,
           marginBottom: 12,
@@ -592,7 +592,7 @@ function ColdSolveStep({
           style={{
             fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 15,
-            color: "oklch(0.21 0 0)",
+            color: "var(--foreground)",
             lineHeight: 1.7,
             marginBottom: 16,
           }}
@@ -606,10 +606,10 @@ function ColdSolveStep({
           style={{
             width: "100%",
             minHeight: 80,
-            background: "oklch(0.97 0.003 87)",
-            border: "1px solid oklch(0.90 0.013 78)",
+            background: "var(--muted)",
+            border: "1px solid var(--border)",
             borderRadius: 3,
-            color: "oklch(0.21 0 0)",
+            color: "var(--foreground)",
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 13,
             padding: "10px 12px",
@@ -618,9 +618,9 @@ function ColdSolveStep({
             boxSizing: "border-box",
           }}
           onFocus={e =>
-            (e.target.style.borderColor = "oklch(0.21 0 0 / 0.28)")
+            (e.target.style.borderColor = "var(--ring)")
           }
-          onBlur={e => (e.target.style.borderColor = "oklch(0.90 0.013 78)")}
+          onBlur={e => (e.target.style.borderColor = "var(--border)")}
         />
       </div>
       {!revealed ? (
@@ -632,20 +632,20 @@ function ColdSolveStep({
             gap: 8,
             padding: "10px 18px",
             background: "transparent",
-            border: "1px solid oklch(0.90 0.013 78)",
+            border: "1px solid var(--border)",
             borderRadius: 4,
-            color: "oklch(0.28 0 0)",
+            color: "var(--foreground)",
             fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 13,
             cursor: "pointer",
           }}
           onMouseEnter={e => {
-            e.currentTarget.style.borderColor = "oklch(0.21 0 0 / 0.28)";
-            e.currentTarget.style.color = "oklch(0.21 0 0)";
+            e.currentTarget.style.borderColor = "var(--ring)";
+            e.currentTarget.style.color = "var(--foreground)";
           }}
           onMouseLeave={e => {
-            e.currentTarget.style.borderColor = "oklch(0.90 0.013 78)";
-            e.currentTarget.style.color = "oklch(0.28 0 0)";
+            e.currentTarget.style.borderColor = "var(--border)";
+            e.currentTarget.style.color = "var(--foreground)";
           }}
         >
           <Eye size={14} />
@@ -657,7 +657,7 @@ function ColdSolveStep({
       ) : (
         <div
           style={{
-            background: "oklch(1 0 0)",
+            background: "var(--card)",
             border: "1px solid oklch(0.44 0.15 150 / 0.15)",
             borderLeft: "3px solid oklch(0.44 0.15 150)",
             borderRadius: "0 4px 4px 0",
@@ -666,7 +666,7 @@ function ColdSolveStep({
         >
           <div
             className="section-label"
-            style={{ marginBottom: 8, color: "oklch(0.44 0.15 150)" }}
+            style={{ marginBottom: 8, color: "var(--color-correct)" }}
           >
             ANSWER
           </div>
@@ -683,7 +683,7 @@ function ColdSolveStep({
             style={{
               fontFamily: "'Inter', system-ui, sans-serif",
               fontSize: 13,
-              color: "oklch(0.28 0 0)",
+              color: "var(--foreground)",
             }}
           >
             {stem.explanation}
@@ -713,7 +713,7 @@ function TrapBoxStep({ arch }: { arch: Archetype }) {
   return (
     <div
       style={{
-        background: "oklch(1 0 0)",
+        background: "var(--card)",
         border: "1px solid oklch(0.38 0.20 22 / 0.15)",
         borderLeft: "3px solid oklch(0.38 0.20 22)",
         borderRadius: "0 4px 4px 0",
@@ -728,8 +728,8 @@ function TrapBoxStep({ arch }: { arch: Archetype }) {
           marginBottom: 16,
         }}
       >
-        <AlertTriangle size={16} style={{ color: "oklch(0.38 0.20 22)" }} />
-        <div className="section-label" style={{ color: "oklch(0.38 0.20 22)" }}>
+        <AlertTriangle size={16} style={{ color: "var(--color-error)" }} />
+        <div className="section-label" style={{ color: "var(--color-error)" }}>
           TRAP BOX — COMMON MISTAKES
         </div>
       </div>
@@ -751,7 +751,7 @@ function TrapBoxStep({ arch }: { arch: Archetype }) {
               style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: 11,
-                color: "oklch(0.38 0.20 22)",
+                color: "var(--color-error)",
                 flexShrink: 0,
                 marginTop: 1,
               }}
@@ -762,7 +762,7 @@ function TrapBoxStep({ arch }: { arch: Archetype }) {
               style={{
                 fontFamily: "'Inter', system-ui, sans-serif",
                 fontSize: 13,
-                color: "oklch(0.28 0 0)",
+                color: "var(--foreground)",
                 lineHeight: 1.6,
               }}
             >
@@ -786,8 +786,8 @@ function SanityChecksStep({ arch }: { arch: Archetype }) {
   return (
     <div
       style={{
-        background: "oklch(1 0 0)",
-        border: "1px solid oklch(0.90 0.013 78)",
+        background: "var(--card)",
+        border: "1px solid var(--border)",
         borderRadius: 4,
         padding: 24,
       }}
@@ -804,16 +804,16 @@ function SanityChecksStep({ arch }: { arch: Archetype }) {
               gap: 10,
               alignItems: "flex-start",
               padding: "8px 12px",
-              background: "oklch(0.97 0.003 87)",
+              background: "var(--muted)",
               borderRadius: 3,
-              border: "1px solid oklch(0.90 0.013 78)",
+              border: "1px solid var(--border)",
             }}
           >
             <span
               style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: 10,
-                color: "oklch(0.21 0 0)",
+                color: "var(--foreground)",
                 flexShrink: 0,
                 marginTop: 2,
               }}
@@ -824,7 +824,7 @@ function SanityChecksStep({ arch }: { arch: Archetype }) {
               style={{
                 fontFamily: "'Inter', system-ui, sans-serif",
                 fontSize: 13,
-                color: "oklch(0.28 0 0)",
+                color: "var(--foreground)",
                 lineHeight: 1.6,
               }}
             >

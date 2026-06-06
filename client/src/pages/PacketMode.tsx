@@ -1,11 +1,12 @@
 /* ============================================================
-   REPS — Packet Mode
-   Terminal Precision: Printable reference packet generator
+   REPS — Packet Mode  v2.1
+   Mobile-first · Stacked layout on mobile · CSS variables
    ============================================================ */
 
 import { useState } from "react";
-import { FileText, Download, CheckSquare, Square } from "lucide-react";
+import { Download, CheckSquare, Square } from "lucide-react";
 import { CONTENT_ARCHETYPES as ARCHETYPES } from "@/lib/content/catalog";
+import { useIsMobile } from "@/hooks/useMobile";
 
 export default function PacketMode() {
   const [selected, setSelected] = useState<Set<string>>(
@@ -17,6 +18,7 @@ export default function PacketMode() {
     worked: true,
     triggers: true,
   });
+  const isMobile = useIsMobile();
 
   const toggleArch = (id: string) => {
     setSelected(prev => {
@@ -29,265 +31,126 @@ export default function PacketMode() {
 
   const handlePrint = () => window.print();
 
+  const checkboxStyle = (active: boolean): React.CSSProperties => ({
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    padding: "8px 10px",
+    minHeight: 40,
+    background: "transparent",
+    border: "none",
+    color: active ? "var(--foreground)" : "var(--muted-foreground)",
+    fontFamily: "'IBM Plex Sans', sans-serif",
+    fontSize: 13,
+    cursor: "pointer",
+    textAlign: "left",
+    borderRadius: 4,
+    transition: "color 150ms",
+    WebkitTapHighlightColor: "transparent",
+    width: "100%",
+  });
+
   return (
     <div>
-      <div style={{ marginBottom: 24 }}>
-        <h1
-          style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: 22,
-            fontWeight: 700,
-            color: "oklch(0.21 0 0)",
-            marginBottom: 4,
-          }}
-        >
+      <div style={{ marginBottom: 20 }}>
+        <h1 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 22, fontWeight: 700, color: "var(--foreground)", marginBottom: 4 }}>
           Packet
         </h1>
-        <p
-          style={{
-            fontFamily: "'Inter', system-ui, sans-serif",
-            fontSize: 14,
-            color: "oklch(0.28 0 0)",
-          }}
-        >
-          Generate a printable reference packet for exam day. Select archetypes
-          and sections.
+        <p style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontSize: 14, color: "var(--muted-foreground)", margin: 0 }}>
+          Generate a printable reference packet for exam day. Select archetypes and sections.
         </p>
       </div>
 
-      <div
-        style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 20 }}
-      >
+      {/* On mobile: controls above preview. On desktop: sidebar + preview */}
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "220px 1fr", gap: 16 }}>
+
         {/* Controls */}
-        <div>
-          <div
-            style={{
-              background: "oklch(1 0 0)",
-              border: "1px solid oklch(0.90 0.013 78)",
-              borderRadius: 4,
-              padding: 16,
-              marginBottom: 12,
-            }}
-          >
-            <div className="section-label" style={{ marginBottom: 12 }}>
-              ARCHETYPES
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+
+          {/* Archetype selector — 2-col on mobile */}
+          <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8, padding: 14 }}>
+            <div className="section-label" style={{ marginBottom: 10 }}>ARCHETYPES</div>
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "1fr",
+              gap: 2,
+            }}>
               {ARCHETYPES.map(arch => (
-                <button
-                  key={arch.id}
-                  onClick={() => toggleArch(arch.id)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    padding: "6px 8px",
-                    background: "transparent",
-                    border: "none",
-                    color: selected.has(arch.id)
-                      ? "oklch(0.21 0 0)"
-                      : "oklch(0.51 0 0)",
-                    fontFamily: "'Inter', system-ui, sans-serif",
-                    fontSize: 13,
-                    cursor: "pointer",
-                    textAlign: "left",
-                    borderRadius: 3,
-                    transition: "color 150ms",
-                  }}
-                >
-                  {selected.has(arch.id) ? (
-                    <CheckSquare
-                      size={13}
-                      style={{ color: "oklch(0.21 0 0)", flexShrink: 0 }}
-                    />
-                  ) : (
-                    <Square size={13} style={{ flexShrink: 0 }} />
-                  )}
+                <button key={arch.id} onClick={() => toggleArch(arch.id)} style={checkboxStyle(selected.has(arch.id))}>
+                  {selected.has(arch.id)
+                    ? <CheckSquare size={14} style={{ color: "var(--foreground)", flexShrink: 0 }} aria-hidden="true" />
+                    : <Square size={14} style={{ flexShrink: 0 }} aria-hidden="true" />}
                   {arch.shortName}
                 </button>
               ))}
             </div>
           </div>
 
-          <div
-            style={{
-              background: "oklch(1 0 0)",
-              border: "1px solid oklch(0.90 0.013 78)",
-              borderRadius: 4,
-              padding: 16,
-              marginBottom: 12,
-            }}
-          >
-            <div className="section-label" style={{ marginBottom: 12 }}>
-              SECTIONS
-            </div>
-            {(
-              [
-                ["triggers", "Triggers & Disqualifiers"],
-                ["formula", "Formula & Variables"],
+          {/* Section selector — 2-col on mobile */}
+          <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8, padding: 14 }}>
+            <div className="section-label" style={{ marginBottom: 10 }}>SECTIONS</div>
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "1fr",
+              gap: 2,
+            }}>
+              {([
+                ["triggers", "Triggers"],
+                ["formula", "Formula"],
                 ["worked", "Worked Example"],
                 ["traps", "Trap Box"],
-              ] as [keyof typeof sections, string][]
-            ).map(([key, label]) => (
-              <button
-                key={key}
-                onClick={() => setSections(s => ({ ...s, [key]: !s[key] }))}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "6px 8px",
-                  background: "transparent",
-                  border: "none",
-                  color: sections[key]
-                    ? "oklch(0.21 0 0)"
-                    : "oklch(0.51 0 0)",
-                  fontFamily: "'Inter', system-ui, sans-serif",
-                  fontSize: 13,
-                  cursor: "pointer",
-                  textAlign: "left",
-                  width: "100%",
-                  borderRadius: 3,
-                }}
-              >
-                {sections[key] ? (
-                  <CheckSquare
-                    size={13}
-                    style={{ color: "oklch(0.21 0 0)", flexShrink: 0 }}
-                  />
-                ) : (
-                  <Square size={13} style={{ flexShrink: 0 }} />
-                )}
-                {label}
-              </button>
-            ))}
+              ] as [keyof typeof sections, string][]).map(([key, label]) => (
+                <button key={key} onClick={() => setSections(s => ({ ...s, [key]: !s[key] }))} style={checkboxStyle(sections[key])}>
+                  {sections[key]
+                    ? <CheckSquare size={14} style={{ color: "var(--foreground)", flexShrink: 0 }} aria-hidden="true" />
+                    : <Square size={14} style={{ flexShrink: 0 }} aria-hidden="true" />}
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <button
-            onClick={handlePrint}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "10px 16px",
-              background: "oklch(0.21 0 0)",
-              border: "none",
-              borderRadius: 4,
-              color: "oklch(1 0 0)",
-              fontFamily: "'Inter', system-ui, sans-serif",
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: "pointer",
-              width: "100%",
-              justifyContent: "center",
-            }}
-            onMouseEnter={e =>
-              (e.currentTarget.style.background = "oklch(0.14 0 0)")
-            }
-            onMouseLeave={e =>
-              (e.currentTarget.style.background = "oklch(0.21 0 0)")
-            }
-          >
-            <Download size={14} />
+          <button onClick={handlePrint} className="btn-primary" style={{ width: "100%", justifyContent: "center" }}>
+            <Download size={14} aria-hidden="true" />
             Print / Export PDF
           </button>
         </div>
 
         {/* Preview */}
-        <div
-          style={{
-            background: "oklch(1 0 0)",
-            border: "1px solid oklch(0.90 0.013 78)",
-            borderRadius: 4,
-            padding: 24,
-            maxHeight: "70vh",
-            overflowY: "auto",
-          }}
-        >
-          <div
-            style={{
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: 16,
-              fontWeight: 700,
-              color: "oklch(0.21 0 0)",
-              marginBottom: 4,
-            }}
-          >
+        <div style={{
+          background: "var(--card)",
+          border: "1px solid var(--border)",
+          borderRadius: 8,
+          padding: 20,
+          maxHeight: isMobile ? "60vh" : "72vh",
+          overflowY: "auto",
+        }}>
+          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 15, fontWeight: 700, color: "var(--foreground)", marginBottom: 4 }}>
             REPS — OPNS-430 Reference Packet
           </div>
-          <div
-            style={{
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: 10,
-              color: "oklch(0.51 0 0)",
-              marginBottom: 24,
-              letterSpacing: "0.08em",
-            }}
-          >
-            {new Date().toLocaleDateString("en-US", {
-              month: "long",
-              day: "numeric",
-              year: "numeric",
-            })}{" "}
-            · {selected.size} archetypes
+          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "var(--muted-foreground)", marginBottom: 20, letterSpacing: "0.08em" }}>
+            {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })} · {selected.size} archetypes
           </div>
+
           {ARCHETYPES.filter(a => selected.has(a.id)).map((arch, i) => (
-            <div
-              key={arch.id}
-              style={{
-                marginBottom: 28,
-                paddingBottom: 28,
-                borderBottom:
-                  i < selected.size - 1
-                    ? "1px solid oklch(0.90 0.013 78)"
-                    : "none",
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: "oklch(0.21 0 0)",
-                  marginBottom: 12,
-                }}
-              >
+            <div key={arch.id} style={{
+              marginBottom: 24,
+              paddingBottom: 24,
+              borderBottom: i < selected.size - 1 ? "1px solid var(--border)" : "none",
+            }}>
+              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, fontWeight: 700, color: "var(--foreground)", marginBottom: 10 }}>
                 {i + 1}. {arch.shortName}
-                <span
-                  style={{
-                    fontFamily: "'Inter', system-ui, sans-serif",
-                    fontSize: 12,
-                    fontWeight: 400,
-                    color: "oklch(0.51 0 0)",
-                    marginLeft: 10,
-                  }}
-                >
+                <span style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontSize: 12, fontWeight: 400, color: "var(--muted-foreground)", marginLeft: 8 }}>
                   {arch.description}
                 </span>
               </div>
 
               {sections.triggers && (
                 <div style={{ marginBottom: 10 }}>
-                  <div
-                    style={{
-                      fontFamily: "'JetBrains Mono', monospace",
-                      fontSize: 10,
-                      color: "oklch(0.51 0 0)",
-                      letterSpacing: "0.08em",
-                      marginBottom: 6,
-                    }}
-                  >
-                    TRIGGERS
-                  </div>
+                  <div className="section-label" style={{ marginBottom: 6 }}>TRIGGERS</div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                     {(arch.triggers as string[]).map(t => (
-                      <span
-                        key={t}
-                        className="trigger-chip"
-                        style={{ fontSize: 11 }}
-                      >
-                        {t}
-                      </span>
+                      <span key={t} className="trigger-chip" style={{ fontSize: 11 }}>{t}</span>
                     ))}
                   </div>
                 </div>
@@ -295,10 +158,7 @@ export default function PacketMode() {
 
               {sections.formula && (
                 <div style={{ marginBottom: 10 }}>
-                  <div
-                    className="formula-display"
-                    style={{ fontSize: 13, padding: "8px 12px" }}
-                  >
+                  <div className="formula-display" style={{ fontSize: 13, padding: "8px 12px" }}>
                     {arch.formula as string}
                   </div>
                 </div>
@@ -306,25 +166,8 @@ export default function PacketMode() {
 
               {sections.worked && (
                 <div style={{ marginBottom: 10 }}>
-                  <div
-                    style={{
-                      fontFamily: "'JetBrains Mono', monospace",
-                      fontSize: 10,
-                      color: "oklch(0.51 0 0)",
-                      letterSpacing: "0.08em",
-                      marginBottom: 4,
-                    }}
-                  >
-                    WORKED EXAMPLE
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: "'Inter', system-ui, sans-serif",
-                      fontSize: 12,
-                      color: "oklch(0.28 0 0)",
-                      lineHeight: 1.6,
-                    }}
-                  >
+                  <div className="section-label" style={{ marginBottom: 4 }}>WORKED EXAMPLE</div>
+                  <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontSize: 12, color: "var(--foreground)", lineHeight: 1.6 }}>
                     {(arch.workedExample as { solution: string }).solution}
                   </div>
                 </div>
@@ -332,29 +175,10 @@ export default function PacketMode() {
 
               {sections.traps && (
                 <div>
-                  <div
-                    style={{
-                      fontFamily: "'JetBrains Mono', monospace",
-                      fontSize: 10,
-                      color: "oklch(0.38 0.20 22)",
-                      letterSpacing: "0.08em",
-                      marginBottom: 6,
-                    }}
-                  >
-                    TRAPS
-                  </div>
-                  <div
-                    style={{ display: "flex", flexDirection: "column", gap: 3 }}
-                  >
-                    {(arch.trapNotes as string[]).map((t, i) => (
-                      <div
-                        key={i}
-                        style={{
-                          fontFamily: "'Inter', system-ui, sans-serif",
-                          fontSize: 12,
-                          color: "oklch(0.28 0 0)",
-                        }}
-                      >
+                  <div className="section-label" style={{ marginBottom: 6, color: "var(--color-error)" }}>TRAPS</div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                    {(arch.trapNotes as string[]).map((t, ti) => (
+                      <div key={ti} style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontSize: 12, color: "var(--foreground)" }}>
                         ⚠ {t}
                       </div>
                     ))}
