@@ -303,7 +303,10 @@ export default function SettingsPage() {
           }}
         >
           <div>REPS v3.0 — OPNS-430 Exam Drill (Improved)</div>
-          <div>6 archetypes · SRS scheduling · localStorage persistence</div>
+          <div>
+            {ARCHETYPES.length} archetypes · SRS scheduling · localStorage
+            persistence
+          </div>
           <div style={{ marginTop: 8, color: "oklch(0.30 0.01 265)" }}>
             Improved from exam-drill.replit.app
           </div>

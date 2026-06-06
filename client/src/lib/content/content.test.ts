@@ -18,6 +18,28 @@ import {
 } from "./selectors";
 import { validateContentCatalog } from "./validate";
 
+const LITTLES_LAW_PRACTICE_IDS = [
+  "ll_insects_cube",
+  "ll_insurance_hard_claims",
+  "ll_coffee_shop",
+  "ll_it_new_feature",
+  "ll_it_overall_system",
+  "ll_mt_kinley",
+  "ll_hospital_research",
+];
+
+const QUEUEING_PRACTICE_IDS = [
+  "que_ev_charging",
+  "que_airport_priority",
+  "que_carwash_pooling",
+  "que_wwic_discount",
+  "que_kwikemart_mm1",
+  "que_wwic_lq_tail",
+  "que_restaurant_tables",
+];
+
+const INVENTORY_TIMING_PRACTICE_IDS = ["inv_batch_rice"];
+
 describe("content boundary schemas", () => {
   it("parses the legacy archetype and router exports through canonical schemas", () => {
     expect(() =>
@@ -51,7 +73,7 @@ describe("content boundary schemas", () => {
     const practiceItems = eligiblePracticeItems(ARCHETYPES);
     const routerStems = eligibleRouterStems(ROUTER_STEMS, archetypes);
 
-    expect(archetypes).toHaveLength(6);
+    expect(archetypes).toHaveLength(9);
     expect(
       practiceItems.every(item => item.verificationStatus === "verified")
     ).toBe(true);
@@ -73,6 +95,72 @@ describe("content boundary schemas", () => {
       )
     ).toBe(true);
   });
+
+  it("integrates the Little's Law direct problem set as eligible practice content", () => {
+    const archetype = CONTENT_ARCHETYPES.find(
+      item => item.id === "littles_law"
+    );
+    const practiceItems = CONTENT_PRACTICE_ITEMS.filter(
+      item => item.archetypeId === "littles_law"
+    );
+    const routerStems = CONTENT_ROUTER_STEMS.filter(
+      stem => stem.correctId === "littles_law"
+    );
+
+    expect(archetype?.shortName).toBe("Little's Law");
+    expect(practiceItems.map(item => item.id)).toEqual(
+      LITTLES_LAW_PRACTICE_IDS
+    );
+    expect(
+      practiceItems.every(
+        item =>
+          item.verificationStatus === "verified" &&
+          item.semanticQa.checks.hasSourceBackedAnswer &&
+          item.semanticQa.checks.hasTrapCoverage
+      )
+    ).toBe(true);
+    expect(routerStems).toHaveLength(6);
+  });
+
+  it("integrates the queueing waiting-time problem set as eligible practice content", () => {
+    const archetype = CONTENT_ARCHETYPES.find(item => item.id === "queueing");
+    const practiceItems = CONTENT_PRACTICE_ITEMS.filter(
+      item => item.archetypeId === "queueing"
+    );
+    const routerStems = CONTENT_ROUTER_STEMS.filter(
+      stem => stem.correctId === "queueing"
+    );
+
+    expect(archetype?.shortName).toBe("Queueing");
+    expect(practiceItems.map(item => item.id)).toEqual(QUEUEING_PRACTICE_IDS);
+    expect(
+      practiceItems.every(
+        item =>
+          item.verificationStatus === "verified" &&
+          item.semanticQa.checks.hasSourceBackedAnswer &&
+          item.semanticQa.checks.hasTrapCoverage
+      )
+    ).toBe(true);
+    expect(routerStems).toHaveLength(6);
+  });
+
+  it("keeps the inventory additions in the eligible practice catalog without duplicating SnowCity", () => {
+    const timingArchetype = CONTENT_ARCHETYPES.find(
+      item => item.id === "inventory_timing"
+    );
+    const timingItems = CONTENT_PRACTICE_ITEMS.filter(
+      item => item.archetypeId === "inventory_timing"
+    );
+    const newsvendorIds = CONTENT_PRACTICE_ITEMS.filter(
+      item => item.archetypeId === "newsvendor"
+    ).map(item => item.id);
+
+    expect(timingArchetype?.shortName).toBe("Inventory Timing");
+    expect(timingItems.map(item => item.id)).toEqual(
+      INVENTORY_TIMING_PRACTICE_IDS
+    );
+    expect(newsvendorIds.filter(id => id === "nv_snowcity")).toHaveLength(1);
+  });
 });
 
 describe("content catalog validation", () => {
@@ -84,7 +172,7 @@ describe("content catalog validation", () => {
 
     expect(result.ok).toBe(true);
     expect(result.errors).toEqual([]);
-    expect(result.stats.eligibleArchetypes).toBe(6);
+    expect(result.stats.eligibleArchetypes).toBe(9);
     expect(result.stats.eligiblePracticeItems).toBeGreaterThanOrEqual(6);
     expect(result.stats.eligibleRouterStems).toBe(ROUTER_STEMS.length);
   });

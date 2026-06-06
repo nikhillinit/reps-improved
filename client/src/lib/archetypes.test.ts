@@ -7,7 +7,7 @@ type RouterStemWithMvpMetadata = (typeof ROUTER_STEMS)[number] & {
 };
 
 describe("router stem bank", () => {
-  it("ships six MVP router stems per P0 archetype with the required mix", () => {
+  it("ships six MVP router stems per eligible archetype with the required mix", () => {
     const stems = ROUTER_STEMS as RouterStemWithMvpMetadata[];
 
     for (const archetype of ARCHETYPES) {

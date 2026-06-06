@@ -26,6 +26,10 @@ interface MockQuestion {
 }
 
 const MOCK_DURATION = 20 * 60; // 20 minutes
+const MOCK_ROUTER_QUESTION_COUNT = ARCHETYPES.length;
+const MOCK_PRACTICE_QUESTION_COUNT = ARCHETYPES.length;
+const MOCK_QUESTION_COUNT =
+  MOCK_ROUTER_QUESTION_COUNT + MOCK_PRACTICE_QUESTION_COUNT;
 
 export default function MockMode() {
   const [, navigate] = useLocation();
@@ -38,15 +42,20 @@ export default function MockMode() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const startExam = () => {
-    // Mix router + practice questions
-    const routerQs: MockQuestion[] = ROUTER_STEMS.slice(0, 6).map(s => ({
-      id: nanoid(),
-      type: "router",
-      stem: s.stem,
-      correctArchetypeId: s.correctId,
-      choices: ARCHETYPES.map(a => a.id),
-    }));
-    const practiceQs: MockQuestion[] = ARCHETYPES.slice(0, 6).map(arch => {
+    const routerQs: MockQuestion[] = ARCHETYPES.map(arch => {
+      const stem =
+        ROUTER_STEMS.find(candidate => candidate.correctId === arch.id) ??
+        ROUTER_STEMS[0];
+
+      return {
+        id: nanoid(),
+        type: "router",
+        stem: stem.stem,
+        correctArchetypeId: stem.correctId,
+        choices: ARCHETYPES.map(a => a.id),
+      };
+    });
+    const practiceQs: MockQuestion[] = ARCHETYPES.map(arch => {
       const stem = CONTENT_PRACTICE_ITEMS_BY_ARCHETYPE[arch.id]?.[0];
       return {
         id: nanoid(),
@@ -371,7 +380,8 @@ function SetupScreen({ onStart }: { onStart: () => void }) {
             color: "oklch(0.55 0.01 265)",
           }}
         >
-          12 questions (6 router + 6 practice) under a 20-minute timer.
+          {MOCK_QUESTION_COUNT} questions ({MOCK_ROUTER_QUESTION_COUNT} router +{" "}
+          {MOCK_PRACTICE_QUESTION_COUNT} practice) under a 20-minute timer.
           Simulates exam conditions.
         </p>
       </div>
@@ -390,11 +400,11 @@ function SetupScreen({ onStart }: { onStart: () => void }) {
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {[
             [
-              "6 Router questions",
-              "Identify the correct archetype from 6 choices",
+              `${MOCK_ROUTER_QUESTION_COUNT} Router questions`,
+              `Identify the correct archetype from ${ARCHETYPES.length} choices`,
             ],
             [
-              "6 Practice questions",
+              `${MOCK_PRACTICE_QUESTION_COUNT} Practice questions`,
               "Solve and self-rate against the answer key",
             ],
             ["20-minute timer", "Auto-submits when time expires"],
