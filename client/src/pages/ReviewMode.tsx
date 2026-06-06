@@ -4,16 +4,24 @@
    ============================================================ */
 
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { BarChart2, AlertTriangle, Wrench, TrendingUp } from "lucide-react";
-import { loadStore, getAccuracy, type PracticeAttempt } from "@/lib/store";
+import {
+  loadStore,
+  getAccuracy,
+  getDuePatchItems,
+  getOpenErrorItems,
+} from "@/lib/store";
 import {
   CONTENT_ARCHETYPES as ARCHETYPES,
   CONTENT_ARCHETYPE_MAP as ARCHETYPE_MAP,
+  CONTENT_PRACTICE_ITEM_MAP,
 } from "@/lib/content/catalog";
 
 type Tab = "errors" | "trapmap" | "patch";
 
 export default function ReviewMode() {
+  const [, navigate] = useLocation();
   const [tab, setTab] = useState<Tab>("errors");
   const store = loadStore();
 
@@ -91,7 +99,7 @@ export default function ReviewMode() {
 
       {tab === "errors" && <ErrorLog store={store} />}
       {tab === "trapmap" && <TrapMap store={store} />}
-      {tab === "patch" && <PatchQueue store={store} />}
+      {tab === "patch" && <PatchQueue store={store} navigate={navigate} />}
     </div>
   );
 }
@@ -391,26 +399,51 @@ function TrapMap({ store }: { store: ReturnType<typeof loadStore> }) {
   );
 }
 
-function PatchQueue({ store }: { store: ReturnType<typeof loadStore> }) {
-  // Find archetypes with recent incorrect attempts that haven't been corrected
-  const patchItems = ARCHETYPES.map(arch => {
-    const attempts = store.practiceAttempts
-      .filter(a => a.archetypeId === arch.id)
-      .sort((a, b) => a.timestamp - b.timestamp);
-    const lastAttempt = attempts[attempts.length - 1];
-    if (!lastAttempt || lastAttempt.rating !== "incorrect") return null;
-    const rootCauses = (lastAttempt.rootCauseIds as string[]).map(rcId => {
-      const rc = (arch.rootCauses as Array<{ id: string; label: string }>).find(
-        r => r.id === rcId
-      );
+function PatchQueue({
+  store,
+  navigate,
+}: {
+  store: ReturnType<typeof loadStore>;
+  navigate: (path: string) => void;
+}) {
+  const dueItems = getDuePatchItems(store);
+  const dueItemIds = new Set(dueItems.map(item => item.id));
+  const laterItems = getOpenErrorItems(store).filter(
+    item => !dueItemIds.has(item.id)
+  );
+  const patchItems = [...dueItems, ...laterItems].map(item => {
+    const arch = ARCHETYPE_MAP[item.archetypeId];
+    const rootCauses = item.latestAttempt.rootCauseIds.map(rcId => {
+      const rc = arch?.rootCauses.find(rootCause => rootCause.id === rcId);
       return rc?.label || rcId;
     });
-    return { arch, lastAttempt, rootCauses };
-  }).filter(Boolean) as Array<{
-    arch: (typeof ARCHETYPES)[0];
-    lastAttempt: PracticeAttempt;
-    rootCauses: string[];
-  }>;
+    const problemItem = item.problemItemId
+      ? CONTENT_PRACTICE_ITEM_MAP[item.problemItemId]
+      : undefined;
+    const dueNow = dueItemIds.has(item.id);
+    const minutesUntilDue = Math.ceil((item.dueAt - Date.now()) / 60000);
+    const dueLabel = dueNow
+      ? "due now"
+      : minutesUntilDue < 60
+        ? `due in ${Math.max(1, minutesUntilDue)}m`
+        : `due in ${Math.ceil(minutesUntilDue / 60)}h`;
+    const practicePath = item.problemItemId
+      ? `/practice/${item.archetypeId}?problemItemId=${encodeURIComponent(
+          item.problemItemId
+        )}`
+      : `/practice/${item.archetypeId}`;
+
+    return {
+      item,
+      arch,
+      problemItem,
+      lastAttempt: item.latestAttempt,
+      rootCauses,
+      dueNow,
+      dueLabel,
+      practicePath,
+    };
+  });
 
   if (patchItems.length === 0) {
     return (
@@ -440,76 +473,176 @@ function PatchQueue({ store }: { store: ReturnType<typeof loadStore> }) {
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       <div
         style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+          flexWrap: "wrap",
+          marginBottom: 4,
+        }}
+      >
+        <div
+          style={{
+            fontFamily: "'IBM Plex Sans', sans-serif",
+            fontSize: 13,
+            color: "oklch(0.45 0.01 265)",
+          }}
+        >
+          {dueItems.length} due now / {laterItems.length} due later
+        </div>
+        <button
+          onClick={() => navigate("/practice")}
+          disabled={dueItems.length === 0}
+          style={{
+            padding: "8px 14px",
+            background:
+              dueItems.length > 0 ? "oklch(0.78 0.17 65)" : "transparent",
+            border: `1px solid ${
+              dueItems.length > 0
+                ? "oklch(0.78 0.17 65)"
+                : "oklch(0.28 0.01 265)"
+            }`,
+            borderRadius: 4,
+            color:
+              dueItems.length > 0
+                ? "oklch(0.13 0.01 265)"
+                : "oklch(0.40 0.01 265)",
+            fontFamily: "'IBM Plex Sans', sans-serif",
+            fontSize: 13,
+            fontWeight: 700,
+            cursor: dueItems.length > 0 ? "pointer" : "not-allowed",
+          }}
+        >
+          Practice due patches
+        </button>
+      </div>
+      <div
+        style={{
           fontFamily: "'IBM Plex Sans', sans-serif",
           fontSize: 13,
           color: "oklch(0.45 0.01 265)",
           marginBottom: 4,
         }}
       >
-        {patchItems.length} archetype{patchItems.length > 1 ? "s" : ""} with
-        unresolved errors:
+        Item-level patches from the latest miss or partial:
       </div>
-      {patchItems.map(({ arch, lastAttempt, rootCauses }) => (
-        <div
-          key={arch.id}
-          style={{
-            background: "oklch(0.17 0.012 265)",
-            border: "1px solid oklch(0.62 0.22 25 / 0.3)",
-            borderLeft: "3px solid oklch(0.62 0.22 25)",
-            borderRadius: "0 4px 4px 0",
-            padding: 16,
-          }}
-        >
+      {patchItems.map(
+        ({
+          item,
+          arch,
+          problemItem,
+          lastAttempt,
+          rootCauses,
+          dueNow,
+          dueLabel,
+          practicePath,
+        }) => (
           <div
+            key={item.id}
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 8,
+              background: "oklch(0.17 0.012 265)",
+              border: `1px solid ${
+                dueNow
+                  ? "oklch(0.62 0.22 25 / 0.3)"
+                  : "oklch(0.78 0.17 65 / 0.25)"
+              }`,
+              borderLeft: `3px solid ${
+                dueNow ? "oklch(0.62 0.22 25)" : "oklch(0.78 0.17 65)"
+              }`,
+              borderRadius: "0 4px 4px 0",
+              padding: 16,
             }}
           >
             <div
               style={{
-                fontFamily: "'IBM Plex Sans', sans-serif",
-                fontSize: 14,
-                fontWeight: 600,
-                color: "oklch(0.91 0.005 265)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: 8,
               }}
             >
-              {arch.shortName}
+              <div style={{ minWidth: 0 }}>
+                <div
+                  style={{
+                    fontFamily: "'IBM Plex Sans', sans-serif",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: "oklch(0.91 0.005 265)",
+                  }}
+                >
+                  {arch?.shortName ?? item.archetypeId}
+                </div>
+                <div
+                  style={{
+                    marginTop: 4,
+                    fontFamily: "'IBM Plex Sans', sans-serif",
+                    fontSize: 12,
+                    color: "oklch(0.55 0.01 265)",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {problemItem?.text ?? "Archetype-level retest"}
+                </div>
+              </div>
+              <span
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: 10,
+                  color: dueNow
+                    ? "oklch(0.62 0.22 25)"
+                    : "oklch(0.40 0.01 265)",
+                }}
+              >
+                {dueLabel}
+              </span>
             </div>
-            <span
+            {rootCauses.length > 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {rootCauses.map(rc => (
+                  <span key={rc} className="trap-chip">
+                    ! {rc}
+                  </span>
+                ))}
+              </div>
+            )}
+            <div
               style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 10,
-                color: "oklch(0.40 0.01 265)",
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 12,
+                flexWrap: "wrap",
+                marginTop: 12,
               }}
             >
-              {new Date(lastAttempt.timestamp).toLocaleDateString()}
-            </span>
-          </div>
-          {rootCauses.length > 0 && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {rootCauses.map(rc => (
-                <span key={rc} className="trap-chip">
-                  ⚠ {rc}
-                </span>
-              ))}
+              <span
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: 10,
+                  color: "oklch(0.40 0.01 265)",
+                }}
+              >
+                Latest: {lastAttempt.rating}
+              </span>
+              <button
+                onClick={() => navigate(practicePath)}
+                style={{
+                  padding: "6px 10px",
+                  background: "transparent",
+                  border: "1px solid oklch(0.78 0.17 65 / 0.45)",
+                  borderRadius: 4,
+                  color: "oklch(0.78 0.17 65)",
+                  fontFamily: "'IBM Plex Sans', sans-serif",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                Mark by retest
+              </button>
             </div>
-          )}
-          <div
-            style={{
-              marginTop: 10,
-              fontFamily: "'IBM Plex Sans', sans-serif",
-              fontSize: 12,
-              color: "oklch(0.45 0.01 265)",
-            }}
-          >
-            Recommended: Review the Trap Box for {arch.shortName}, then re-drill
-            in Practice Mode.
           </div>
-        </div>
-      ))}
+        )
+      )}
     </div>
   );
 }
