@@ -38,11 +38,7 @@ export function useKeyboardShortcuts(location: string, navigate: Navigate) {
 
       const key = event.key.toLowerCase();
       const store = loadStore();
-      const openErrors = getOpenErrors(
-        store.practiceAttempts,
-        store.cards,
-        store.dismissedErrorIds
-      );
+      const openErrors = getOpenErrors(store.practiceAttempts, store.cards);
 
       if (key === "r") {
         event.preventDefault();

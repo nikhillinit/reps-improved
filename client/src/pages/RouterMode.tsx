@@ -3,7 +3,7 @@
    Terminal Precision: Rapid archetype identification drill
    ============================================================ */
 
-import { useState, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
 import {
   Shuffle,
@@ -12,9 +12,11 @@ import {
   ChevronRight,
   RotateCcw,
 } from "lucide-react";
-import { StatCard } from "@/components/StatCard";
-import { useHotkeys } from "@/hooks/useHotkeys";
-import { ARCHETYPES, ARCHETYPE_MAP, ROUTER_STEMS } from "@/lib/archetypes";
+import {
+  CONTENT_ARCHETYPE_MAP as ARCHETYPE_MAP,
+  CONTENT_ARCHETYPES as ARCHETYPES,
+  CONTENT_ROUTER_STEMS as ROUTER_STEMS,
+} from "@/lib/content/catalog";
 import { loadStore, saveStore, type RouterAttempt } from "@/lib/store";
 import { nanoid } from "nanoid";
 
@@ -59,6 +61,7 @@ export default function RouterMode() {
     const isCorrect = archetypeId === stem.correctId;
     const attempt: RouterAttempt = {
       id: nanoid(),
+      routerStemId: stem.id,
       stem: stem.stem,
       correctArchetypeId: stem.correctId,
       selectedArchetypeId: archetypeId,
@@ -90,30 +93,23 @@ export default function RouterMode() {
     }
   };
 
-  const selectByIndex = (index: number) => {
-    const archetypeId = ARCHETYPES[index]?.id;
-    if (phase === "drill" && session && !showFeedback && archetypeId) {
-      handleSelect(archetypeId);
-    }
-  };
-
-  useHotkeys(
-    {
-      Enter: () => {
-        if (phase === "drill" && showFeedback) handleNext();
-      },
-      ArrowRight: () => {
-        if (phase === "drill" && showFeedback) handleNext();
-      },
-      "1": () => selectByIndex(0),
-      "2": () => selectByIndex(1),
-      "3": () => selectByIndex(2),
-      "4": () => selectByIndex(3),
-      "5": () => selectByIndex(4),
-      "6": () => selectByIndex(5),
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (phase !== "drill" || !session) return;
+      if (showFeedback && (e.key === "Enter" || e.key === "ArrowRight")) {
+        handleNext();
+        return;
+      }
+      const idx = parseInt(e.key) - 1;
+      if (idx >= 0 && idx < ARCHETYPES.length) handleSelect(ARCHETYPES[idx].id);
     },
-    [phase, showFeedback, session]
+    [phase, session, showFeedback]
   );
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
 
   if (phase === "setup") return <SetupScreen onStart={startSession} />;
   if (phase === "result" && session)
@@ -133,7 +129,7 @@ export default function RouterMode() {
   if (selected && selected !== stem.correctId) confuserIds.add(selected);
   const confuserArches = Array.from(confuserIds)
     .map(id => ARCHETYPE_MAP[id])
-    .filter(Boolean);
+    .filter((arch): arch is (typeof ARCHETYPES)[number] => Boolean(arch));
 
   return (
     <div>
@@ -217,7 +213,14 @@ export default function RouterMode() {
       </div>
 
       {/* Choices */}
-      <div className="responsive-grid" style={{ gap: 8, marginBottom: 20 }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(2, 1fr)",
+          gap: 8,
+          marginBottom: 20,
+        }}
+      >
         {ARCHETYPES.map((arch, i) => {
           const isSelected = selected === arch.id;
           const isCorrect = arch.id === stem.correctId;
@@ -308,32 +311,36 @@ export default function RouterMode() {
           style={{
             background: "oklch(0.17 0.012 265)",
             border: "1px solid oklch(0.28 0.01 265)",
-            borderLeft: "3px solid oklch(0.78 0.17 65)",
-            borderRadius: "0 4px 4px 0",
+            borderRadius: 4,
             padding: 18,
-            marginBottom: 16,
+            marginBottom: 20,
           }}
         >
-          <div
-            className="section-label"
-            style={{ marginBottom: 12, color: "oklch(0.78 0.17 65)" }}
-          >
+          <div className="section-label" style={{ marginBottom: 12 }}>
             WHY THIS BUCKET
           </div>
           <div
-            className="responsive-grid"
-            style={{ gap: 10, marginBottom: confuserArches.length ? 14 : 0 }}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+              gap: 10,
+              marginBottom: confuserArches.length > 0 ? 16 : 0,
+            }}
           >
             <RouterFeedbackFact
               label="Derived condition"
               value={correctArch.derivedCondition}
             />
-            <RouterFeedbackFact label="First formula" value={correctArch.formula} />
+            <RouterFeedbackFact
+              label="First formula"
+              value={correctArch.formula}
+            />
             <RouterFeedbackFact
               label="Top trap"
-              value={correctArch.trapNotes[0] ?? "Check units and scope."}
+              value={correctArch.trapNotes[0] ?? "No trap note available."}
             />
           </div>
+
           {confuserArches.length > 0 && (
             <div>
               <div className="section-label" style={{ marginBottom: 8 }}>
@@ -344,14 +351,14 @@ export default function RouterMode() {
                   <div
                     key={confuser.id}
                     style={{
-                      padding: "9px 12px",
-                      background: "oklch(0.13 0.01 265)",
-                      border: "1px solid oklch(0.28 0.01 265)",
-                      borderRadius: 3,
                       fontFamily: "'IBM Plex Sans', sans-serif",
                       fontSize: 13,
-                      color: "oklch(0.66 0.01 265)",
-                      lineHeight: 1.55,
+                      lineHeight: 1.6,
+                      color: "oklch(0.68 0.01 265)",
+                      background: "oklch(0.13 0.01 265)",
+                      border: "1px solid oklch(0.24 0.01 265)",
+                      borderRadius: 4,
+                      padding: "10px 12px",
                     }}
                   >
                     <strong style={{ color: "oklch(0.82 0.005 265)" }}>
@@ -456,21 +463,29 @@ function RouterFeedbackFact({
     <div
       style={{
         background: "oklch(0.13 0.01 265)",
-        border: "1px solid oklch(0.28 0.01 265)",
-        borderRadius: 3,
-        padding: "10px 12px",
-        minHeight: 78,
+        border: "1px solid oklch(0.24 0.01 265)",
+        borderRadius: 4,
+        padding: 12,
       }}
     >
-      <div className="section-label" style={{ marginBottom: 6 }}>
+      <div
+        style={{
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: 10,
+          color: "oklch(0.43 0.01 265)",
+          textTransform: "uppercase",
+          letterSpacing: 0,
+          marginBottom: 6,
+        }}
+      >
         {label}
       </div>
       <div
         style={{
           fontFamily: "'IBM Plex Sans', sans-serif",
           fontSize: 13,
-          color: "oklch(0.70 0.01 265)",
-          lineHeight: 1.55,
+          lineHeight: 1.5,
+          color: "oklch(0.78 0.01 265)",
         }}
       >
         {value}
@@ -586,15 +601,40 @@ function ResultScreen({
           Session Complete
         </h1>
       </div>
-      <div className="grid grid-cols-1 gap-3 mb-7 md:grid-cols-3">
-        <StatCard
-          value={`${pct}%`}
-          label="Accuracy"
-          danger={pct < 60}
-          accent={pct >= 80}
-        />
-        <StatCard value={`${correct}/${total}`} label="Correct" />
-        <StatCard value={`${avgTime}s`} label="Avg Time" />
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: 12,
+          marginBottom: 28,
+        }}
+      >
+        <div className="stat-card">
+          <div
+            className="stat-value"
+            style={{
+              color:
+                pct >= 80
+                  ? "oklch(0.72 0.14 185)"
+                  : pct >= 60
+                    ? "oklch(0.78 0.17 65)"
+                    : "oklch(0.62 0.22 25)",
+            }}
+          >
+            {pct}%
+          </div>
+          <div className="stat-label">Accuracy</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value">
+            {correct}/{total}
+          </div>
+          <div className="stat-label">Correct</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value">{avgTime}s</div>
+          <div className="stat-label">Avg Time</div>
+        </div>
       </div>
       <div
         style={{

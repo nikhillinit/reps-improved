@@ -3,12 +3,22 @@
    Terminal Precision: SRS-based practice with rating + root causes
    ============================================================ */
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useLocation, useRoute } from "wouter";
-import { Zap, CheckCircle2, XCircle, MinusCircle, Eye } from "lucide-react";
-import { StatCard } from "@/components/StatCard";
-import { useHotkeys } from "@/hooks/useHotkeys";
-import { ARCHETYPES, ARCHETYPE_MAP } from "@/lib/archetypes";
+import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
+import {
+  Zap,
+  CheckCircle2,
+  XCircle,
+  MinusCircle,
+  ChevronRight,
+  Eye,
+} from "lucide-react";
+import {
+  CONTENT_ARCHETYPES as ARCHETYPES,
+  CONTENT_ARCHETYPE_MAP as ARCHETYPE_MAP,
+  CONTENT_PRACTICE_ITEMS_BY_ARCHETYPE,
+  isEligibleArchetypeId,
+} from "@/lib/content/catalog";
 import {
   loadStore,
   saveStore,
@@ -28,11 +38,6 @@ interface DrillCard {
 
 export default function PracticeMode() {
   const [, navigate] = useLocation();
-  const [, params] = useRoute<{ archetypeId: string }>(
-    "/practice/:archetypeId"
-  );
-  const targetArchetypeId = params?.archetypeId;
-  const autoStartedRef = useRef(false);
   const [phase, setPhase] = useState<Phase>("setup");
   const [queue, setQueue] = useState<DrillCard[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -41,128 +46,84 @@ export default function PracticeMode() {
   const [selectedRootCauses, setSelectedRootCauses] = useState<string[]>([]);
   const [startTime, setStartTime] = useState(Date.now());
 
-  const startSession = useCallback(
-    (count: number) => {
-      const store = loadStore();
-      const targetArch = targetArchetypeId
-        ? ARCHETYPE_MAP[targetArchetypeId]
-        : undefined;
-      let cards = store.cards.filter(c =>
-        targetArch ? c.archetypeId === targetArch.id : c.dueAt <= Date.now()
-      );
-      // If no due cards, create cards for all archetypes
-      if (cards.length === 0) {
-        const seedArchetypes = targetArch ? [targetArch] : ARCHETYPES;
-        const newCards: Card[] = seedArchetypes.map(arch => ({
-          id: nanoid(),
-          archetypeId: arch.id,
-          cardType: "practice" as const,
-          dueAt: Date.now(),
-          interval: 1,
-          easeFactor: 2.5,
-          reps: 0,
-          lapses: 0,
-          verificationStatus: arch.verificationStatus,
-        }));
-        const updated = { ...store, cards: [...store.cards, ...newCards] };
-        saveStore(updated);
-        cards = newCards;
-      }
-      const shuffled = [...cards]
-        .sort(() => Math.random() - 0.5)
-        .slice(0, count);
-      const drillQueue: DrillCard[] = shuffled.map(card => {
-        const arch = ARCHETYPE_MAP[card.archetypeId];
-        const stemIdx = Math.floor(
-          Math.random() * (arch?.practiceStems?.length || 1)
-        );
-        return { card, stemIdx };
-      });
-      setQueue(drillQueue);
-      setCurrentIdx(0);
-      setAttempts([]);
+  const startSession = (count: number) => {
+    const store = loadStore();
+    let cards = store.cards.filter(
+      c => c.dueAt <= Date.now() && isEligibleArchetypeId(c.archetypeId)
+    );
+    // If no due cards, create cards for all archetypes
+    if (cards.length === 0) {
+      const newCards: Card[] = ARCHETYPES.map(arch => ({
+        id: nanoid(),
+        archetypeId: arch.id,
+        cardType: "practice" as const,
+        dueAt: Date.now(),
+        interval: 1,
+        easeFactor: 2.5,
+        reps: 0,
+        lapses: 0,
+        verificationStatus: arch.verificationStatus,
+      }));
+      const updated = { ...store, cards: [...store.cards, ...newCards] };
+      saveStore(updated);
+      cards = newCards;
+    }
+    const shuffled = cards.sort(() => Math.random() - 0.5).slice(0, count);
+    const drillQueue: DrillCard[] = shuffled.map(card => {
+      const stems = CONTENT_PRACTICE_ITEMS_BY_ARCHETYPE[card.archetypeId] ?? [];
+      const stemIdx = Math.floor(Math.random() * (stems.length || 1));
+      return { card, stemIdx };
+    });
+    setQueue(drillQueue);
+    setCurrentIdx(0);
+    setAttempts([]);
+    setRevealed(false);
+    setSelectedRootCauses([]);
+    setStartTime(Date.now());
+    setPhase("drill");
+  };
+
+  const handleReveal = () => setRevealed(true);
+
+  const handleRate = (rating: Rating) => {
+    if (!queue[currentIdx]) return;
+    const { card } = queue[currentIdx];
+    const stems = CONTENT_PRACTICE_ITEMS_BY_ARCHETYPE[card.archetypeId] ?? [];
+    const stem = stems[queue[currentIdx].stemIdx] ?? stems[0];
+    const attempt: PracticeAttempt = {
+      id: nanoid(),
+      archetypeId: card.archetypeId,
+      problemItemId: stem?.id,
+      stemId: stem?.id,
+      rating,
+      rootCauseIds: rating !== "correct" ? selectedRootCauses : [],
+      timestamp: Date.now(),
+      mode: "practice",
+      timeSpent: Date.now() - startTime,
+    };
+    const updatedCard = scheduleCard(card, rating);
+    const store = loadStore();
+    const updatedCards = store.cards.map(c =>
+      c.id === card.id ? updatedCard : c
+    );
+    saveStore({
+      ...store,
+      cards: updatedCards,
+      practiceAttempts: [...store.practiceAttempts, attempt],
+    });
+    const newAttempts = [...attempts, attempt];
+    setAttempts(newAttempts);
+    if (currentIdx >= queue.length - 1) {
+      setPhase("result");
+    } else {
+      setCurrentIdx(i => i + 1);
       setRevealed(false);
       setSelectedRootCauses([]);
       setStartTime(Date.now());
-      setPhase("drill");
-    },
-    [targetArchetypeId]
-  );
+    }
+  };
 
-  useEffect(() => {
-    if (!targetArchetypeId || autoStartedRef.current || phase !== "setup")
-      return;
-    autoStartedRef.current = true;
-    startSession(5);
-  }, [phase, startSession, targetArchetypeId]);
-
-  const handleReveal = useCallback(() => setRevealed(true), []);
-
-  const handleRate = useCallback(
-    (rating: Rating) => {
-      if (!queue[currentIdx]) return;
-      const { card } = queue[currentIdx];
-      const arch = ARCHETYPE_MAP[card.archetypeId];
-      const attempt: PracticeAttempt = {
-        id: nanoid(),
-        archetypeId: card.archetypeId,
-        rating,
-        rootCauseIds: rating !== "correct" ? selectedRootCauses : [],
-        timestamp: Date.now(),
-        mode: "practice",
-        timeSpent: Date.now() - startTime,
-      };
-      const updatedCard = scheduleCard(card, rating);
-      const store = loadStore();
-      const updatedCards = store.cards.map(c =>
-        c.id === card.id ? updatedCard : c
-      );
-      saveStore({
-        ...store,
-        cards: updatedCards,
-        practiceAttempts: [...store.practiceAttempts, attempt],
-      });
-      const newAttempts = [...attempts, attempt];
-      setAttempts(newAttempts);
-      if (currentIdx >= queue.length - 1) {
-        setPhase("result");
-      } else {
-        setCurrentIdx(i => i + 1);
-        setRevealed(false);
-        setSelectedRootCauses([]);
-        setStartTime(Date.now());
-      }
-    },
-    [attempts, currentIdx, queue, selectedRootCauses, startTime]
-  );
-
-  useHotkeys(
-    {
-      " ": event => {
-        if (phase !== "drill" || revealed) return;
-        event.preventDefault();
-        handleReveal();
-      },
-      "1": () => {
-        if (phase === "drill" && revealed) handleRate("correct");
-      },
-      "2": () => {
-        if (phase === "drill" && revealed) handleRate("partial");
-      },
-      "3": () => {
-        if (phase === "drill" && revealed) handleRate("incorrect");
-      },
-    },
-    [handleRate, handleReveal, phase, revealed]
-  );
-
-  if (phase === "setup")
-    return (
-      <SetupScreen
-        onStart={startSession}
-        targetArchetypeId={targetArchetypeId}
-      />
-    );
+  if (phase === "setup") return <SetupScreen onStart={startSession} />;
   if (phase === "result")
     return (
       <ResultScreen
@@ -175,7 +136,8 @@ export default function PracticeMode() {
 
   const { card, stemIdx } = queue[currentIdx];
   const arch = ARCHETYPE_MAP[card.archetypeId];
-  const stem = arch?.practiceStems?.[stemIdx] || arch?.practiceStems?.[0];
+  const stems = CONTENT_PRACTICE_ITEMS_BY_ARCHETYPE[card.archetypeId] ?? [];
+  const stem = stems[stemIdx] || stems[0];
   const progress = (currentIdx / queue.length) * 100;
 
   return (
@@ -359,21 +321,18 @@ export default function PracticeMode() {
               <RateButton
                 icon={<CheckCircle2 size={14} />}
                 label="Correct"
-                shortcut="1"
                 color="oklch(0.72 0.14 185)"
                 onClick={() => handleRate("correct")}
               />
               <RateButton
                 icon={<MinusCircle size={14} />}
                 label="Partial"
-                shortcut="2"
                 color="oklch(0.78 0.17 65)"
                 onClick={() => handleRate("partial")}
               />
               <RateButton
                 icon={<XCircle size={14} />}
                 label="Incorrect"
-                shortcut="3"
                 color="oklch(0.62 0.22 25)"
                 onClick={() => handleRate("incorrect")}
               />
@@ -439,13 +398,11 @@ export default function PracticeMode() {
 function RateButton({
   icon,
   label,
-  shortcut,
   color,
   onClick,
 }: {
   icon: React.ReactNode;
   label: string;
-  shortcut: string;
   color: string;
   onClick: () => void;
 }) {
@@ -478,26 +435,14 @@ function RateButton({
     >
       {icon}
       {label}
-      <span className="kbd-badge">{shortcut}</span>
     </button>
   );
 }
 
-function SetupScreen({
-  onStart,
-  targetArchetypeId,
-}: {
-  onStart: (count: number) => void;
-  targetArchetypeId?: string;
-}) {
+function SetupScreen({ onStart }: { onStart: (count: number) => void }) {
   const [count, setCount] = useState(10);
   const store = loadStore();
-  const targetArch = targetArchetypeId
-    ? ARCHETYPE_MAP[targetArchetypeId]
-    : undefined;
-  const dueCount = store.cards.filter(c =>
-    targetArch ? c.archetypeId === targetArch.id : c.dueAt <= Date.now()
-  ).length;
+  const dueCount = store.cards.filter(c => c.dueAt <= Date.now()).length;
   return (
     <div>
       <div style={{ marginBottom: 28 }}>
@@ -510,7 +455,7 @@ function SetupScreen({
             marginBottom: 8,
           }}
         >
-          {targetArch ? `${targetArch.shortName} Re-drill` : "Practice Mode"}
+          Practice Mode
         </h1>
         <p
           style={{
@@ -566,9 +511,7 @@ function SetupScreen({
               marginTop: 10,
             }}
           >
-            {targetArch
-              ? `${dueCount} re-drill card ready`
-              : `${dueCount} cards due today`}
+            ✓ {dueCount} cards due today
           </div>
         )}
       </div>
@@ -631,20 +574,43 @@ function ResultScreen({
           Session Complete
         </h1>
       </div>
-      <div className="grid grid-cols-2 gap-3 mb-6 md:grid-cols-4">
-        <StatCard
-          value={`${pct}%`}
-          label="Accuracy"
-          danger={pct < 60}
-          accent={pct >= 80}
-        />
-        <StatCard value={correct} label="Correct" accent />
-        <StatCard
-          value={partial}
-          label="Partial"
-          valueClassName="!text-[#E8A000]"
-        />
-        <StatCard value={incorrect} label="Incorrect" danger />
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: 12,
+          marginBottom: 24,
+        }}
+      >
+        <div className="stat-card">
+          <div
+            className="stat-value"
+            style={{
+              color: pct >= 80 ? "oklch(0.72 0.14 185)" : "oklch(0.78 0.17 65)",
+            }}
+          >
+            {pct}%
+          </div>
+          <div className="stat-label">Accuracy</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value" style={{ color: "oklch(0.72 0.14 185)" }}>
+            {correct}
+          </div>
+          <div className="stat-label">Correct</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value" style={{ color: "oklch(0.78 0.17 65)" }}>
+            {partial}
+          </div>
+          <div className="stat-label">Partial</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value" style={{ color: "oklch(0.62 0.22 25)" }}>
+            {incorrect}
+          </div>
+          <div className="stat-label">Incorrect</div>
+        </div>
       </div>
       <div style={{ display: "flex", gap: 10 }}>
         <button

@@ -5,19 +5,22 @@
 
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Zap, Shuffle, AlertTriangle, Trophy, BookOpen } from "lucide-react";
-import { StatCard } from "@/components/StatCard";
+import {
+  Zap,
+  Shuffle,
+  AlertTriangle,
+  Trophy,
+  BookOpen,
+  TrendingUp,
+} from "lucide-react";
 import {
   loadStore,
   getDueCards,
   getAccuracy,
   getOpenErrors,
-  getRouterAccuracy,
-  getTodayReps,
-  getWeakestStats,
   type RepsStore,
 } from "@/lib/store";
-import { ARCHETYPES } from "@/lib/archetypes";
+import { CONTENT_ARCHETYPES as ARCHETYPES } from "@/lib/content/catalog";
 
 export default function Dashboard() {
   const [, navigate] = useLocation();
@@ -28,13 +31,10 @@ export default function Dashboard() {
   }, []);
 
   const dueCards = getDueCards(store.cards);
-  const todayReps = getTodayReps(store);
-  const openErrors = getOpenErrors(
-    store.practiceAttempts,
-    store.cards,
-    store.dismissedErrorIds
-  );
-  const routerAccuracy = getRouterAccuracy(store.routerAttempts);
+  const todayReps = store.practiceAttempts.filter(
+    a => a.timestamp > Date.now() - 86400000
+  ).length;
+  const openErrors = getOpenErrors(store.practiceAttempts, store.cards);
 
   const now = new Date();
   const dateStr = now.toLocaleDateString("en-US", {
@@ -56,8 +56,7 @@ export default function Dashboard() {
     return a.accuracy - b.accuracy;
   });
 
-  const weakest = getWeakestStats(archetypeStats);
-  const hasAttempts = archetypeStats.some(s => s.attempts > 0);
+  const weakest = archetypeStats.filter(s => s.attempts > 0).slice(0, 3);
 
   return (
     <div>
@@ -130,7 +129,14 @@ export default function Dashboard() {
       </div>
 
       {/* Stats row */}
-      <div className="grid grid-cols-1 gap-3 mb-8 md:grid-cols-2 xl:grid-cols-4">
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: 12,
+          marginBottom: 32,
+        }}
+      >
         <StatCard
           value={dueCards.length}
           label="Cards Due"
@@ -140,15 +146,6 @@ export default function Dashboard() {
           }
         />
         <StatCard value={todayReps} label="Today's Reps" />
-        <StatCard
-          value={store.routerAttempts.length === 0 ? "-" : `${routerAccuracy}%`}
-          label="Router Accuracy"
-          sub={
-            store.routerAttempts.length > 0
-              ? `${store.routerAttempts.length} router attempts`
-              : "No router attempts"
-          }
-        />
         <StatCard
           value={openErrors}
           label="Open Errors"
@@ -202,7 +199,7 @@ export default function Dashboard() {
           }}
         >
           <div className="section-label">P0 ARCHETYPES</div>
-          {weakest.length > 0 ? (
+          {weakest.length > 0 && (
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <span
                 style={{
@@ -230,22 +227,13 @@ export default function Dashboard() {
                 </span>
               ))}
             </div>
-          ) : hasAttempts ? (
-            <div
-              style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 10,
-                color: "oklch(0.40 0.01 265)",
-              }}
-            >
-              No weak spots yet
-            </div>
-          ) : null}
+          )}
         </div>
 
         <div
-          className="responsive-grid"
           style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
             gap: 10,
           }}
         >
@@ -261,6 +249,47 @@ export default function Dashboard() {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+function StatCard({
+  value,
+  label,
+  sub,
+  accent,
+  danger,
+}: {
+  value: number;
+  label: string;
+  sub?: string;
+  accent?: boolean;
+  danger?: boolean;
+}) {
+  const valueColor = danger
+    ? "oklch(0.62 0.22 25)"
+    : accent
+      ? "oklch(0.78 0.17 65)"
+      : "oklch(0.91 0.005 265)";
+
+  return (
+    <div className="stat-card">
+      <div className="stat-value" style={{ color: valueColor }}>
+        {value}
+      </div>
+      <div className="stat-label">{label}</div>
+      {sub && (
+        <div
+          style={{
+            fontFamily: "'IBM Plex Sans', sans-serif",
+            fontSize: 12,
+            color: "oklch(0.40 0.01 265)",
+            marginTop: 4,
+          }}
+        >
+          {sub}
+        </div>
+      )}
     </div>
   );
 }

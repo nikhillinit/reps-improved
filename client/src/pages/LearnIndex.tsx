@@ -5,7 +5,7 @@
 
 import { useLocation } from "wouter";
 import { BookOpen, CheckCircle2, ChevronRight } from "lucide-react";
-import { ARCHETYPES } from "@/lib/archetypes";
+import { CONTENT_ARCHETYPES as ARCHETYPES } from "@/lib/content/catalog";
 import { loadStore, getAccuracy } from "@/lib/store";
 
 export default function LearnIndex() {

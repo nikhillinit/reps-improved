@@ -3,24 +3,14 @@
    Terminal Precision: Timed exam simulation
    ============================================================ */
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
+import { Trophy, Clock } from "lucide-react";
 import {
-  Trophy,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  MinusCircle,
-} from "lucide-react";
-import { StatCard } from "@/components/StatCard";
-import { ARCHETYPES, ARCHETYPE_MAP, ROUTER_STEMS } from "@/lib/archetypes";
-import {
-  loadStore,
-  saveStore,
-  type PracticeAttempt,
-  type Rating,
-  type RouterAttempt,
-} from "@/lib/store";
+  CONTENT_ARCHETYPES as ARCHETYPES,
+  CONTENT_PRACTICE_ITEMS_BY_ARCHETYPE,
+  CONTENT_ROUTER_STEMS as ROUTER_STEMS,
+} from "@/lib/content/catalog";
 import { nanoid } from "nanoid";
 
 type Phase = "setup" | "exam" | "result";
@@ -46,7 +36,6 @@ export default function MockMode() {
   const [timeLeft, setTimeLeft] = useState(MOCK_DURATION);
   const [revealed, setRevealed] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const savedRef = useRef(false);
 
   const startExam = () => {
     // Mix router + practice questions
@@ -58,7 +47,7 @@ export default function MockMode() {
       choices: ARCHETYPES.map(a => a.id),
     }));
     const practiceQs: MockQuestion[] = ARCHETYPES.slice(0, 6).map(arch => {
-      const stem = arch.practiceStems[0];
+      const stem = CONTENT_PRACTICE_ITEMS_BY_ARCHETYPE[arch.id]?.[0];
       return {
         id: nanoid(),
         type: "practice",
@@ -69,7 +58,6 @@ export default function MockMode() {
       };
     });
     const all = [...routerQs, ...practiceQs].sort(() => Math.random() - 0.5);
-    savedRef.current = false;
     setQuestions(all);
     setCurrentIdx(0);
     setAnswers({});
@@ -78,72 +66,20 @@ export default function MockMode() {
     setPhase("exam");
   };
 
-  const saveResults = useCallback(() => {
-    if (savedRef.current || questions.length === 0) return;
-    savedRef.current = true;
-
-    const now = Date.now();
-    const mockPracticeAttempts: PracticeAttempt[] = questions
-      .filter(q => q.type === "practice")
-      .map((q, index) => {
-        const answer = answers[q.id];
-        const rating: Rating =
-          answer === "correct" || answer === "partial" || answer === "incorrect"
-            ? answer
-            : "incorrect";
-
-        return {
-          id: nanoid(),
-          archetypeId: q.correctArchetypeId,
-          stemId: q.id,
-          rating,
-          rootCauseIds: [],
-          timestamp: now + index,
-          mode: "mock",
-        };
-      });
-
-    const mockRouterAttempts: RouterAttempt[] = questions
-      .filter(q => q.type === "router")
-      .map((q, index) => {
-        const selectedArchetypeId = answers[q.id] || "";
-        return {
-          id: nanoid(),
-          stem: q.stem,
-          correctArchetypeId: q.correctArchetypeId,
-          selectedArchetypeId,
-          isCorrect: selectedArchetypeId === q.correctArchetypeId,
-          timestamp: now + mockPracticeAttempts.length + index,
-        };
-      });
-
-    const store = loadStore();
-    saveStore({
-      ...store,
-      practiceAttempts: [...store.practiceAttempts, ...mockPracticeAttempts],
-      routerAttempts: [...store.routerAttempts, ...mockRouterAttempts],
-    });
-  }, [answers, questions]);
-
-  const finishExam = useCallback(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    saveResults();
-    setPhase("result");
-  }, [saveResults]);
-
   useEffect(() => {
     if (phase !== "exam") return;
     timerRef.current = setInterval(() => {
       setTimeLeft(t => {
         if (t <= 1) {
-          finishExam();
+          clearInterval(timerRef.current!);
+          setPhase("result");
           return 0;
         }
         return t - 1;
       });
     }, 1000);
     return () => clearInterval(timerRef.current!);
-  }, [finishExam, phase]);
+  }, [phase]);
 
   const handleAnswer = (qId: string, answer: string) => {
     setAnswers(prev => ({ ...prev, [qId]: answer }));
@@ -152,7 +88,8 @@ export default function MockMode() {
   const handleNext = () => {
     setRevealed(false);
     if (currentIdx >= questions.length - 1) {
-      finishExam();
+      clearInterval(timerRef.current!);
+      setPhase("result");
     } else {
       setCurrentIdx(i => i + 1);
     }
@@ -301,7 +238,14 @@ export default function MockMode() {
 
       {/* Router: choices */}
       {isRouter && (
-        <div className="responsive-grid" style={{ gap: 8, marginBottom: 16 }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, 1fr)",
+            gap: 8,
+            marginBottom: 16,
+          }}
+        >
           {ARCHETYPES.map(arch => {
             const isSelected = userAnswer === arch.id;
             return (
@@ -372,31 +316,6 @@ export default function MockMode() {
           >
             {q.answer}
           </div>
-          <div
-            style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 14 }}
-          >
-            <MockRateButton
-              icon={<CheckCircle2 size={14} />}
-              label="Correct"
-              active={userAnswer === "correct"}
-              color="oklch(0.72 0.14 185)"
-              onClick={() => handleAnswer(q.id, "correct")}
-            />
-            <MockRateButton
-              icon={<MinusCircle size={14} />}
-              label="Partial"
-              active={userAnswer === "partial"}
-              color="oklch(0.78 0.17 65)"
-              onClick={() => handleAnswer(q.id, "partial")}
-            />
-            <MockRateButton
-              icon={<XCircle size={14} />}
-              label="Incorrect"
-              active={userAnswer === "incorrect"}
-              color="oklch(0.62 0.22 25)"
-              onClick={() => handleAnswer(q.id, "incorrect")}
-            />
-          </div>
         </div>
       )}
 
@@ -427,43 +346,6 @@ export default function MockMode() {
         {currentIdx >= questions.length - 1 ? "Finish Exam" : "Next →"}
       </button>
     </div>
-  );
-}
-
-function MockRateButton({
-  icon,
-  label,
-  active,
-  color,
-  onClick,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  active: boolean;
-  color: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 6,
-        padding: "7px 13px",
-        background: active ? `${color} / 0.16` : "transparent",
-        border: `1px solid ${active ? color : "oklch(0.28 0.01 265)"}`,
-        borderRadius: 4,
-        color: active ? color : "oklch(0.55 0.01 265)",
-        fontFamily: "'IBM Plex Sans', sans-serif",
-        fontSize: 13,
-        fontWeight: active ? 600 : 500,
-        cursor: "pointer",
-      }}
-    >
-      {icon}
-      {label}
-    </button>
   );
 }
 
@@ -604,20 +486,30 @@ function ResultScreen({
       >
         Exam Complete
       </h1>
-      <div className="grid grid-cols-1 gap-3 mb-6 md:grid-cols-3">
-        <StatCard
-          value={`${attempted}/${questions.length}`}
-          label="Attempted"
-        />
-        <StatCard
-          value={`${routerCorrect}/${routerQs.length}`}
-          label="Router Correct"
-          accent
-        />
-        <StatCard
-          value={questions.length - routerQs.length}
-          label="Practice Qs"
-        />
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: 12,
+          marginBottom: 24,
+        }}
+      >
+        <div className="stat-card">
+          <div className="stat-value">
+            {attempted}/{questions.length}
+          </div>
+          <div className="stat-label">Attempted</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value" style={{ color: "oklch(0.72 0.14 185)" }}>
+            {routerCorrect}/{routerQs.length}
+          </div>
+          <div className="stat-label">Router Correct</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value">{questions.length - routerQs.length}</div>
+          <div className="stat-label">Practice Qs</div>
+        </div>
       </div>
       <button
         onClick={onDone}

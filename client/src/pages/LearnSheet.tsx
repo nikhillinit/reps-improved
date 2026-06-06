@@ -3,11 +3,10 @@
    Terminal Precision: Step-through archetype learning
    ============================================================ */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useLocation } from "wouter";
 import { ChevronLeft, ChevronRight, AlertTriangle, Eye } from "lucide-react";
-import { useHotkeys } from "@/hooks/useHotkeys";
-import { ARCHETYPE_MAP } from "@/lib/archetypes";
+import { CONTENT_ARCHETYPE_MAP as ARCHETYPE_MAP } from "@/lib/content/catalog";
 import type { Archetype } from "@/lib/store";
 
 const STEPS = [
@@ -33,24 +32,27 @@ export default function LearnSheet() {
     setColdSolveInput("");
   }, [currentStep]);
 
-  useHotkeys(
-    {
-      ArrowRight: () => {
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === "ArrowRight" || e.key === "Enter") {
         if (currentStep < STEPS.length - 1) setCurrentStep(s => s + 1);
-      },
-      Enter: () => {
-        if (currentStep < STEPS.length - 1) setCurrentStep(s => s + 1);
-      },
-      ArrowLeft: () => {
+      }
+      if (e.key === "ArrowLeft") {
         if (currentStep > 0) setCurrentStep(s => s - 1);
-      },
-      " ": event => {
-        event.preventDefault();
+      }
+      if (e.key === " ") {
+        e.preventDefault();
         setRevealed(r => !r);
-      },
+      }
     },
     [currentStep]
   );
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
 
   if (!arch)
     return (

@@ -1,37 +1,21 @@
+/* ============================================================
+   REPS — Review Mode
+   Terminal Precision: Error Log + Trap Map + Patch Queue
+   ============================================================ */
+
 import { useState } from "react";
-import { useLocation } from "wouter";
+import { BarChart2, AlertTriangle, Wrench, TrendingUp } from "lucide-react";
+import { loadStore, getAccuracy, type PracticeAttempt } from "@/lib/store";
 import {
-  BarChart2,
-  AlertTriangle,
-  Wrench,
-  Zap,
-  CheckCircle2,
-} from "lucide-react";
-import { StatCard } from "@/components/StatCard";
-import {
-  dismissOpenError,
-  getAccuracy,
-  getOpenErrorItems,
-  getRouterAccuracy,
-  loadStore,
-  saveStore,
-  type PracticeAttempt,
-  type RepsStore,
-} from "@/lib/store";
-import { ARCHETYPES, ARCHETYPE_MAP } from "@/lib/archetypes";
+  CONTENT_ARCHETYPES as ARCHETYPES,
+  CONTENT_ARCHETYPE_MAP as ARCHETYPE_MAP,
+} from "@/lib/content/catalog";
 
 type Tab = "errors" | "trapmap" | "patch";
 
 export default function ReviewMode() {
-  const [, navigate] = useLocation();
   const [tab, setTab] = useState<Tab>("errors");
-  const [store, setStore] = useState<RepsStore>(loadStore());
-
-  const handleDismiss = (attemptId: string) => {
-    const updated = dismissOpenError(store, attemptId);
-    saveStore(updated);
-    setStore(updated);
-  };
+  const store = loadStore();
 
   return (
     <div>
@@ -59,6 +43,7 @@ export default function ReviewMode() {
         </p>
       </div>
 
+      {/* Tabs */}
       <div
         style={{
           display: "flex",
@@ -69,8 +54,6 @@ export default function ReviewMode() {
           borderRadius: 4,
           border: "1px solid oklch(0.28 0.01 265)",
           width: "fit-content",
-          maxWidth: "100%",
-          flexWrap: "wrap",
         }}
       >
         {(
@@ -108,54 +91,20 @@ export default function ReviewMode() {
 
       {tab === "errors" && <ErrorLog store={store} />}
       {tab === "trapmap" && <TrapMap store={store} />}
-      {tab === "patch" && (
-        <PatchQueue
-          store={store}
-          onDismiss={handleDismiss}
-          onRedrill={archetypeId => navigate(`/practice/${archetypeId}`)}
-        />
-      )}
+      {tab === "patch" && <PatchQueue store={store} />}
     </div>
   );
 }
 
-function ReviewSummary({ store }: { store: RepsStore }) {
-  const practiceAccuracy = getAccuracy(store.practiceAttempts);
-  const routerAccuracy = getRouterAccuracy(store.routerAttempts);
-
-  return (
-    <div className="grid grid-cols-1 gap-3 mb-[18px] md:grid-cols-3">
-      <StatCard
-        value={
-          store.practiceAttempts.length === 0 ? "-" : `${practiceAccuracy}%`
-        }
-        label="Practice Accuracy"
-        valueClassName="!text-2xl"
-      />
-      <StatCard
-        value={store.routerAttempts.length === 0 ? "-" : `${routerAccuracy}%`}
-        label="Router Accuracy"
-        valueClassName="!text-2xl"
-      />
-      <StatCard
-        value={store.routerAttempts.length}
-        label="Router Attempts"
-        valueClassName="!text-2xl"
-      />
-    </div>
-  );
-}
-
-function ErrorLog({ store }: { store: RepsStore }) {
+function ErrorLog({ store }: { store: ReturnType<typeof loadStore> }) {
   const archetypeStats = ARCHETYPES.map(arch => {
     const attempts = store.practiceAttempts.filter(
       a => a.archetypeId === arch.id
     );
     const accuracy = getAccuracy(store.practiceAttempts, arch.id);
-    const recentAttempts = attempts
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .slice(0, 5);
-    return { arch, attempts, accuracy, recentAttempts };
+    const lastAttempt = attempts.sort((a, b) => b.timestamp - a.timestamp)[0];
+    const recentAttempts = attempts.slice(-5);
+    return { arch, attempts, accuracy, lastAttempt, recentAttempts };
   }).sort((a, b) => {
     if (a.attempts.length === 0 && b.attempts.length === 0) return 0;
     if (a.attempts.length === 0) return 1;
@@ -163,173 +112,140 @@ function ErrorLog({ store }: { store: RepsStore }) {
     return a.accuracy - b.accuracy;
   });
 
-  if (
-    store.practiceAttempts.length === 0 &&
-    store.routerAttempts.length === 0
-  ) {
+  if (store.practiceAttempts.length === 0) {
     return (
-      <>
-        <ReviewSummary store={store} />
+      <div
+        style={{
+          background: "oklch(0.17 0.012 265)",
+          border: "1px solid oklch(0.28 0.01 265)",
+          borderRadius: 4,
+          padding: 32,
+          textAlign: "center",
+        }}
+      >
         <div
           style={{
-            background: "oklch(0.17 0.012 265)",
-            border: "1px solid oklch(0.28 0.01 265)",
-            borderRadius: 4,
-            padding: 32,
-            textAlign: "center",
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: 13,
+            color: "oklch(0.40 0.01 265)",
           }}
         >
-          <div
-            style={{
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: 13,
-              color: "oklch(0.40 0.01 265)",
-            }}
-          >
-            No attempts yet. Start a Practice or Router session to see your
-            review log.
-          </div>
+          No practice attempts yet. Start a Practice session to see your error
+          log.
         </div>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
-      <ReviewSummary store={store} />
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {archetypeStats
-          .filter(s => s.attempts.length > 0)
-          .map(({ arch, attempts, accuracy, recentAttempts }) => {
-            const routerAccuracy = getRouterAccuracy(
-              store.routerAttempts,
-              arch.id
-            );
-            const routerAttempts = store.routerAttempts.filter(
-              a => a.correctArchetypeId === arch.id
-            ).length;
-            const accuracyColor =
-              accuracy >= 80
-                ? "oklch(0.72 0.14 185)"
-                : accuracy >= 60
-                  ? "oklch(0.78 0.17 65)"
-                  : "oklch(0.62 0.22 25)";
-            return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {archetypeStats
+        .filter(s => s.attempts.length > 0)
+        .map(({ arch, attempts, accuracy, recentAttempts }) => {
+          const accuracyColor =
+            accuracy >= 80
+              ? "oklch(0.72 0.14 185)"
+              : accuracy >= 60
+                ? "oklch(0.78 0.17 65)"
+                : "oklch(0.62 0.22 25)";
+          return (
+            <div
+              key={arch.id}
+              style={{
+                background: "oklch(0.17 0.012 265)",
+                border: "1px solid oklch(0.28 0.01 265)",
+                borderRadius: 4,
+                padding: 16,
+              }}
+            >
               <div
-                key={arch.id}
                 style={{
-                  background: "oklch(0.17 0.012 265)",
-                  border: "1px solid oklch(0.28 0.01 265)",
-                  borderRadius: 4,
-                  padding: 16,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: 10,
                 }}
               >
                 <div
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 12,
-                    marginBottom: 10,
-                    flexWrap: "wrap",
+                    fontFamily: "'IBM Plex Sans', sans-serif",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: "oklch(0.91 0.005 265)",
                   }}
                 >
-                  <div
+                  {arch.shortName}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <span
                     style={{
-                      fontFamily: "'IBM Plex Sans', sans-serif",
-                      fontSize: 14,
-                      fontWeight: 600,
-                      color: "oklch(0.91 0.005 265)",
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: 13,
+                      fontWeight: 700,
+                      color: accuracyColor,
                     }}
                   >
-                    {arch.shortName}
-                  </div>
-                  <div
+                    {accuracy}%
+                  </span>
+                  <span
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 12,
-                      flexWrap: "wrap",
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: 11,
+                      color: "oklch(0.40 0.01 265)",
                     }}
                   >
-                    <span
-                      style={{
-                        fontFamily: "'JetBrains Mono', monospace",
-                        fontSize: 13,
-                        fontWeight: 700,
-                        color: accuracyColor,
-                      }}
-                    >
-                      {accuracy}% practice
-                    </span>
-                    <span
-                      style={{
-                        fontFamily: "'JetBrains Mono', monospace",
-                        fontSize: 11,
-                        color: "oklch(0.40 0.01 265)",
-                      }}
-                    >
-                      {attempts.length} attempts
-                    </span>
-                    {routerAttempts > 0 && (
-                      <span
-                        style={{
-                          fontFamily: "'JetBrains Mono', monospace",
-                          fontSize: 11,
-                          color: "oklch(0.78 0.17 65)",
-                        }}
-                      >
-                        {routerAccuracy}% router
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div
-                  style={{
-                    height: 4,
-                    background: "oklch(0.22 0.01 265)",
-                    borderRadius: 2,
-                    overflow: "hidden",
-                  }}
-                >
-                  <div
-                    style={{
-                      height: "100%",
-                      width: `${accuracy}%`,
-                      background: accuracyColor,
-                      borderRadius: 2,
-                      transition: "width 600ms ease-out",
-                    }}
-                  />
-                </div>
-                <div style={{ display: "flex", gap: 4, marginTop: 8 }}>
-                  {recentAttempts.map(a => (
-                    <div
-                      key={a.id}
-                      style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: "50%",
-                        background:
-                          a.rating === "correct"
-                            ? "oklch(0.72 0.14 185)"
-                            : a.rating === "partial"
-                              ? "oklch(0.78 0.17 65)"
-                              : "oklch(0.62 0.22 25)",
-                      }}
-                      title={a.rating}
-                    />
-                  ))}
+                    {attempts.length} attempts
+                  </span>
                 </div>
               </div>
-            );
-          })}
-      </div>
-    </>
+              {/* Mini accuracy bar */}
+              <div
+                style={{
+                  height: 4,
+                  background: "oklch(0.22 0.01 265)",
+                  borderRadius: 2,
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{
+                    height: "100%",
+                    width: `${accuracy}%`,
+                    background: accuracyColor,
+                    borderRadius: 2,
+                    transition: "width 600ms ease-out",
+                  }}
+                />
+              </div>
+              {/* Recent attempts dots */}
+              <div style={{ display: "flex", gap: 4, marginTop: 8 }}>
+                {recentAttempts.map(a => (
+                  <div
+                    key={a.id}
+                    style={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: "50%",
+                      background:
+                        a.rating === "correct"
+                          ? "oklch(0.72 0.14 185)"
+                          : a.rating === "partial"
+                            ? "oklch(0.78 0.17 65)"
+                            : "oklch(0.62 0.22 25)",
+                    }}
+                    title={a.rating}
+                  />
+                ))}
+              </div>
+            </div>
+          );
+        })}
+    </div>
   );
 }
 
-function TrapMap({ store }: { store: RepsStore }) {
+function TrapMap({ store }: { store: ReturnType<typeof loadStore> }) {
+  // Aggregate root causes across all incorrect attempts
   const rootCauseFreq: Record<
     string,
     { label: string; count: number; archetypeId: string }
@@ -339,8 +255,10 @@ function TrapMap({ store }: { store: RepsStore }) {
     .forEach(a => {
       const arch = ARCHETYPE_MAP[a.archetypeId];
       if (!arch) return;
-      a.rootCauseIds.forEach(rcId => {
-        const rc = arch.rootCauses.find(r => r.id === rcId);
+      (a.rootCauseIds as string[]).forEach(rcId => {
+        const rc = (
+          arch.rootCauses as Array<{ id: string; label: string }>
+        ).find(r => r.id === rcId);
         if (!rc) return;
         if (!rootCauseFreq[rcId])
           rootCauseFreq[rcId] = {
@@ -413,7 +331,6 @@ function TrapMap({ store }: { store: RepsStore }) {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                gap: 12,
                 marginBottom: 8,
               }}
             >
@@ -447,7 +364,7 @@ function TrapMap({ store }: { store: RepsStore }) {
                   color: "oklch(0.62 0.22 25)",
                 }}
               >
-                {count}x
+                {count}×
               </span>
             </div>
             <div
@@ -474,29 +391,22 @@ function TrapMap({ store }: { store: RepsStore }) {
   );
 }
 
-function PatchQueue({
-  store,
-  onDismiss,
-  onRedrill,
-}: {
-  store: RepsStore;
-  onDismiss: (attemptId: string) => void;
-  onRedrill: (archetypeId: string) => void;
-}) {
-  const patchItems = getOpenErrorItems(
-    store.practiceAttempts,
-    store.dismissedErrorIds
-  )
-    .map(({ archetypeId, lastIncorrectAttempt }) => {
-      const arch = ARCHETYPE_MAP[archetypeId];
-      if (!arch) return null;
-      const rootCauses = lastIncorrectAttempt.rootCauseIds.map(rcId => {
-        const rc = arch.rootCauses.find(r => r.id === rcId);
-        return rc?.label || rcId;
-      });
-      return { arch, lastAttempt: lastIncorrectAttempt, rootCauses };
-    })
-    .filter(Boolean) as Array<{
+function PatchQueue({ store }: { store: ReturnType<typeof loadStore> }) {
+  // Find archetypes with recent incorrect attempts that haven't been corrected
+  const patchItems = ARCHETYPES.map(arch => {
+    const attempts = store.practiceAttempts
+      .filter(a => a.archetypeId === arch.id)
+      .sort((a, b) => a.timestamp - b.timestamp);
+    const lastAttempt = attempts[attempts.length - 1];
+    if (!lastAttempt || lastAttempt.rating !== "incorrect") return null;
+    const rootCauses = (lastAttempt.rootCauseIds as string[]).map(rcId => {
+      const rc = (arch.rootCauses as Array<{ id: string; label: string }>).find(
+        r => r.id === rcId
+      );
+      return rc?.label || rcId;
+    });
+    return { arch, lastAttempt, rootCauses };
+  }).filter(Boolean) as Array<{
     arch: (typeof ARCHETYPES)[0];
     lastAttempt: PracticeAttempt;
     rootCauses: string[];
@@ -515,15 +425,12 @@ function PatchQueue({
       >
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 13,
             color: "oklch(0.72 0.14 185)",
           }}
         >
-          <CheckCircle2 size={15} /> Patch queue is empty - no open errors.
+          ✓ Patch queue is empty — no open errors.
         </div>
       </div>
     );
@@ -544,7 +451,7 @@ function PatchQueue({
       </div>
       {patchItems.map(({ arch, lastAttempt, rootCauses }) => (
         <div
-          key={lastAttempt.id}
+          key={arch.id}
           style={{
             background: "oklch(0.17 0.012 265)",
             border: "1px solid oklch(0.62 0.22 25 / 0.3)",
@@ -558,9 +465,7 @@ function PatchQueue({
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              gap: 12,
               marginBottom: 8,
-              flexWrap: "wrap",
             }}
           >
             <div
@@ -587,7 +492,7 @@ function PatchQueue({
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
               {rootCauses.map(rc => (
                 <span key={rc} className="trap-chip">
-                  ! {rc}
+                  ⚠ {rc}
                 </span>
               ))}
             </div>
@@ -600,47 +505,8 @@ function PatchQueue({
               color: "oklch(0.45 0.01 265)",
             }}
           >
-            Review the Trap Box for {arch.shortName}, then re-drill in Practice
-            Mode.
-          </div>
-          <div
-            style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}
-          >
-            <button
-              onClick={() => onRedrill(arch.id)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "8px 14px",
-                background: "oklch(0.78 0.17 65)",
-                border: "none",
-                borderRadius: 4,
-                color: "oklch(0.13 0.01 265)",
-                fontFamily: "'IBM Plex Sans', sans-serif",
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
-              <Zap size={13} />
-              Re-drill now
-            </button>
-            <button
-              onClick={() => onDismiss(lastAttempt.id)}
-              style={{
-                padding: "8px 14px",
-                background: "transparent",
-                border: "1px solid oklch(0.28 0.01 265)",
-                borderRadius: 4,
-                color: "oklch(0.55 0.01 265)",
-                fontFamily: "'IBM Plex Sans', sans-serif",
-                fontSize: 13,
-                cursor: "pointer",
-              }}
-            >
-              Mark resolved
-            </button>
+            Recommended: Review the Trap Box for {arch.shortName}, then re-drill
+            in Practice Mode.
           </div>
         </div>
       ))}

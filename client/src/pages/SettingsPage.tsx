@@ -5,9 +5,15 @@
 
 import { useState } from "react";
 import { Settings, Trash2, Database, Download, Upload } from "lucide-react";
-import { StatCard } from "@/components/StatCard";
-import { loadStore, saveStore, resetStore, seedQAData } from "@/lib/store";
-import { ARCHETYPES } from "@/lib/archetypes";
+import {
+  exportStore,
+  importStoreFromJson,
+  loadStore,
+  resetStore,
+  saveStore,
+  seedQAData,
+} from "@/lib/store";
+import { CONTENT_ARCHETYPES as ARCHETYPES } from "@/lib/content/catalog";
 import { toast } from "sonner";
 
 export default function SettingsPage() {
@@ -45,7 +51,7 @@ export default function SettingsPage() {
   };
 
   const handleExport = () => {
-    const json = JSON.stringify(store, null, 2);
+    const json = exportStore();
     const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -65,13 +71,18 @@ export default function SettingsPage() {
       if (!file) return;
       const reader = new FileReader();
       reader.onload = ev => {
-        try {
-          const parsed = JSON.parse(ev.target?.result as string);
-          saveStore(parsed);
-          setStore(parsed);
+        const result = importStoreFromJson(String(ev.target?.result ?? ""));
+        if (!result.ok || !result.store) {
+          toast.error(result.errors[0] ?? "Invalid backup file.");
+          return;
+        }
+        setStore(result.store);
+        if (result.warnings.length > 0) {
+          toast.warning(
+            `Data imported with ${result.warnings.length} quarantined record(s).`
+          );
+        } else {
           toast.success("Data imported successfully.");
-        } catch {
-          toast.error("Invalid backup file.");
         }
       };
       reader.readAsText(file);
@@ -121,25 +132,31 @@ export default function SettingsPage() {
         <div className="section-label" style={{ marginBottom: 12 }}>
           DATA SUMMARY
         </div>
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-          <StatCard
-            value={totalAttempts}
-            label="Total Attempts"
-            className="!p-3"
-            valueClassName="!text-xl"
-          />
-          <StatCard
-            value={totalCards}
-            label="SRS Cards"
-            className="!p-3"
-            valueClassName="!text-xl"
-          />
-          <StatCard
-            value={store.cards.filter(c => c.dueAt <= Date.now()).length}
-            label="Cards Due"
-            className="!p-3"
-            valueClassName="!text-xl"
-          />
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: 12,
+          }}
+        >
+          <div className="stat-card" style={{ padding: "12px 16px" }}>
+            <div className="stat-value" style={{ fontSize: 20 }}>
+              {totalAttempts}
+            </div>
+            <div className="stat-label">Total Attempts</div>
+          </div>
+          <div className="stat-card" style={{ padding: "12px 16px" }}>
+            <div className="stat-value" style={{ fontSize: 20 }}>
+              {totalCards}
+            </div>
+            <div className="stat-label">SRS Cards</div>
+          </div>
+          <div className="stat-card" style={{ padding: "12px 16px" }}>
+            <div className="stat-value" style={{ fontSize: 20 }}>
+              {store.cards.filter(c => c.dueAt <= Date.now()).length}
+            </div>
+            <div className="stat-label">Cards Due</div>
+          </div>
         </div>
       </div>
 
@@ -285,7 +302,7 @@ export default function SettingsPage() {
             lineHeight: 1.8,
           }}
         >
-          <div>REPS v2.0 — OPNS-430 Exam Drill (Improved)</div>
+          <div>REPS v3.0 — OPNS-430 Exam Drill (Improved)</div>
           <div>6 archetypes · SRS scheduling · localStorage persistence</div>
           <div style={{ marginTop: 8, color: "oklch(0.30 0.01 265)" }}>
             Improved from exam-drill.replit.app

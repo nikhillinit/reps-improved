@@ -10,6 +10,8 @@
     "preview": "vite preview --host",
     "test": "vitest run",
     "check": "tsc --noEmit",
+    "validate:content": "tsx scripts/validate-content.ts",
+    "verify:content": "tsx scripts/verify-content.ts",
     "format": "prettier --write ."
   },
   "dependencies": {

@@ -5,7 +5,7 @@
 
 import { useState } from "react";
 import { FileText, Download, CheckSquare, Square } from "lucide-react";
-import { ARCHETYPES } from "@/lib/archetypes";
+import { CONTENT_ARCHETYPES as ARCHETYPES } from "@/lib/content/catalog";
 
 export default function PacketMode() {
   const [selected, setSelected] = useState<Set<string>>(
@@ -55,7 +55,9 @@ export default function PacketMode() {
         </p>
       </div>
 
-      <div className="packet-grid" style={{ gap: 20 }}>
+      <div
+        style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 20 }}
+      >
         {/* Controls */}
         <div>
           <div
