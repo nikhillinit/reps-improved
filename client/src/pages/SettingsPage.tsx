@@ -175,8 +175,8 @@ export default function SettingsPage() {
       <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8, padding: 16 }}>
         <div className="section-label" style={{ marginBottom: 12 }}>ABOUT</div>
         <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "var(--muted-foreground)", lineHeight: 1.8 }}>
-          <div>REPS v2.1 — OPNS-430 Exam Drill (Improved)</div>
-          <div>6 archetypes · SRS scheduling · localStorage persistence</div>
+          <div>REPS v2.2 — OPNS-430 Exam Drill (Improved)</div>
+          <div>9 archetypes · SRS scheduling · localStorage persistence</div>
           <div style={{ marginTop: 8 }}>Improved from exam-drill.replit.app</div>
         </div>
       </div>

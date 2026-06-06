@@ -41,14 +41,14 @@ export default function MockMode() {
 
   const startExam = () => {
     // Mix router + practice questions
-    const routerQs: MockQuestion[] = ROUTER_STEMS.slice(0, 6).map(s => ({
+    const routerQs: MockQuestion[] = ROUTER_STEMS.slice(0, 9).map(s => ({
       id: nanoid(),
       type: "router",
       stem: s.stem,
       correctArchetypeId: s.correctId,
       choices: ARCHETYPES.map(a => a.id),
     }));
-    const practiceQs: MockQuestion[] = ARCHETYPES.slice(0, 6).map(arch => {
+    const practiceQs: MockQuestion[] = ARCHETYPES.slice(0, 9).map(arch => {
       const stem = CONTENT_PRACTICE_ITEMS_BY_ARCHETYPE[arch.id]?.[0];
       return {
         id: nanoid(),
@@ -359,7 +359,7 @@ function SetupScreen({ onStart }: { onStart: () => void }) {
             color: "var(--foreground)",
           }}
         >
-          12 questions (6 router + 6 practice) under a 20-minute timer.
+          18 questions (9 router + 9 practice) under a 20-minute timer.
           Simulates exam conditions.
         </p>
       </div>
@@ -378,11 +378,11 @@ function SetupScreen({ onStart }: { onStart: () => void }) {
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {[
             [
-              "6 Router questions",
-              "Identify the correct archetype from 6 choices",
+              "9 Router questions",
+              "Identify the correct archetype from 9 choices",
             ],
             [
-              "6 Practice questions",
+              "9 Practice questions",
               "Solve and self-rate against the answer key",
             ],
             ["20-minute timer", "Auto-submits when time expires"],

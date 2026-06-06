@@ -1,6 +1,6 @@
 /* ============================================================
    REPS — OPNS-430 Archetype Bank (Deterministic, Verified)
-   6 core archetypes from the PRD
+   9 core archetypes from the PRD + sourced operations drill sets
    ============================================================ */
 
 import type { Archetype, RouterStem } from "./content/schemas";
@@ -379,7 +379,8 @@ export const ARCHETYPES: Archetype[] = [
     ],
     derivedCondition:
       "Estimate a treatment effect from a randomized rollout; check whether treatment and control share a resource (interference).",
-    formula: "effect = β₁ in  Y = β₀ + β₁·treatment ;  significant if p(β₁) < 0.05",
+    formula:
+      "effect = β₁ in  Y = β₀ + β₁·treatment ;  significant if p(β₁) < 0.05",
     formulaVars: {
       Y: "Outcome metric (wait time, session length, …)",
       treatment: "1 if the new policy/feature applies, else 0",
@@ -446,7 +447,10 @@ export const ARCHETYPES: Archetype[] = [
     rootCauses: [
       { id: "exp_rc1", label: "Used A/B when units interfere (ignored SUTVA)" },
       { id: "exp_rc2", label: "Read p-value but ignored the sign/direction" },
-      { id: "exp_rc3", label: "Misclassified bucket (SPC vs experiment / p-flip)" },
+      {
+        id: "exp_rc3",
+        label: "Misclassified bucket (SPC vs experiment / p-flip)",
+      },
       { id: "exp_rc4", label: "Called it causal without p < 0.05" },
     ],
   },
@@ -553,8 +557,381 @@ export const ARCHETYPES: Archetype[] = [
     rootCauses: [
       { id: "spc_rc1", label: "Used σ/√n for capability (should use σ)" },
       { id: "spc_rc2", label: "Confused control limits with spec limits" },
-      { id: "spc_rc3", label: "Treated the 3σ false-alarm rate as a defect rate" },
-      { id: "spc_rc4", label: "Widened limits for a critical process (should narrow)" },
+      {
+        id: "spc_rc3",
+        label: "Treated the 3σ false-alarm rate as a defect rate",
+      },
+      {
+        id: "spc_rc4",
+        label: "Widened limits for a critical process (should narrow)",
+      },
+    ],
+  },
+  {
+    id: "littles_law",
+    name: "Little's Law / Flow Measures",
+    shortName: "Little's Law",
+    description:
+      "Connect average inventory, throughput, and flow time in stable systems, phases, paths, and career pipelines.",
+    verificationStatus: "verified",
+    triggers: [
+      "average number in system",
+      "flow time",
+      "throughput rate",
+      "work in process",
+      "stable system",
+      "average tenure",
+      "path mix",
+      "inflow equals outflow",
+    ],
+    disqualifiers: [
+      "optimal order quantity",
+      "service level buffer",
+      "one-shot uncertain demand",
+      "control limits",
+      "randomized experiment",
+    ],
+    derivedCondition:
+      "Stable flow boundary where I, R, and T describe average inventory, throughput, and time; split phases or paths when only subsets flow through them.",
+    formula: "I = R * T | T = I / R | R = I / T",
+    formulaVars: {
+      I: "Average inventory, WIP, or number of people inside the system",
+      R: "Throughput rate through the system boundary in one direction",
+      T: "Average flow time spent inside the system",
+      I_total: "Sum of inventories across phases or cohorts",
+      R_total: "External throughput through the whole system boundary",
+    },
+    trapNotes: [
+      "Use one-direction throughput; if a rate counts both entries and exits, halve it in a stable system",
+      "Keep time units aligned before dividing inventory by throughput",
+      "For phase inventories, scale throughput by the fraction that actually enters that phase",
+      "For mixed paths, weight path times by path volume or sum all inventories and divide by total external throughput",
+      "Internal promotions or transfers are not external arrivals for the whole-system average",
+    ],
+    workedExample: {
+      stem: "Insects cross the boundary of a cubic meter of air at an overall rate of 0.061 per hour, counting both entries and exits. The average number inside is 0.0082. What is the average visit duration?",
+      solution:
+        "In a stable system, entries equal exits, so one-direction throughput is R = 0.061/2 = 0.0305 insects/hour. Little's Law gives T = I/R = 0.0082/0.0305 = 0.269 hours, or about 16.1 minutes.",
+      steps: [
+        "Define the system as insects inside the cube",
+        "Use one-direction throughput: R = 0.061/2 = 0.0305 insects/hour",
+        "Apply T = I/R = 0.0082/0.0305 = 0.269 hours",
+        "Convert 0.269 hours to minutes: 0.269 * 60 = 16.1 minutes",
+      ],
+    },
+    practiceStems: [
+      {
+        id: "ll_insects_cube",
+        text: "Insects cross the boundary of a cubic meter of air at an overall rate of 0.061 per hour, either going in or going out. The average number of insects inside the cube is 0.0082. What is the average duration of an insect visit?",
+        answer:
+          "About 0.269 hours, or 16.1 minutes. Because the crossing rate counts both directions, stable-system throughput into the cube is R = 0.061/2 = 0.0305 per hour; T = I/R = 0.0082/0.0305.",
+        explanation:
+          "Little's Law uses throughput in one direction across the system boundary. A total in-plus-out crossing rate double-counts flow in a stable system.",
+        traps: [
+          "Do not use 0.061/hour as one-direction throughput",
+          "Convert hours to minutes only after computing T",
+        ],
+      },
+      {
+        id: "ll_insurance_hard_claims",
+        text: "An insurer processes 2,000 claims/week, and average processing time is 6 weeks. Claims are 60% simple, 30% medium, and 10% hard. Medium claims take 8 weeks on average. There are 3,600 simple claims in the system. How long does a hard claim take on average?",
+        answer:
+          "18 weeks. Total inventory is 2,000 * 6 = 12,000 claims. Throughputs are simple 1,200/week, medium 600/week, hard 200/week. Medium inventory is 600 * 8 = 4,800. Hard inventory is 12,000 - 3,600 - 4,800 = 3,600, so T_hard = 3,600/200 = 18 weeks.",
+        explanation:
+          "Use Little's Law at the total-system level, then by category. The missing category inventory comes from subtracting known category inventories from total inventory.",
+        traps: [
+          "Use category throughput, not total throughput, for the hard-claim flow time",
+          "Compute medium inventory from R * T before subtracting",
+        ],
+      },
+      {
+        id: "ll_coffee_shop",
+        text: "A coffee shop serves 60 customers/hour. 60% take out; 40% stay. On average 10 customers are in the order line, drink prep takes 5 minutes for everyone, and stay-in customers consume for 20 minutes. (1) How many people are in the shop on average? (2) How long does an average customer spend in the shop?",
+        answer:
+          "23 people and 23 minutes. Convert throughput to 1 customer/minute. Order-line inventory is 10. Prep inventory is 1 * 5 = 5. Consumption inventory is 0.4 * 1 * 20 = 8. Total inventory is 23. For the whole shop, T = I/R = 23/1 = 23 minutes.",
+        explanation:
+          "Compute phase inventories with the throughput that actually visits each phase, then sum inventories. The whole-shop flow time comes from total inventory divided by total external throughput.",
+        traps: [
+          "Only 40% of customers enter the consumption phase",
+          "Use minutes consistently after converting 60/hour to 1/minute",
+        ],
+      },
+      {
+        id: "ll_it_new_feature",
+        text: "An IT group has Triage plus New Feature, Revise Feature, and Repair Error groups. 100 requests/day arrive at Triage; 5% route to New Feature. Triage inventory is 500. New Feature also receives 10 direct requests/day and has inventory 375. How long does a New Feature request take from arrival to deployment on average?",
+        answer:
+          "About 26.7 days. Triage time is 500/100 = 5 days. New Feature throughput is 0.05 * 100 + 10 = 15/day, so New Feature time is 375/15 = 25 days. Five requests/day take the triage path for 30 days; ten/day go direct for 25 days. Weighted average = (5*30 + 10*25)/15 = 26.67 days.",
+        explanation:
+          "This is a path-mix Little's Law problem. Compute the shared stage time and specialist stage time, then weight by the volumes taking each path.",
+        traps: [
+          "Do not add triage time to direct New Feature arrivals",
+          "Weight path times by 5/day versus 10/day, not by an unweighted average",
+        ],
+      },
+      {
+        id: "ll_it_overall_system",
+        text: "Using the IT system above, Revise Feature has 30 direct arrivals/day and 10 days average flow time; Repair Error has 60 direct arrivals/day and 4 days average flow time. Triage sends 25% to Revise and 70% to Repair. What is the average time across all requests in the whole IT system?",
+        answer:
+          "About 9.7 days. Downstream throughputs are New Feature 15/day, Revise 25 + 30 = 55/day, Repair 70 + 60 = 130/day. Total external throughput is 200/day. Inventories are Triage 500, New Feature 375, Revise 55*10 = 550, Repair 130*4 = 520. Total inventory is 1,945, so T = 1,945/200 = 9.725 days.",
+        explanation:
+          "For the whole system, sum all inventories inside the boundary and divide by total external arrivals. Internal routing from Triage is not new external demand.",
+        traps: [
+          "Total throughput is external arrivals: 100 + 10 + 30 + 60 = 200/day",
+          "Include Triage inventory once, then downstream group inventories",
+        ],
+      },
+      {
+        id: "ll_mt_kinley",
+        text: "Mt. Kinley is stable with 60 managers and 10 partners. A manager stays 6 years, then becomes partner or leaves. The firm hires 5 managers/year externally, and all partners come from managers. Associates: 20% are promoted at evaluation; of the 80% not promoted, 40% stay for another 2-year stint and 60% leave. (a) How many associates are promoted to manager per year? (b) How many new associates are hired per year? (c) What is average tenure across all ranks?",
+        answer:
+          "(a) 5 associates/year. Manager throughput is 60/6 = 10/year; subtract 5 external manager hires. (b) 17 new associates/year. If 20% promoted equals 5, then 25 associates are evaluated; 20 are not promoted, 8 stay, and 12 leave, so associate outflow is 5 + 12 = 17. (c) 7 years. External inflow is 17 associates + 5 managers = 22/year. Inventory is associate-stay 8*2 = 16, associate-hire 17*4 = 68, managers 60, partners 10; total 154. Average tenure = 154/22 = 7 years.",
+        explanation:
+          "Career-pipeline versions of Little's Law use ranks or cohorts as systems. For the whole firm, divide total headcount by external inflow, not internal promotion flow.",
+        traps: [
+          "Subtract external manager hires before counting associate promotions",
+          "Do not count internal promotions as external inflow for firmwide tenure",
+        ],
+      },
+      {
+        id: "ll_hospital_research",
+        text: "A hospital research track has Juniors, Seniors, Chiefs, and Doctors. It hires 400 Juniors/year and has 2,000 Juniors. 25% of Juniors become Seniors. Seniors also have 100 external hires/year, stay 4 years, and 15% become Chiefs. Chiefs also have 10 external hires/year, stay 12 years, and 25% become Doctors. Doctors have average inventory 100. (a) How many people work in research? (b) How long does an average person spend in the research division?",
+        answer:
+          "(a) 3,380 people. Junior inventory is 2,000. Senior throughput is 0.25*400 + 100 = 200/year, so Senior inventory is 200*4 = 800. Chief throughput is 0.15*200 + 10 = 40/year, so Chief inventory is 40*12 = 480. Add Doctors 100 for total inventory 3,380. (b) 6.6 years. External inflow is 400 + 100 + 10 = 510/year, so average time is 3,380/510 = 6.63 years.",
+        explanation:
+          "Work rank by rank to compute inventories, then switch to the whole-division boundary. External inflow excludes internal promotions from Junior to Senior and Senior to Chief.",
+        traps: [
+          "Do not treat promotions as external hires in the whole-division calculation",
+          "Use each rank's own throughput before applying I = R * T",
+        ],
+      },
+    ],
+    rootCauses: [
+      { id: "ll_rc1", label: "Used a double-counted or wrong throughput" },
+      { id: "ll_rc2", label: "Mixed time units" },
+      { id: "ll_rc3", label: "Skipped path or phase weighting" },
+      { id: "ll_rc4", label: "Counted internal transfers as external flow" },
+    ],
+  },
+  {
+    id: "queueing",
+    name: "Queueing / Waiting Time",
+    shortName: "Queueing",
+    description:
+      "Use M/M/1 and M/M/s inputs to compute utilization, waiting probability, queue length, waiting time, and priority or pooling effects.",
+    verificationStatus: "verified",
+    triggers: [
+      "arrival rate",
+      "service rate",
+      "number of servers",
+      "utilization",
+      "average waiting time",
+      "average number waiting",
+      "probability wait exceeds",
+      "priority queue",
+      "pooled line",
+    ],
+    disqualifiers: [
+      "deterministic inventory timing",
+      "order quantity cost tradeoff",
+      "one-shot inventory buy",
+      "stable flow time without stochastic service",
+    ],
+    derivedCondition:
+      "Exponential interarrival and service times with one or more servers; check stability lambda < s*mu before using steady-state queue outputs.",
+    formula:
+      "rho = lambda / (s*mu) | Wq = Lq / lambda | M/M/1 Wq = lambda / (mu*(mu-lambda)) | P(Wq>t) = C*exp(-(s*mu-lambda)*t)",
+    formulaVars: {
+      lambda: "Average arrival rate",
+      mu: "Average service rate per server",
+      s: "Number of parallel servers",
+      rho: "Server utilization lambda/(s*mu)",
+      Lq: "Average number waiting in queue",
+      Wq: "Average time waiting in queue",
+      C: "Erlang-C probability an arrival must wait",
+    },
+    trapNotes: [
+      "Convert service time into service rate before entering the spreadsheet",
+      "Use the same time units for lambda, mu, and any wait threshold T",
+      "Utilization can stay the same after pooling even while waiting time improves",
+      "Probability of no wait is 1 minus the Erlang-C probability of waiting",
+      "Priority rules redistribute waiting across classes; they do not create capacity",
+    ],
+    workedExample: {
+      stem: "An EV charging location has 5 chargers, arrivals average 9 cars/hour, and each charging session takes 30 minutes on average. What are P(Wq > 1 hour), Lq, and L?",
+      solution:
+        "Use s = 5, lambda = 9/hour, and mu = 2/hour because 30 minutes is 0.5 hours. The system is stable since s*mu = 10 > 9. The queueing spreadsheet reports P(Wq > 1) = 0.2805, Lq = 6.862 cars, and L = 11.362 cars.",
+      steps: [
+        "Convert mean service time to mu = 1/0.5 = 2 cars/hour",
+        "Check stability: lambda = 9 is less than s*mu = 10",
+        "Enter s = 5, lambda = 9, and mu = 2 in the infinite-queue sheet",
+        "Read the wait-tail, waiting-line, and total-system outputs",
+      ],
+    },
+    practiceStems: [
+      {
+        id: "que_ev_charging",
+        text: "An EV charging location has 5 identical chargers. Cars arrive at 9/hour, and each charge takes 30 minutes on average. Assuming M/M/5 with infinite queue, find (a) P(Wq > 1 hour), (b) Lq, and (c) L.",
+        answer:
+          "Use s = 5, lambda = 9/hour, mu = 2/hour. Stability holds because 5*2 = 10 > 9. Spreadsheet outputs: P(Wq > 1 hour) = 0.2805, Lq = 6.862 cars, and L = 11.362 cars.",
+        explanation:
+          "The key setup move is converting 30 minutes into a per-hour service rate. With consistent hourly units, the spreadsheet's wait-tail and queue-length outputs give the answer.",
+        traps: [
+          "Do not enter 30 as the service rate",
+          "Use T = 1 because the rates are per hour",
+        ],
+      },
+      {
+        id: "que_airport_priority",
+        text: "Airport security has 5 teams, mean service time 1 minute, and 240 passenger arrivals/hour. (a) What is Lq? (b) What is Wq? (c) If 20% are first-class priority passengers, what are Lq and Wq for first-class and non-priority passengers?",
+        answer:
+          "Use s = 5, lambda = 240/hour, mu = 60/hour. Baseline Lq = 2.216 passengers and Wq = 0.5541 minutes. Priority split: first-class lambda1 = 48/hour has Lq1 = 0.106 and Wq1 = 0.1319 minutes; non-priority lambda2 = 192/hour has Lq2 = 2.111 and Wq2 = 0.6597 minutes.",
+        explanation:
+          "The baseline M/M/5 system is stable at rho = 240/(5*60) = 0.8. The priority block keeps total capacity fixed while redistributing waiting toward the lower-priority class.",
+        traps: [
+          "Convert 1 minute of service to mu = 60/hour",
+          "Priority lowers one class's wait by raising another class's wait",
+        ],
+      },
+      {
+        id: "que_carwash_pooling",
+        text: "A carwash has two separate lines, each with 2 stations. Each line receives 5 cars/hour, and each station takes 20 minutes per car. A manager proposes one pooled line with 4 stations and 10 cars/hour. (a) How does utilization change? (b) Should they pool?",
+        answer:
+          "Utilization stays 5/(2*3) = 10/(4*3) = 0.8333 in both systems because 20 minutes implies mu = 3/hour. They should pool: with the same total utilization, one M/M/4 queue has lower average wait and queue length than two independent M/M/2 queues.",
+        explanation:
+          "Pooling does not change total load or capacity here; it reduces waiting by smoothing variability across all servers.",
+        traps: [
+          "Do not claim utilization falls just because the line is pooled",
+          "The benefit is waiting-time reduction, not capacity creation",
+        ],
+      },
+      {
+        id: "que_wwic_discount",
+        text: "A walk-in clinic has 2 nurse practitioners. Patients arrive at 3.9/hour, each NP sees 3 patients/hour on average, revenue is $55/visit, and each NP earns $15/hour plus $10/patient. (a) Find utilization and probability a patient waits. (b) If patients waiting more than 15 minutes get a $10 discount, what is hourly margin?",
+        answer:
+          "Utilization is 3.9/(2*3) = 65%. The spreadsheet with T = 0 gives P(wait) = 51.21%. With T = 0.25 hours, P(Wq > 15 min) = 30.29%, so discounted patients/hour = 3.9*0.3029 = 1.18131. Revenue/hour = 3.9*$55 = $214.50. Labor/hour = 2*$15 + 3.9*$10 = $69. Discount/hour = 1.18131*$10 = $11.81. Margin = $214.50 - $69 - $11.81 = $133.69/hour.",
+        explanation:
+          "This combines queue outputs with economics. The probability threshold must be in hours because the queue inputs are hourly.",
+        traps: [
+          "15 minutes is T = 0.25 hours",
+          "Discount cost is expected discounted patients per hour times $10",
+        ],
+      },
+      {
+        id: "que_kwikemart_mm1",
+        text: "At a single-cashier store, customers arrive at 1/minute and checkout service takes 48 seconds on average. Assuming M/M/1, how long does the average customer wait in line before checkout?",
+        answer:
+          "Use lambda = 1/minute and mu = 1/0.8 = 1.25/minute. M/M/1 waiting time in queue is Wq = lambda/(mu*(mu-lambda)) = 1/(1.25*(1.25-1)) = 1/0.3125 = 3.2 minutes.",
+        explanation:
+          "Convert 48 seconds to 0.8 minutes, then apply the M/M/1 Wq formula.",
+        traps: [
+          "The question asks waiting in line, not total time including service",
+          "Use minutes consistently",
+        ],
+      },
+      {
+        id: "que_wwic_lq_tail",
+        text: "A one-NP walk-in clinic has arrivals lambda = 6.2/hour and service rate mu = 7.2/hour. What is the probability that more than 2 patients are waiting?",
+        answer:
+          "For M/M/1, rho = lambda/mu = 6.2/7.2 = 31/36. More than 2 waiting means at least 4 in system, so P(Lq > 2) = rho^4 = (31/36)^4 = 923,521/1,679,616 = 0.5498, about 0.55.",
+        explanation:
+          "Queue length excludes the patient in service. Translate more-than-2-waiting into the equivalent system-count tail before using the geometric M/M/1 distribution.",
+        traps: [
+          "Do not confuse number waiting with number in system",
+          "Use rho^4 for more than 2 waiting in this M/M/1 setup",
+        ],
+      },
+      {
+        id: "que_restaurant_tables",
+        text: "A restaurant has 28 two-person tables, parties arrive at 16/hour, and each party uses a table for 90 minutes on average. Assuming M/M/28, what is the probability an arriving party does not wait?",
+        answer:
+          "Use s = 28, lambda = 16/hour, mu = 1/1.5 = 0.6667/hour. Offered load is a = lambda/mu = 24 and rho = 24/28 = 0.857. Erlang-C gives P(wait) about 0.333, so P(no wait) = 1 - 0.333 = 0.667, or 66.7%.",
+        explanation:
+          "The spreadsheet reports the probability of waiting; the requested probability is its complement.",
+        traps: [
+          "Convert 90 minutes to 1.5 hours before computing mu",
+          "Do not report P(wait) when the question asks P(no wait)",
+        ],
+      },
+    ],
+    rootCauses: [
+      { id: "que_rc1", label: "Used inconsistent time units" },
+      { id: "que_rc2", label: "Entered service time instead of service rate" },
+      { id: "que_rc3", label: "Confused waiting with total system time" },
+      { id: "que_rc4", label: "Missed pooling or priority interpretation" },
+    ],
+  },
+  {
+    id: "inventory_timing",
+    name: "Inventory Timing / Batch Replenishment",
+    shortName: "Inventory Timing",
+    description:
+      "Track deterministic inventory paths, reorder timing, batch arrivals, stockouts, and end-of-horizon leftovers.",
+    verificationStatus: "verified",
+    triggers: [
+      "batch arrives all at once",
+      "holding pan",
+      "cook time",
+      "start a new batch",
+      "time-varying demand",
+      "closing inventory",
+      "inventory path",
+      "base-stock timing",
+    ],
+    disqualifiers: [
+      "ordering plus holding cost minimization",
+      "random one-period demand",
+      "safety stock service level",
+      "queue waiting time",
+    ],
+    derivedCondition:
+      "Known demand rates and deterministic replenishment lead time; draw the inventory path and time the batch arrivals against depletion.",
+    formula:
+      "depletion = demand_rate * time | time_to_zero = inventory / demand_rate | reorder_point = demand_rate * lead_time",
+    formulaVars: {
+      demand_rate: "Servings or units consumed per minute or hour",
+      lead_time: "Time between starting and receiving the replenishment batch",
+      batch_size: "Units added when replenishment arrives",
+      inventory: "Units currently available before the next demand segment",
+    },
+    trapNotes: [
+      "Track jump times separately from batch start times",
+      "Demand-rate changes can move the zero time after a reorder point is reached",
+      "A full batch arrival jumps inventory up; it is not a gradual fill",
+      "End-of-day leftovers are computed from the last batch arrival to closing",
+    ],
+    workedExample: {
+      stem: "Big Z's makes rice in full 90-serving batches with a 30-minute cook time. Demand is 1/min from 11:00-12:00, 80/hour from 12:00-13:30, and 0.9/min from 13:30-16:00. When do batch arrivals happen and how much rice remains at closing?",
+      solution:
+        "At 11:00 inventory is 90. It falls to 30 by 12:00, then at 80/hour it reaches zero at 12:22.5 and jumps to 90. That batch lasts 67.5 minutes, so it reaches zero and jumps again at 13:30. At 0.9/min, 90 servings last 100 minutes, so the next jump is 15:10. From 15:10 to 16:00 demand is 45 servings, leaving 45 at closing.",
+      steps: [
+        "Start at 90 servings at 11:00",
+        "Use each demand segment to find when inventory reaches zero",
+        "Add a 90-serving jump at each timed batch arrival",
+        "Subtract final segment demand from the last 90-serving batch",
+      ],
+    },
+    practiceStems: [
+      {
+        id: "inv_batch_rice",
+        text: "Big Z's makes only full 90-serving rice batches. Cooking takes 30 minutes. The first batch arrives at 11:00. Demand is 1/min from 11:00-12:00, 80/hour from 12:00-13:30, and 0.9/min from 13:30-16:00. A new batch is timed to arrive just as inventory would run out. When do batch arrivals occur, and how much rice remains at closing?",
+        answer:
+          "Batch arrivals after opening occur at 12:22.5, 13:30, and 15:10. Closing inventory is 45 servings. Inventory starts at 90 at 11:00, falls to 30 by noon, then reaches zero 22.5 minutes later at the 80/hour rate. The 12:22.5 batch lasts 67.5 minutes, reaching zero at 13:30. The 13:30 batch lasts 100 minutes at 0.9/min, reaching zero at 15:10. The final 90-serving batch sells 0.9*50 = 45 servings before 16:00, leaving 45.",
+        explanation:
+          "This is deterministic inventory-path accounting. The important move is to recompute time-to-zero when demand rates change, then treat each completed batch as an instant jump of 90 servings.",
+        traps: [
+          "Do not average the demand rates across the day",
+          "Distinguish cook start times from batch arrival jump times",
+        ],
+      },
+    ],
+    rootCauses: [
+      {
+        id: "inv_time_rc1",
+        label: "Averaged demand instead of segmenting time",
+      },
+      { id: "inv_time_rc2", label: "Confused batch start with batch arrival" },
+      { id: "inv_time_rc3", label: "Missed a demand-rate change" },
+      { id: "inv_time_rc4", label: "Forgot the final leftover calculation" },
     ],
   },
 ];
@@ -809,6 +1186,123 @@ const ROUTER_STEM_DATA: Array<Omit<RouterStem, "semanticQa">> = [
     correctId: "spc",
     kind: "conceptual-trap",
     confuserIds: ["experimentation"],
+  },
+  {
+    id: "router_littles_direct_1",
+    stem: "The problem gives an average number of items inside a stable system plus a throughput rate and asks how long an item spends inside.",
+    correctId: "littles_law",
+    kind: "direct",
+  },
+  {
+    id: "router_littles_direct_2",
+    stem: "A service department reports WIP inventory and request completions per day; the question asks average flow time through the department.",
+    correctId: "littles_law",
+    kind: "direct",
+  },
+  {
+    id: "router_littles_direct_3",
+    stem: "A process has several phases, each with its own inventory or time, and the task is to sum inventories before finding total time in the system.",
+    correctId: "littles_law",
+    kind: "direct",
+  },
+  {
+    id: "router_littles_near_miss_1",
+    stem: "The question mentions inventory and demand, but it is not asking for order quantity or safety stock; it asks average time from average WIP and throughput.",
+    correctId: "littles_law",
+    kind: "near-miss",
+    confuserIds: ["eoq", "safety_stock"],
+  },
+  {
+    id: "router_littles_near_miss_2",
+    stem: "A stable promotion pipeline asks for hires, promotions, and average tenure across ranks, so internal transfers must be separated from external flow.",
+    correctId: "littles_law",
+    kind: "near-miss",
+    confuserIds: ["experimentation", "spc"],
+  },
+  {
+    id: "router_littles_conceptual_1",
+    stem: "A boundary-crossing rate counts both entries and exits; the exam trap is to use one-direction throughput before applying I = R*T.",
+    correctId: "littles_law",
+    kind: "conceptual-trap",
+    confuserIds: ["spc"],
+  },
+  {
+    id: "router_queueing_direct_1",
+    stem: "The problem gives arrival rate, service rate, and number of servers, then asks for utilization, average waiting time, or average number waiting.",
+    correctId: "queueing",
+    kind: "direct",
+  },
+  {
+    id: "router_queueing_direct_2",
+    stem: "An M/M/s spreadsheet setup asks for lambda, mu, servers, and the probability that queue wait exceeds a threshold.",
+    correctId: "queueing",
+    kind: "direct",
+  },
+  {
+    id: "router_queueing_direct_3",
+    stem: "A single-server line has exponential arrivals and service, and the task is to compute Wq before service begins.",
+    correctId: "queueing",
+    kind: "direct",
+  },
+  {
+    id: "router_queueing_near_miss_1",
+    stem: "The question mentions waiting and flow, but service-time variability and server count matter; it is not just Little's Law with a known average inventory.",
+    correctId: "queueing",
+    kind: "near-miss",
+    confuserIds: ["littles_law"],
+  },
+  {
+    id: "router_queueing_near_miss_2",
+    stem: "Pooling multiple service lines keeps utilization unchanged but lowers stochastic waiting time, so the answer is not risk-pooling safety stock.",
+    correctId: "queueing",
+    kind: "near-miss",
+    confuserIds: ["risk_pooling"],
+  },
+  {
+    id: "router_queueing_conceptual_1",
+    stem: "The trap is entering mean service time as mu instead of converting it into service rate before using the M/M/s sheet.",
+    correctId: "queueing",
+    kind: "conceptual-trap",
+    confuserIds: ["littles_law"],
+  },
+  {
+    id: "router_inventory_timing_direct_1",
+    stem: "A full batch arrives all at once after a fixed cook time, and the question asks when inventory jumps occur.",
+    correctId: "inventory_timing",
+    kind: "direct",
+  },
+  {
+    id: "router_inventory_timing_direct_2",
+    stem: "Known demand rates deplete inventory across time segments, and the task is to find stockout times and closing leftovers.",
+    correctId: "inventory_timing",
+    kind: "direct",
+  },
+  {
+    id: "router_inventory_timing_direct_3",
+    stem: "The policy starts replenishment when enough stock remains to cover lead-time demand, then a fixed batch arrives as a jump.",
+    correctId: "inventory_timing",
+    kind: "direct",
+  },
+  {
+    id: "router_inventory_timing_near_miss_1",
+    stem: "There is a batch size and inventory path, but no ordering or holding cost tradeoff to optimize.",
+    correctId: "inventory_timing",
+    kind: "near-miss",
+    confuserIds: ["eoq"],
+  },
+  {
+    id: "router_inventory_timing_near_miss_2",
+    stem: "Demand is deterministic by time segment, so the task is timing replenishment arrivals rather than choosing a single-period critical-fractile quantity.",
+    correctId: "inventory_timing",
+    kind: "near-miss",
+    confuserIds: ["newsvendor"],
+  },
+  {
+    id: "router_inventory_timing_conceptual_1",
+    stem: "The trap is confusing the time a batch is started with the later moment when that batch is finished and inventory jumps up.",
+    correctId: "inventory_timing",
+    kind: "conceptual-trap",
+    confuserIds: ["safety_stock"],
   },
 ];
 

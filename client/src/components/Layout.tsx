@@ -214,7 +214,7 @@ function SidebarFooter() {
           letterSpacing: "0.05em",
         }}
       >
-        v2.1 improved
+        v2.2 improved
       </div>
     </div>
   );
