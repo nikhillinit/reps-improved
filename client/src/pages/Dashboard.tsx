@@ -36,6 +36,41 @@ export default function Dashboard() {
   ).length;
   const openErrors = getOpenErrors(store.practiceAttempts, store.cards);
 
+  // Keyboard shortcuts for Quick Actions
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore when focus is inside an input, textarea, or select
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      // Ignore modifier combos (Ctrl+R would be browser refresh, etc.)
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+      switch (e.key.toLowerCase()) {
+        case "r":
+          e.preventDefault();
+          navigate("/router");
+          break;
+        case "p":
+          e.preventDefault();
+          navigate("/practice");
+          break;
+        case "e":
+          if (openErrors > 0) {
+            e.preventDefault();
+            navigate("/review");
+          }
+          break;
+        case "m":
+          e.preventDefault();
+          navigate("/mock");
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [navigate, openErrors]);
+
   const now = new Date();
   const dateStr = now.toLocaleDateString("en-US", {
     month: "short",
