@@ -1,4 +1,10 @@
-import { useState, type ReactNode } from "react";
+/* ============================================================
+   REPS — Layout
+   Mobile: fixed top bar + bottom tab nav (5 primary items)
+   Desktop: persistent left sidebar
+   ============================================================ */
+
+import { type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard,
@@ -17,10 +23,10 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { useState } from "react";
 import { useIsMobile } from "@/hooks/useMobile";
 
-const NAV_ITEMS = [
+const SIDEBAR_ITEMS = [
   { path: "/", label: "Dashboard", icon: LayoutDashboard },
   { path: "/learn", label: "Learn", icon: BookOpen },
   { path: "/router", label: "Router", icon: Shuffle },
@@ -31,75 +37,145 @@ const NAV_ITEMS = [
   { path: "/settings", label: "Settings", icon: Settings },
 ];
 
+// Bottom nav shows the 5 most-used modes; overflow goes in the sheet
+const BOTTOM_NAV_ITEMS = [
+  { path: "/", label: "Home", icon: LayoutDashboard },
+  { path: "/router", label: "Router", icon: Shuffle },
+  { path: "/practice", label: "Practice", icon: Zap },
+  { path: "/review", label: "Review", icon: BarChart2 },
+  { path: "/learn", label: "Learn", icon: BookOpen },
+];
+
 interface LayoutProps {
   children: ReactNode;
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const [location, navigate] = useLocation();
-  const [isNavOpen, setIsNavOpen] = useState(false);
+  const [location] = useLocation();
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const isMobile = useIsMobile();
 
-  useKeyboardShortcuts(location, navigate);
+  // Active path helper
+  const isActive = (path: string) =>
+    path === "/" ? location === "/" : location.startsWith(path);
 
   return (
-    <div className="flex min-h-screen bg-background">
-      {isMobile ? (
-        <>
-          <header className="mobile-topbar">
-            <button
-              type="button"
-              aria-label="Open navigation"
-              onClick={() => setIsNavOpen(true)}
-              className="icon-button"
-            >
-              <Menu size={18} />
-            </button>
-            <Link href="/">
-              <span className="brand-mark">REPS_</span>
-            </Link>
-            <span className="topbar-code">OPNS-430</span>
-          </header>
-          <Sheet open={isNavOpen} onOpenChange={setIsNavOpen}>
-            <SheetContent
-              side="left"
-              className="p-0"
-              style={{
-                width: 220,
-                background: "var(--sidebar)",
-                borderRight: "1px solid var(--sidebar-border)",
-              }}
-            >
-              <SheetHeader
-                style={{
-                  padding: "20px 16px 12px",
-                  borderBottom: "1px solid var(--sidebar-border)",
-                }}
-              >
-                <SheetTitle>
-                  <span className="brand-mark">REPS_</span>
-                </SheetTitle>
-                <div className="topbar-code">OPNS-430</div>
-              </SheetHeader>
-              <NavContent
-                location={location}
-                onNavigate={() => setIsNavOpen(false)}
-              />
-              <SidebarFooter />
-            </SheetContent>
-          </Sheet>
-        </>
-      ) : (
+    <div className="app-shell">
+      {/* ── Desktop sidebar ── */}
+      {!isMobile && (
         <aside className="desktop-sidebar">
           <SidebarHeader />
-          <NavContent location={location} />
+          <nav style={{ flex: 1, padding: "12px 8px", overflowY: "auto" }}>
+            <div className="section-label" style={{ padding: "4px 8px 8px" }}>
+              MODES
+            </div>
+            {SIDEBAR_ITEMS.map(({ path, label, icon: Icon }) => (
+              <Link key={path} href={path}>
+                <div className={`nav-item ${isActive(path) ? "active" : ""}`}>
+                  <Icon size={15} strokeWidth={1.8} aria-hidden="true" />
+                  <span>{label}</span>
+                </div>
+              </Link>
+            ))}
+          </nav>
           <SidebarFooter />
         </aside>
       )}
 
-      <main className={`app-main ${isMobile ? "app-main-mobile" : ""}`}>
+      {/* ── Mobile top bar ── */}
+      {isMobile && (
+        <header className="mobile-topbar" role="banner">
+          <button
+            type="button"
+            aria-label="Open navigation menu"
+            onClick={() => setIsSheetOpen(true)}
+            className="icon-button"
+          >
+            <Menu size={18} aria-hidden="true" />
+          </button>
+          <Link href="/">
+            <span className="brand-mark">REPS_</span>
+          </Link>
+          <span className="topbar-code">OPNS-430</span>
+        </header>
+      )}
+
+      {/* ── Mobile full nav sheet (for overflow items) ── */}
+      {isMobile && (
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+          <SheetContent
+            side="left"
+            className="p-0"
+            style={{
+              width: 220,
+              background: "var(--sidebar)",
+              borderRight: "1px solid var(--sidebar-border)",
+            }}
+          >
+            <SheetHeader
+              style={{
+                padding: "20px 16px 12px",
+                borderBottom: "1px solid var(--sidebar-border)",
+              }}
+            >
+              <SheetTitle>
+                <span className="brand-mark">REPS_</span>
+              </SheetTitle>
+              <div className="topbar-code">OPNS-430</div>
+            </SheetHeader>
+            <nav style={{ flex: 1, padding: "12px 8px", overflowY: "auto" }}>
+              <div className="section-label" style={{ padding: "4px 8px 8px" }}>
+                ALL MODES
+              </div>
+              {SIDEBAR_ITEMS.map(({ path, label, icon: Icon }) => (
+                <Link key={path} href={path} onClick={() => setIsSheetOpen(false)}>
+                  <div className={`nav-item ${isActive(path) ? "active" : ""}`}>
+                    <Icon size={15} strokeWidth={1.8} aria-hidden="true" />
+                    <span>{label}</span>
+                  </div>
+                </Link>
+              ))}
+            </nav>
+            <SidebarFooter />
+          </SheetContent>
+        </Sheet>
+      )}
+
+      {/* ── Main content ── */}
+      <main
+        className={`app-main ${isMobile ? "app-main-mobile" : ""}`}
+        id="main-content"
+        role="main"
+      >
         {children}
       </main>
+
+      {/* ── Mobile bottom tab bar ── */}
+      {isMobile && (
+        <nav
+          className="mobile-bottom-nav"
+          role="navigation"
+          aria-label="Primary navigation"
+        >
+          {BOTTOM_NAV_ITEMS.map(({ path, label, icon: Icon }) => (
+            <Link key={path} href={path}>
+              <div
+                className={`bottom-nav-item ${isActive(path) ? "active" : ""}`}
+                role="link"
+                aria-label={label}
+                aria-current={isActive(path) ? "page" : undefined}
+              >
+                <Icon
+                  size={20}
+                  strokeWidth={isActive(path) ? 2.2 : 1.8}
+                  aria-hidden="true"
+                />
+                <span>{label}</span>
+              </div>
+            </Link>
+          ))}
+        </nav>
+      )}
     </div>
   );
 }
@@ -115,38 +191,10 @@ function SidebarHeader() {
       <Link href="/">
         <span className="brand-mark">REPS_</span>
       </Link>
-      <div className="topbar-code" style={{ marginTop: 2 }}>
+      <div className="topbar-code" style={{ marginTop: 4 }}>
         OPNS-430
       </div>
     </div>
-  );
-}
-
-function NavContent({
-  location,
-  onNavigate,
-}: {
-  location: string;
-  onNavigate?: () => void;
-}) {
-  return (
-    <nav style={{ flex: 1, padding: "12px 8px", overflowY: "auto" }}>
-      <div className="section-label" style={{ padding: "4px 8px 8px" }}>
-        MODES
-      </div>
-      {NAV_ITEMS.map(({ path, label, icon: Icon }) => {
-        const isActive =
-          path === "/" ? location === "/" : location.startsWith(path);
-        return (
-          <Link key={path} href={path} onClick={onNavigate}>
-            <div className={`nav-item ${isActive ? "active" : ""}`}>
-              <Icon size={15} strokeWidth={1.8} />
-              <span>{label}</span>
-            </div>
-          </Link>
-        );
-      })}
-    </nav>
   );
 }
 
@@ -166,7 +214,7 @@ function SidebarFooter() {
           letterSpacing: "0.05em",
         }}
       >
-        v2.0 improved
+        v2.1 improved
       </div>
     </div>
   );

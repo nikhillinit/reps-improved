@@ -3,9 +3,10 @@
    Terminal Precision: Timed exam simulation
    ============================================================ */
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
-import { Trophy, Clock } from "lucide-react";
+import { Trophy, Clock, ChevronRight } from "lucide-react";
+import { useIsMobile } from "@/hooks/useMobile";
 import {
   CONTENT_ARCHETYPES as ARCHETYPES,
   CONTENT_PRACTICE_ITEMS_BY_ARCHETYPE,
@@ -36,6 +37,7 @@ export default function MockMode() {
   const [timeLeft, setTimeLeft] = useState(MOCK_DURATION);
   const [revealed, setRevealed] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const isMobile = useIsMobile();
 
   const startExam = () => {
     // Mix router + practice questions
@@ -85,7 +87,7 @@ export default function MockMode() {
     setAnswers(prev => ({ ...prev, [qId]: answer }));
   };
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     setRevealed(false);
     if (currentIdx >= questions.length - 1) {
       clearInterval(timerRef.current!);
@@ -93,7 +95,25 @@ export default function MockMode() {
     } else {
       setCurrentIdx(i => i + 1);
     }
-  };
+  }, [currentIdx, questions.length]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (phase !== "exam") return;
+      if (e.key === "Enter" || e.key === "ArrowRight") { e.preventDefault(); handleNext(); }
+      if (e.key === " " && questions[currentIdx]?.type === "practice") { e.preventDefault(); setRevealed(true); }
+      const num = parseInt(e.key);
+      if (!isNaN(num) && num >= 1 && num <= ARCHETYPES.length && questions[currentIdx]?.type === "router") {
+        handleAnswer(questions[currentIdx].id, ARCHETYPES[num - 1].id);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [phase, currentIdx, questions, handleNext]);
 
   const formatTime = (s: number) =>
     `${Math.floor(s / 60)
@@ -128,13 +148,13 @@ export default function MockMode() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <Trophy size={16} style={{ color: "oklch(0.21 0 0)" }} />
+          <Trophy size={16} style={{ color: "var(--foreground)" }} />
           <h1
             style={{
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 18,
               fontWeight: 700,
-              color: "oklch(0.21 0 0)",
+              color: "var(--foreground)",
             }}
           >
             Mock Exam
@@ -149,7 +169,7 @@ export default function MockMode() {
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 14,
               fontWeight: 700,
-              color: isLowTime ? "oklch(0.38 0.20 22)" : "oklch(0.21 0 0)",
+              color: isLowTime ? "var(--color-error)" : "var(--foreground)",
             }}
           >
             <Clock size={14} />
@@ -159,7 +179,7 @@ export default function MockMode() {
             style={{
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 12,
-              color: "oklch(0.51 0 0)",
+              color: "var(--muted-foreground)",
             }}
           >
             {currentIdx + 1}/{questions.length}
@@ -170,8 +190,8 @@ export default function MockMode() {
       {/* Progress */}
       <div
         style={{
-          height: 3,
-          background: "oklch(0.90 0.013 78)",
+          height: 4,
+          background: "var(--border)",
           borderRadius: 2,
           marginBottom: 28,
           overflow: "hidden",
@@ -181,7 +201,7 @@ export default function MockMode() {
           style={{
             height: "100%",
             width: `${progress}%`,
-            background: "oklch(0.21 0 0)",
+            background: "var(--foreground)",
             borderRadius: 2,
             transition: "width 300ms ease-out",
           }}
@@ -191,8 +211,8 @@ export default function MockMode() {
       {/* Question */}
       <div
         style={{
-          background: "oklch(1 0 0)",
-          border: "1px solid oklch(0.90 0.013 78)",
+          background: "var(--card)",
+          border: "1px solid var(--border)",
           borderRadius: 4,
           padding: 24,
           marginBottom: 16,
@@ -204,9 +224,9 @@ export default function MockMode() {
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 10,
               padding: "2px 6px",
-              border: "1px solid oklch(0.90 0.013 78)",
+              border: "1px solid var(--border)",
               borderRadius: 2,
-              color: "oklch(0.51 0 0)",
+              color: "var(--muted-foreground)",
             }}
           >
             Q{currentIdx + 1}
@@ -216,9 +236,9 @@ export default function MockMode() {
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 10,
               padding: "2px 6px",
-              border: "1px solid oklch(0.90 0.013 78)",
+              border: "1px solid var(--border)",
               borderRadius: 2,
-              color: "oklch(0.51 0 0)",
+              color: "var(--muted-foreground)",
             }}
           >
             {isRouter ? "IDENTIFY" : "SOLVE"}
@@ -228,7 +248,7 @@ export default function MockMode() {
           style={{
             fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 16,
-            color: "oklch(0.21 0 0)",
+            color: "var(--foreground)",
             lineHeight: 1.75,
           }}
         >
@@ -236,40 +256,43 @@ export default function MockMode() {
         </p>
       </div>
 
-      {/* Router: choices */}
+      {/* Router: choices — single column on mobile */}
       {isRouter && (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
-            gap: 8,
-            marginBottom: 16,
-          }}
-        >
-          {ARCHETYPES.map(arch => {
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: isMobile ? "1fr" : "repeat(2, 1fr)",
+          gap: 8,
+          marginBottom: 16,
+        }}>
+          {ARCHETYPES.map((arch, idx) => {
             const isSelected = userAnswer === arch.id;
             return (
               <button
                 key={arch.id}
                 onClick={() => handleAnswer(q.id, arch.id)}
                 style={{
-                  padding: "10px 14px",
-                  background: isSelected
-                    ? "oklch(0.21 0 0 / 0.07)"
-                    : "oklch(1 0 0)",
-                  border: `1px solid ${isSelected ? "oklch(0.21 0 0)" : "oklch(0.90 0.013 78)"}`,
-                  borderRadius: 4,
-                  color: isSelected
-                    ? "oklch(0.21 0 0)"
-                    : "oklch(0.28 0 0)",
-                  fontFamily: "'Inter', system-ui, sans-serif",
-                  fontSize: 13,
-                  fontWeight: 500,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "12px 14px",
+                  minHeight: 48,
+                  background: isSelected ? "var(--muted)" : "var(--card)",
+                  border: `1.5px solid ${isSelected ? "var(--foreground)" : "var(--border)"}`,
+                  borderRadius: 6,
+                  color: "var(--foreground)",
+                  fontFamily: "'IBM Plex Sans', sans-serif",
+                  fontSize: 14,
+                  fontWeight: isSelected ? 600 : 400,
                   cursor: "pointer",
                   textAlign: "left",
                   transition: "all 150ms",
                 }}
               >
+                {!isMobile && (
+                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "var(--muted-foreground)", minWidth: 14 }}>
+                    {idx + 1}
+                  </span>
+                )}
                 {arch.shortName}
               </button>
             );
@@ -279,72 +302,37 @@ export default function MockMode() {
 
       {/* Practice: reveal answer */}
       {!isRouter && !revealed && (
-        <button
-          onClick={() => setRevealed(true)}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "10px 18px",
-            background: "transparent",
-            border: "1px solid oklch(0.90 0.013 78)",
-            borderRadius: 4,
-            color: "oklch(0.28 0 0)",
-            fontFamily: "'Inter', system-ui, sans-serif",
-            fontSize: 13,
-            cursor: "pointer",
-            marginBottom: 16,
-          }}
-        >
-          Reveal Answer
-        </button>
+        <div className="sticky-next">
+          <button onClick={() => setRevealed(true)} className="btn-reveal">
+            Reveal Answer
+            {!isMobile && <span className="kbd-badge" style={{ marginLeft: 4 }}>Space</span>}
+          </button>
+        </div>
       )}
       {!isRouter && revealed && (
-        <div
-          style={{
-            background: "oklch(1 0 0)",
-            border: "1px solid oklch(0.44 0.15 150 / 0.15)",
-            borderLeft: "3px solid oklch(0.44 0.15 150)",
-            borderRadius: "0 4px 4px 0",
-            padding: 20,
-            marginBottom: 16,
-          }}
-        >
-          <div
-            className="formula-display"
-            style={{ borderLeftColor: "oklch(0.44 0.15 150)" }}
-          >
-            {q.answer}
-          </div>
+        <div className="fade-in" style={{
+          background: "var(--card)",
+          border: "1px solid var(--color-correct-border)",
+          borderLeft: "3px solid var(--color-correct)",
+          borderRadius: "0 6px 6px 0",
+          padding: 18,
+          marginBottom: 14,
+        }}>
+          <div className="section-label" style={{ marginBottom: 8, color: "var(--color-correct)" }}>ANSWER</div>
+          <div className="formula-display" style={{ borderLeftColor: "var(--color-correct)" }}>{q.answer}</div>
         </div>
       )}
 
-      {/* Next */}
-      <button
-        onClick={handleNext}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          padding: "10px 20px",
-          background: "oklch(0.21 0 0)",
-          border: "none",
-          borderRadius: 4,
-          color: "oklch(1 0 0)",
-          fontFamily: "'Inter', system-ui, sans-serif",
-          fontSize: 13,
-          fontWeight: 600,
-          cursor: "pointer",
-        }}
-        onMouseEnter={e =>
-          (e.currentTarget.style.background = "oklch(0.14 0 0)")
-        }
-        onMouseLeave={e =>
-          (e.currentTarget.style.background = "oklch(0.21 0 0)")
-        }
-      >
-        {currentIdx >= questions.length - 1 ? "Finish Exam" : "Next →"}
-      </button>
+      {/* Next — sticky on mobile, shown after selection/reveal */}
+      {(isRouter || revealed) && (
+        <div className="sticky-next">
+          <button onClick={handleNext} className="btn-primary" style={{ width: "100%", justifyContent: "center" }}>
+            {currentIdx >= questions.length - 1 ? "Finish Exam" : "Next"}
+            <ChevronRight size={16} aria-hidden="true" />
+            {!isMobile && <span className="kbd-badge">Enter</span>}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -358,7 +346,7 @@ function SetupScreen({ onStart }: { onStart: () => void }) {
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 22,
             fontWeight: 700,
-            color: "oklch(0.21 0 0)",
+            color: "var(--foreground)",
             marginBottom: 8,
           }}
         >
@@ -368,7 +356,7 @@ function SetupScreen({ onStart }: { onStart: () => void }) {
           style={{
             fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 14,
-            color: "oklch(0.28 0 0)",
+            color: "var(--foreground)",
           }}
         >
           12 questions (6 router + 6 practice) under a 20-minute timer.
@@ -377,8 +365,8 @@ function SetupScreen({ onStart }: { onStart: () => void }) {
       </div>
       <div
         style={{
-          background: "oklch(1 0 0)",
-          border: "1px solid oklch(0.90 0.013 78)",
+          background: "var(--card)",
+          border: "1px solid var(--border)",
           borderRadius: 4,
           padding: 20,
           marginBottom: 24,
@@ -404,7 +392,7 @@ function SetupScreen({ onStart }: { onStart: () => void }) {
                 style={{
                   fontFamily: "'JetBrains Mono', monospace",
                   fontSize: 10,
-                  color: "oklch(0.21 0 0)",
+                  color: "var(--foreground)",
                   marginTop: 2,
                 }}
               >
@@ -416,7 +404,7 @@ function SetupScreen({ onStart }: { onStart: () => void }) {
                     fontFamily: "'Inter', system-ui, sans-serif",
                     fontSize: 13,
                     fontWeight: 600,
-                    color: "oklch(0.21 0 0)",
+                    color: "var(--foreground)",
                   }}
                 >
                   {title}
@@ -425,7 +413,7 @@ function SetupScreen({ onStart }: { onStart: () => void }) {
                   style={{
                     fontFamily: "'Inter', system-ui, sans-serif",
                     fontSize: 12,
-                    color: "oklch(0.51 0 0)",
+                    color: "var(--muted-foreground)",
                   }}
                 >
                   {desc}
@@ -435,30 +423,8 @@ function SetupScreen({ onStart }: { onStart: () => void }) {
           ))}
         </div>
       </div>
-      <button
-        onClick={onStart}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          padding: "12px 24px",
-          background: "oklch(0.21 0 0)",
-          border: "none",
-          borderRadius: 4,
-          color: "oklch(1 0 0)",
-          fontFamily: "'Inter', system-ui, sans-serif",
-          fontSize: 14,
-          fontWeight: 700,
-          cursor: "pointer",
-        }}
-        onMouseEnter={e =>
-          (e.currentTarget.style.background = "oklch(0.14 0 0)")
-        }
-        onMouseLeave={e =>
-          (e.currentTarget.style.background = "oklch(0.21 0 0)")
-        }
-      >
-        <Trophy size={16} />
+      <button onClick={onStart} className="btn-primary" style={{ width: "100%", justifyContent: "center" }}>
+        <Trophy size={16} aria-hidden="true" />
         Start Mock Exam
       </button>
     </div>
@@ -486,7 +452,7 @@ function ResultScreen({
           fontFamily: "'JetBrains Mono', monospace",
           fontSize: 22,
           fontWeight: 700,
-          color: "oklch(0.21 0 0)",
+          color: "var(--foreground)",
           marginBottom: 24,
         }}
       >
@@ -507,7 +473,7 @@ function ResultScreen({
           <div className="stat-label">Attempted</div>
         </div>
         <div className="stat-card">
-          <div className="stat-value" style={{ color: "oklch(0.44 0.15 150)" }}>
+          <div className="stat-value" style={{ color: "var(--color-correct)" }}>
             {routerCorrect}/{routerQs.length}
           </div>
           <div className="stat-label">Router Correct</div>
@@ -517,26 +483,7 @@ function ResultScreen({
           <div className="stat-label">Practice Qs</div>
         </div>
       </div>
-      <button
-        onClick={onDone}
-        style={{
-          padding: "10px 20px",
-          background: "oklch(0.21 0 0)",
-          border: "none",
-          borderRadius: 4,
-          color: "oklch(1 0 0)",
-          fontFamily: "'Inter', system-ui, sans-serif",
-          fontSize: 13,
-          fontWeight: 600,
-          cursor: "pointer",
-        }}
-        onMouseEnter={e =>
-          (e.currentTarget.style.background = "oklch(0.14 0 0)")
-        }
-        onMouseLeave={e =>
-          (e.currentTarget.style.background = "oklch(0.21 0 0)")
-        }
-      >
+      <button onClick={onDone} className="btn-primary" style={{ width: "100%", justifyContent: "center" }}>
         Back to Dashboard
       </button>
     </div>

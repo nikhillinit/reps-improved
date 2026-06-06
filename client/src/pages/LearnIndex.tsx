@@ -20,7 +20,7 @@ export default function LearnIndex() {
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 22,
             fontWeight: 700,
-            color: "oklch(0.21 0 0)",
+            color: "var(--foreground)",
             letterSpacing: "-0.01em",
           }}
         >
@@ -30,7 +30,7 @@ export default function LearnIndex() {
           style={{
             fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 14,
-            color: "oklch(0.28 0 0)",
+            color: "var(--foreground)",
             marginTop: 4,
           }}
         >
@@ -61,8 +61,8 @@ export default function LearnIndex() {
                 alignItems: "center",
                 gap: 14,
                 padding: "16px 18px",
-                background: "oklch(1 0 0)",
-                border: "1px solid oklch(0.90 0.013 78)",
+                background: "var(--card)",
+                border: "1px solid var(--border)",
                 borderRadius: 4,
                 cursor: "pointer",
                 textAlign: "left",
@@ -82,7 +82,7 @@ export default function LearnIndex() {
                   flexShrink: 0,
                 }}
               >
-                <BookOpen size={16} style={{ color: "oklch(0.21 0 0)" }} />
+                <BookOpen size={16} style={{ color: "var(--foreground)" }} />
               </div>
 
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -91,7 +91,7 @@ export default function LearnIndex() {
                     fontFamily: "'Inter', system-ui, sans-serif",
                     fontSize: 14,
                     fontWeight: 600,
-                    color: "oklch(0.21 0 0)",
+                    color: "var(--foreground)",
                     marginBottom: 2,
                   }}
                 >
@@ -101,7 +101,7 @@ export default function LearnIndex() {
                   style={{
                     fontFamily: "'Inter', system-ui, sans-serif",
                     fontSize: 12,
-                    color: "oklch(0.51 0 0)",
+                    color: "var(--muted-foreground)",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
@@ -139,12 +139,12 @@ export default function LearnIndex() {
                 {arch.verificationStatus === "verified" && (
                   <CheckCircle2
                     size={14}
-                    style={{ color: "oklch(0.44 0.15 150)" }}
+                    style={{ color: "var(--color-correct)" }}
                   />
                 )}
                 <ChevronRight
                   size={14}
-                  style={{ color: "oklch(0.69 0 0)" }}
+                  style={{ color: "var(--muted-foreground)" }}
                 />
               </div>
             </button>
