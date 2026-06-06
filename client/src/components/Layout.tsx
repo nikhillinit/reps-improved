@@ -43,10 +43,7 @@ export default function Layout({ children }: LayoutProps) {
   useKeyboardShortcuts(location, navigate);
 
   return (
-    <div
-      className="flex min-h-screen"
-      style={{ background: "oklch(0.13 0.01 265)" }}
-    >
+    <div className="flex min-h-screen bg-background">
       {isMobile ? (
         <>
           <header className="mobile-topbar">
@@ -68,15 +65,15 @@ export default function Layout({ children }: LayoutProps) {
               side="left"
               className="p-0"
               style={{
-                width: 260,
-                background: "oklch(0.15 0.012 265)",
-                borderRight: "1px solid oklch(0.22 0.01 265)",
+                width: 220,
+                background: "var(--sidebar)",
+                borderRight: "1px solid var(--sidebar-border)",
               }}
             >
               <SheetHeader
                 style={{
                   padding: "20px 16px 12px",
-                  borderBottom: "1px solid oklch(0.22 0.01 265)",
+                  borderBottom: "1px solid var(--sidebar-border)",
                 }}
               >
                 <SheetTitle>
@@ -112,7 +109,7 @@ function SidebarHeader() {
     <div
       style={{
         padding: "20px 16px 16px",
-        borderBottom: "1px solid oklch(0.22 0.01 265)",
+        borderBottom: "1px solid var(--sidebar-border)",
       }}
     >
       <Link href="/">
@@ -158,14 +155,14 @@ function SidebarFooter() {
     <div
       style={{
         padding: "12px 16px",
-        borderTop: "1px solid oklch(0.22 0.01 265)",
+        borderTop: "1px solid var(--sidebar-border)",
       }}
     >
       <div
         style={{
           fontFamily: "'JetBrains Mono', monospace",
           fontSize: 10,
-          color: "oklch(0.30 0.01 265)",
+          color: "var(--muted-foreground)",
           letterSpacing: "0.05em",
         }}
       >

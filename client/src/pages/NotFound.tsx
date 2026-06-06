@@ -1,49 +1,89 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle, Home } from "lucide-react";
+import { Home } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function NotFound() {
   const [, setLocation] = useLocation();
 
-  const handleGoHome = () => {
-    setLocation("/");
-  };
-
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-      <Card className="w-full max-w-lg mx-4 shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-        <CardContent className="pt-8 pb-8 text-center">
-          <div className="flex justify-center mb-6">
-            <div className="relative">
-              <div className="absolute inset-0 bg-red-100 rounded-full animate-pulse" />
-              <AlertCircle className="relative h-16 w-16 text-red-500" />
-            </div>
-          </div>
-
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">404</h1>
-
-          <h2 className="text-xl font-semibold text-slate-700 mb-4">
-            Page Not Found
-          </h2>
-
-          <p className="text-slate-600 mb-8 leading-relaxed">
-            Sorry, the page you are looking for doesn't exist.
-            <br />
-            It may have been moved or deleted.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button
-              onClick={handleGoHome}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
-            >
-              <Home className="w-4 h-4 mr-2" />
-              Go Home
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "oklch(0.97 0.003 87)",
+      }}
+    >
+      <div
+        style={{
+          background: "oklch(1 0 0)",
+          border: "1px solid oklch(0.90 0.013 78)",
+          borderRadius: 8,
+          padding: "48px 40px",
+          maxWidth: 420,
+          width: "100%",
+          textAlign: "center",
+        }}
+      >
+        <div
+          style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: 64,
+            fontWeight: 700,
+            color: "oklch(0.21 0 0)",
+            lineHeight: 1,
+            letterSpacing: "-0.04em",
+            marginBottom: 16,
+          }}
+        >
+          404
+        </div>
+        <div
+          style={{
+            fontFamily: "'Inter', system-ui, sans-serif",
+            fontSize: 18,
+            fontWeight: 600,
+            color: "oklch(0.21 0 0)",
+            marginBottom: 8,
+          }}
+        >
+          Page not found
+        </div>
+        <p
+          style={{
+            fontFamily: "'Inter', system-ui, sans-serif",
+            fontSize: 14,
+            color: "oklch(0.51 0 0)",
+            marginBottom: 28,
+            lineHeight: 1.55,
+          }}
+        >
+          The page you're looking for doesn't exist or has been moved.
+        </p>
+        <button
+          onClick={() => setLocation("/")}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "9px 20px",
+            background: "oklch(0.21 0 0)",
+            border: "none",
+            borderRadius: 4,
+            color: "oklch(1 0 0)",
+            fontFamily: "'Inter', system-ui, sans-serif",
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: "pointer",
+            transition: "background 150ms ease-out",
+          }}
+          onMouseEnter={e => (e.currentTarget.style.background = "oklch(0.14 0 0)")}
+          onMouseLeave={e => (e.currentTarget.style.background = "oklch(0.21 0 0)")}
+        >
+          <Home size={14} />
+          Go home
+        </button>
+      </div>
     </div>
   );
 }

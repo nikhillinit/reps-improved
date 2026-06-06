@@ -21,10 +21,10 @@ export function StatCard({
   valueClassName,
 }: StatCardProps) {
   const valueColor = danger
-    ? "oklch(0.62 0.22 25)"
+    ? "oklch(0.38 0.20 22)"
     : accent
-      ? "oklch(0.72 0.14 185)"
-      : "oklch(0.91 0.005 265)";
+      ? "oklch(0.44 0.15 150)"
+      : "oklch(0.21 0 0)";
 
   return (
     <div className={cn("stat-card", className)}>
@@ -38,9 +38,9 @@ export function StatCard({
       {sub && (
         <div
           style={{
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 12,
-            color: "oklch(0.40 0.01 265)",
+            color: "oklch(0.51 0 0)",
             marginTop: 4,
           }}
         >

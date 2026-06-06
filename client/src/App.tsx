@@ -43,16 +43,16 @@ function Router() {
 export default function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="dark">
+      <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster
-            theme="dark"
+            theme="light"
             toastOptions={{
               style: {
-                background: "oklch(0.17 0.012 265)",
-                border: "1px solid oklch(0.28 0.01 265)",
-                color: "oklch(0.91 0.005 265)",
-                fontFamily: "'IBM Plex Sans', sans-serif",
+                background: "oklch(1 0 0)",
+                border: "1px solid oklch(0.90 0.013 78)",
+                color: "oklch(0.21 0 0)",
+                fontFamily: "'Inter', system-ui, sans-serif",
               },
             }}
           />

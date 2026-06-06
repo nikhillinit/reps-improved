@@ -102,7 +102,7 @@ export default function SettingsPage() {
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 22,
             fontWeight: 700,
-            color: "oklch(0.91 0.005 265)",
+            color: "oklch(0.21 0 0)",
             marginBottom: 4,
           }}
         >
@@ -110,9 +110,9 @@ export default function SettingsPage() {
         </h1>
         <p
           style={{
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 14,
-            color: "oklch(0.55 0.01 265)",
+            color: "oklch(0.28 0 0)",
           }}
         >
           Preferences, data management, and debug tools.
@@ -122,8 +122,8 @@ export default function SettingsPage() {
       {/* Stats */}
       <div
         style={{
-          background: "oklch(0.17 0.012 265)",
-          border: "1px solid oklch(0.28 0.01 265)",
+          background: "oklch(1 0 0)",
+          border: "1px solid oklch(0.90 0.013 78)",
           borderRadius: 4,
           padding: 16,
           marginBottom: 20,
@@ -163,8 +163,8 @@ export default function SettingsPage() {
       {/* Preferences */}
       <div
         style={{
-          background: "oklch(0.17 0.012 265)",
-          border: "1px solid oklch(0.28 0.01 265)",
+          background: "oklch(1 0 0)",
+          border: "1px solid oklch(0.90 0.013 78)",
           borderRadius: 4,
           padding: 16,
           marginBottom: 20,
@@ -196,19 +196,19 @@ export default function SettingsPage() {
             <div>
               <div
                 style={{
-                  fontFamily: "'IBM Plex Sans', sans-serif",
+                  fontFamily: "'Inter', system-ui, sans-serif",
                   fontSize: 13,
                   fontWeight: 600,
-                  color: "oklch(0.85 0.005 265)",
+                  color: "oklch(0.21 0 0)",
                 }}
               >
                 Default Timer (seconds)
               </div>
               <div
                 style={{
-                  fontFamily: "'IBM Plex Sans', sans-serif",
+                  fontFamily: "'Inter', system-ui, sans-serif",
                   fontSize: 12,
-                  color: "oklch(0.45 0.01 265)",
+                  color: "oklch(0.51 0 0)",
                 }}
               >
                 Time allowed per question
@@ -223,14 +223,14 @@ export default function SettingsPage() {
                     padding: "5px 10px",
                     background:
                       store.settings.timerDefault === v
-                        ? "oklch(0.78 0.17 65)"
+                        ? "oklch(0.21 0 0)"
                         : "transparent",
-                    border: `1px solid ${store.settings.timerDefault === v ? "oklch(0.78 0.17 65)" : "oklch(0.28 0.01 265)"}`,
+                    border: `1px solid ${store.settings.timerDefault === v ? "oklch(0.21 0 0)" : "oklch(0.90 0.013 78)"}`,
                     borderRadius: 3,
                     color:
                       store.settings.timerDefault === v
-                        ? "oklch(0.13 0.01 265)"
-                        : "oklch(0.55 0.01 265)",
+                        ? "oklch(1 0 0)"
+                        : "oklch(0.28 0 0)",
                     fontFamily: "'JetBrains Mono', monospace",
                     fontSize: 12,
                     cursor: "pointer",
@@ -247,8 +247,8 @@ export default function SettingsPage() {
       {/* Data Management */}
       <div
         style={{
-          background: "oklch(0.17 0.012 265)",
-          border: "1px solid oklch(0.28 0.01 265)",
+          background: "oklch(1 0 0)",
+          border: "1px solid oklch(0.90 0.013 78)",
           borderRadius: 4,
           padding: 16,
           marginBottom: 20,
@@ -285,8 +285,8 @@ export default function SettingsPage() {
       {/* About */}
       <div
         style={{
-          background: "oklch(0.17 0.012 265)",
-          border: "1px solid oklch(0.28 0.01 265)",
+          background: "oklch(1 0 0)",
+          border: "1px solid oklch(0.90 0.013 78)",
           borderRadius: 4,
           padding: 16,
         }}
@@ -298,13 +298,13 @@ export default function SettingsPage() {
           style={{
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 12,
-            color: "oklch(0.40 0.01 265)",
+            color: "oklch(0.51 0 0)",
             lineHeight: 1.8,
           }}
         >
           <div>REPS v3.0 — OPNS-430 Exam Drill (Improved)</div>
           <div>6 archetypes · SRS scheduling · localStorage persistence</div>
-          <div style={{ marginTop: 8, color: "oklch(0.30 0.01 265)" }}>
+          <div style={{ marginTop: 8, color: "oklch(0.69 0 0)" }}>
             Improved from exam-drill.replit.app
           </div>
         </div>
@@ -335,19 +335,19 @@ function ToggleRow({
       <div>
         <div
           style={{
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 13,
             fontWeight: 600,
-            color: "oklch(0.85 0.005 265)",
+            color: "oklch(0.21 0 0)",
           }}
         >
           {label}
         </div>
         <div
           style={{
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 12,
-            color: "oklch(0.45 0.01 265)",
+            color: "oklch(0.51 0 0)",
           }}
         >
           {description}
@@ -358,7 +358,7 @@ function ToggleRow({
         style={{
           width: 40,
           height: 22,
-          background: value ? "oklch(0.78 0.17 65)" : "oklch(0.28 0.01 265)",
+          background: value ? "oklch(0.21 0 0)" : "oklch(0.90 0.013 78)",
           border: "none",
           borderRadius: 11,
           cursor: "pointer",
@@ -371,7 +371,7 @@ function ToggleRow({
           style={{
             width: 16,
             height: 16,
-            background: "oklch(0.91 0.005 265)",
+            background: "oklch(1 0 0)",
             borderRadius: "50%",
             position: "absolute",
             top: 3,
@@ -395,11 +395,11 @@ function ActionButton({
   onClick: () => void;
   danger?: boolean;
 }) {
-  const color = danger ? "oklch(0.62 0.22 25)" : "oklch(0.55 0.01 265)";
+  const color = danger ? "oklch(0.38 0.20 22)" : "oklch(0.28 0 0)";
   const hoverBorder = danger
-    ? "oklch(0.62 0.22 25 / 0.5)"
-    : "oklch(0.78 0.17 65 / 0.5)";
-  const hoverColor = danger ? "oklch(0.62 0.22 25)" : "oklch(0.78 0.17 65)";
+    ? "oklch(0.38 0.20 22 / 0.28)"
+    : "oklch(0.21 0 0 / 0.28)";
+  const hoverColor = danger ? "oklch(0.38 0.20 22)" : "oklch(0.21 0 0)";
   return (
     <button
       onClick={onClick}
@@ -409,10 +409,10 @@ function ActionButton({
         gap: 6,
         padding: "8px 14px",
         background: "transparent",
-        border: `1px solid ${danger ? "oklch(0.62 0.22 25 / 0.3)" : "oklch(0.28 0.01 265)"}`,
+        border: `1px solid ${danger ? "oklch(0.38 0.20 22 / 0.15)" : "oklch(0.90 0.013 78)"}`,
         borderRadius: 4,
         color,
-        fontFamily: "'IBM Plex Sans', sans-serif",
+        fontFamily: "'Inter', system-ui, sans-serif",
         fontSize: 13,
         cursor: "pointer",
         transition: "all 150ms",
@@ -423,8 +423,8 @@ function ActionButton({
       }}
       onMouseLeave={e => {
         e.currentTarget.style.borderColor = danger
-          ? "oklch(0.62 0.22 25 / 0.3)"
-          : "oklch(0.28 0.01 265)";
+          ? "oklch(0.38 0.20 22 / 0.15)"
+          : "oklch(0.90 0.013 78)";
         e.currentTarget.style.color = color;
       }}
     >
