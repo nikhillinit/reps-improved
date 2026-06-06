@@ -36,6 +36,41 @@ export default function Dashboard() {
   ).length;
   const openErrors = getOpenErrors(store.practiceAttempts, store.cards);
 
+  // Keyboard shortcuts for Quick Actions
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore when focus is inside an input, textarea, or select
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      // Ignore modifier combos (Ctrl+R would be browser refresh, etc.)
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+      switch (e.key.toLowerCase()) {
+        case "r":
+          e.preventDefault();
+          navigate("/router");
+          break;
+        case "p":
+          e.preventDefault();
+          navigate("/practice");
+          break;
+        case "e":
+          if (openErrors > 0) {
+            e.preventDefault();
+            navigate("/review");
+          }
+          break;
+        case "m":
+          e.preventDefault();
+          navigate("/mock");
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [navigate, openErrors]);
+
   const now = new Date();
   const dateStr = now.toLocaleDateString("en-US", {
     month: "short",
@@ -75,7 +110,7 @@ export default function Dashboard() {
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 28,
               fontWeight: 700,
-              color: "oklch(0.78 0.17 65)",
+              color: "oklch(0.21 0 0)",
               letterSpacing: "-0.02em",
               lineHeight: 1,
             }}
@@ -86,7 +121,7 @@ export default function Dashboard() {
             style={{
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 12,
-              color: "oklch(0.40 0.01 265)",
+              color: "oklch(0.51 0 0)",
               marginTop: 4,
             }}
           >
@@ -103,21 +138,21 @@ export default function Dashboard() {
               alignItems: "center",
               gap: 10,
               padding: "10px 20px",
-              background: "oklch(0.78 0.17 65)",
-              color: "oklch(0.13 0.01 265)",
+              background: "oklch(0.21 0 0)",
+              color: "oklch(1 0 0)",
               border: "none",
               borderRadius: 4,
-              fontFamily: "'IBM Plex Sans', sans-serif",
+              fontFamily: "'Inter', system-ui, sans-serif",
               fontSize: 14,
               fontWeight: 600,
               cursor: "pointer",
               transition: "background 150ms ease-out, transform 80ms ease-out",
             }}
             onMouseEnter={e =>
-              (e.currentTarget.style.background = "oklch(0.65 0.14 65)")
+              (e.currentTarget.style.background = "oklch(0.14 0 0)")
             }
             onMouseLeave={e =>
-              (e.currentTarget.style.background = "oklch(0.78 0.17 65)")
+              (e.currentTarget.style.background = "oklch(0.21 0 0)")
             }
             onMouseDown={e => (e.currentTarget.style.transform = "scale(0.97)")}
             onMouseUp={e => (e.currentTarget.style.transform = "scale(1)")}
@@ -205,7 +240,7 @@ export default function Dashboard() {
                 style={{
                   fontFamily: "'JetBrains Mono', monospace",
                   fontSize: 10,
-                  color: "oklch(0.40 0.01 265)",
+                  color: "oklch(0.51 0 0)",
                 }}
               >
                 WEAKEST:
@@ -217,10 +252,10 @@ export default function Dashboard() {
                     fontFamily: "'JetBrains Mono', monospace",
                     fontSize: 10,
                     padding: "2px 6px",
-                    border: "1px solid oklch(0.62 0.22 25 / 0.5)",
+                    border: "1px solid oklch(0.38 0.20 22 / 0.28)",
                     borderRadius: 3,
-                    color: "oklch(0.62 0.22 25)",
-                    background: "oklch(0.62 0.22 25 / 0.08)",
+                    color: "oklch(0.38 0.20 22)",
+                    background: "oklch(0.38 0.20 22 / 0.08)",
                   }}
                 >
                   {s.arch.shortName}
@@ -267,10 +302,10 @@ function StatCard({
   danger?: boolean;
 }) {
   const valueColor = danger
-    ? "oklch(0.62 0.22 25)"
+    ? "oklch(0.38 0.20 22)"
     : accent
-      ? "oklch(0.78 0.17 65)"
-      : "oklch(0.91 0.005 265)";
+      ? "oklch(0.21 0 0)"
+      : "oklch(0.21 0 0)";
 
   return (
     <div className="stat-card">
@@ -281,9 +316,9 @@ function StatCard({
       {sub && (
         <div
           style={{
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 12,
-            color: "oklch(0.40 0.01 265)",
+            color: "oklch(0.51 0 0)",
             marginTop: 4,
           }}
         >
@@ -316,11 +351,11 @@ function QuickAction({
         alignItems: "center",
         gap: 8,
         padding: "8px 14px",
-        background: "oklch(0.17 0.012 265)",
-        border: "1px solid oklch(0.28 0.01 265)",
+        background: "oklch(1 0 0)",
+        border: "1px solid oklch(0.90 0.013 78)",
         borderRadius: 4,
-        color: disabled ? "oklch(0.35 0.01 265)" : "oklch(0.78 0.17 65)",
-        fontFamily: "'IBM Plex Sans', sans-serif",
+        color: disabled ? "oklch(0.69 0 0)" : "oklch(0.21 0 0)",
+        fontFamily: "'Inter', system-ui, sans-serif",
         fontSize: 13,
         fontWeight: 500,
         cursor: disabled ? "not-allowed" : "pointer",
@@ -329,13 +364,13 @@ function QuickAction({
       }}
       onMouseEnter={e => {
         if (!disabled) {
-          e.currentTarget.style.borderColor = "oklch(0.78 0.17 65 / 0.5)";
-          e.currentTarget.style.background = "oklch(0.78 0.17 65 / 0.06)";
+          e.currentTarget.style.borderColor = "oklch(0.21 0 0 / 0.28)";
+          e.currentTarget.style.background = "oklch(0.21 0 0 / 0.06)";
         }
       }}
       onMouseLeave={e => {
-        e.currentTarget.style.borderColor = "oklch(0.28 0.01 265)";
-        e.currentTarget.style.background = "oklch(0.17 0.012 265)";
+        e.currentTarget.style.borderColor = "oklch(0.90 0.013 78)";
+        e.currentTarget.style.background = "oklch(1 0 0)";
       }}
     >
       {icon}
@@ -360,19 +395,19 @@ function ArchetypeCard({
 }) {
   const accuracyColor =
     attempts === 0
-      ? "oklch(0.40 0.01 265)"
+      ? "oklch(0.51 0 0)"
       : accuracy >= 80
-        ? "oklch(0.72 0.14 185)"
+        ? "oklch(0.44 0.15 150)"
         : accuracy >= 60
-          ? "oklch(0.78 0.17 65)"
-          : "oklch(0.62 0.22 25)";
+          ? "oklch(0.48 0.16 68)"
+          : "oklch(0.38 0.20 22)";
 
   return (
     <div
       className="card-interactive"
       style={{
-        background: "oklch(0.17 0.012 265)",
-        border: "1px solid oklch(0.28 0.01 265)",
+        background: "oklch(1 0 0)",
+        border: "1px solid oklch(0.90 0.013 78)",
         borderRadius: 4,
         padding: "16px",
       }}
@@ -387,10 +422,10 @@ function ArchetypeCard({
       >
         <div
           style={{
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 13,
             fontWeight: 600,
-            color: "oklch(0.91 0.005 265)",
+            color: "oklch(0.21 0 0)",
           }}
         >
           {name}
@@ -401,10 +436,10 @@ function ArchetypeCard({
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 9,
               padding: "2px 5px",
-              border: "1px solid oklch(0.72 0.14 185 / 0.4)",
+              border: "1px solid oklch(0.44 0.15 150 / 0.22)",
               borderRadius: 2,
-              color: "oklch(0.72 0.14 185)",
-              background: "oklch(0.72 0.14 185 / 0.08)",
+              color: "oklch(0.44 0.15 150)",
+              background: "oklch(0.44 0.15 150 / 0.10)",
               letterSpacing: "0.06em",
             }}
           >
@@ -431,7 +466,7 @@ function ArchetypeCard({
           style={{
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 10,
-            color: "oklch(0.40 0.01 265)",
+            color: "oklch(0.51 0 0)",
           }}
         >
           {attempts === 0 ? "no attempts" : "accuracy"}
@@ -446,10 +481,10 @@ function ArchetypeCard({
           gap: 6,
           padding: "5px 10px",
           background: "transparent",
-          border: "1px solid oklch(0.28 0.01 265)",
+          border: "1px solid oklch(0.90 0.013 78)",
           borderRadius: 3,
-          color: "oklch(0.55 0.01 265)",
-          fontFamily: "'IBM Plex Sans', sans-serif",
+          color: "oklch(0.28 0 0)",
+          fontFamily: "'Inter', system-ui, sans-serif",
           fontSize: 11,
           fontWeight: 500,
           cursor: "pointer",
@@ -457,12 +492,12 @@ function ArchetypeCard({
           marginTop: 8,
         }}
         onMouseEnter={e => {
-          e.currentTarget.style.color = "oklch(0.78 0.17 65)";
-          e.currentTarget.style.borderColor = "oklch(0.78 0.17 65 / 0.4)";
+          e.currentTarget.style.color = "oklch(0.21 0 0)";
+          e.currentTarget.style.borderColor = "oklch(0.21 0 0 / 0.22)";
         }}
         onMouseLeave={e => {
-          e.currentTarget.style.color = "oklch(0.55 0.01 265)";
-          e.currentTarget.style.borderColor = "oklch(0.28 0.01 265)";
+          e.currentTarget.style.color = "oklch(0.28 0 0)";
+          e.currentTarget.style.borderColor = "oklch(0.90 0.013 78)";
         }}
       >
         <BookOpen size={11} />

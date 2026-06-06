@@ -58,7 +58,7 @@ export default function LearnSheet() {
     return (
       <div
         style={{
-          color: "oklch(0.62 0.22 25)",
+          color: "oklch(0.38 0.20 22)",
           fontFamily: "'JetBrains Mono', monospace",
         }}
       >
@@ -66,7 +66,7 @@ export default function LearnSheet() {
         <button
           onClick={() => navigate("/learn")}
           style={{
-            color: "oklch(0.78 0.17 65)",
+            color: "oklch(0.21 0 0)",
             background: "none",
             border: "none",
             cursor: "pointer",
@@ -98,29 +98,29 @@ export default function LearnSheet() {
             gap: 4,
             background: "none",
             border: "none",
-            color: "oklch(0.40 0.01 265)",
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            color: "oklch(0.51 0 0)",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 13,
             cursor: "pointer",
             padding: "4px 0",
           }}
           onMouseEnter={e =>
-            (e.currentTarget.style.color = "oklch(0.78 0.17 65)")
+            (e.currentTarget.style.color = "oklch(0.21 0 0)")
           }
           onMouseLeave={e =>
-            (e.currentTarget.style.color = "oklch(0.40 0.01 265)")
+            (e.currentTarget.style.color = "oklch(0.51 0 0)")
           }
         >
           <ChevronLeft size={14} />
           Learn
         </button>
-        <span style={{ color: "oklch(0.28 0.01 265)" }}>/</span>
+        <span style={{ color: "oklch(0.69 0 0)" }}>/</span>
         <h1
           style={{
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 18,
             fontWeight: 700,
-            color: "oklch(0.91 0.005 265)",
+            color: "oklch(0.21 0 0)",
           }}
         >
           {arch.shortName}
@@ -131,10 +131,10 @@ export default function LearnSheet() {
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 9,
               padding: "2px 6px",
-              border: "1px solid oklch(0.72 0.14 185 / 0.4)",
+              border: "1px solid oklch(0.44 0.15 150 / 0.22)",
               borderRadius: 2,
-              color: "oklch(0.72 0.14 185)",
-              background: "oklch(0.72 0.14 185 / 0.08)",
+              color: "oklch(0.44 0.15 150)",
+              background: "oklch(0.44 0.15 150 / 0.10)",
               letterSpacing: "0.06em",
             }}
           >
@@ -161,7 +161,7 @@ export default function LearnSheet() {
             style={{
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 11,
-              color: "oklch(0.78 0.17 65)",
+              color: "oklch(0.21 0 0)",
               fontWeight: 600,
             }}
           >
@@ -171,7 +171,7 @@ export default function LearnSheet() {
             style={{
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 11,
-              color: "oklch(0.40 0.01 265)",
+              color: "oklch(0.51 0 0)",
             }}
           >
             {currentStep + 1} / {STEPS.length}
@@ -211,7 +211,7 @@ export default function LearnSheet() {
           alignItems: "center",
           marginTop: 32,
           paddingTop: 20,
-          borderTop: "1px solid oklch(0.22 0.01 265)",
+          borderTop: "1px solid oklch(0.90 0.013 78)",
         }}
       >
         <button
@@ -223,13 +223,13 @@ export default function LearnSheet() {
             gap: 6,
             padding: "8px 16px",
             background: "transparent",
-            border: "1px solid oklch(0.28 0.01 265)",
+            border: "1px solid oklch(0.90 0.013 78)",
             borderRadius: 4,
             color:
               currentStep === 0
-                ? "oklch(0.30 0.01 265)"
-                : "oklch(0.55 0.01 265)",
-            fontFamily: "'IBM Plex Sans', sans-serif",
+                ? "oklch(0.69 0 0)"
+                : "oklch(0.28 0 0)",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 13,
             cursor: currentStep === 0 ? "not-allowed" : "pointer",
           }}
@@ -243,7 +243,7 @@ export default function LearnSheet() {
             style={{
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 10,
-              color: "oklch(0.30 0.01 265)",
+              color: "oklch(0.69 0 0)",
             }}
           >
             navigate
@@ -255,7 +255,7 @@ export default function LearnSheet() {
             style={{
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 10,
-              color: "oklch(0.30 0.01 265)",
+              color: "oklch(0.69 0 0)",
             }}
           >
             reveal
@@ -269,20 +269,20 @@ export default function LearnSheet() {
               alignItems: "center",
               gap: 6,
               padding: "8px 16px",
-              background: "oklch(0.78 0.17 65)",
+              background: "oklch(0.21 0 0)",
               border: "none",
               borderRadius: 4,
-              color: "oklch(0.13 0.01 265)",
-              fontFamily: "'IBM Plex Sans', sans-serif",
+              color: "oklch(1 0 0)",
+              fontFamily: "'Inter', system-ui, sans-serif",
               fontSize: 13,
               fontWeight: 600,
               cursor: "pointer",
             }}
             onMouseEnter={e =>
-              (e.currentTarget.style.background = "oklch(0.65 0.14 65)")
+              (e.currentTarget.style.background = "oklch(0.14 0 0)")
             }
             onMouseLeave={e =>
-              (e.currentTarget.style.background = "oklch(0.78 0.17 65)")
+              (e.currentTarget.style.background = "oklch(0.21 0 0)")
             }
           >
             Next Step
@@ -296,11 +296,11 @@ export default function LearnSheet() {
               alignItems: "center",
               gap: 6,
               padding: "8px 16px",
-              background: "oklch(0.72 0.14 185)",
+              background: "oklch(0.44 0.15 150)",
               border: "none",
               borderRadius: 4,
-              color: "oklch(0.13 0.01 265)",
-              fontFamily: "'IBM Plex Sans', sans-serif",
+              color: "oklch(1 0 0)",
+              fontFamily: "'Inter', system-ui, sans-serif",
               fontSize: 13,
               fontWeight: 600,
               cursor: "pointer",
@@ -318,8 +318,8 @@ function RecognizeStep({ arch }: { arch: Archetype }) {
   return (
     <div
       style={{
-        background: "oklch(0.17 0.012 265)",
-        border: "1px solid oklch(0.28 0.01 265)",
+        background: "oklch(1 0 0)",
+        border: "1px solid oklch(0.90 0.013 78)",
         borderRadius: 4,
         padding: 24,
       }}
@@ -356,11 +356,11 @@ function RecognizeStep({ arch }: { arch: Archetype }) {
           style={{
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 13,
-            color: "oklch(0.70 0.01 265)",
-            background: "oklch(0.13 0.01 265)",
+            color: "oklch(0.28 0 0)",
+            background: "oklch(0.97 0.003 87)",
             padding: "10px 14px",
             borderRadius: 3,
-            border: "1px solid oklch(0.22 0.01 265)",
+            border: "1px solid oklch(0.90 0.013 78)",
           }}
         >
           {arch.derivedCondition as string}
@@ -374,8 +374,8 @@ function FormulaStep({ arch }: { arch: Archetype }) {
   return (
     <div
       style={{
-        background: "oklch(0.17 0.012 265)",
-        border: "1px solid oklch(0.28 0.01 265)",
+        background: "oklch(1 0 0)",
+        border: "1px solid oklch(0.90 0.013 78)",
         borderRadius: 4,
         padding: 24,
       }}
@@ -402,7 +402,7 @@ function FormulaStep({ arch }: { arch: Archetype }) {
                     fontFamily: "'JetBrains Mono', monospace",
                     fontSize: 13,
                     fontWeight: 600,
-                    color: "oklch(0.78 0.17 65)",
+                    color: "oklch(0.21 0 0)",
                     minWidth: 60,
                     flexShrink: 0,
                   }}
@@ -411,9 +411,9 @@ function FormulaStep({ arch }: { arch: Archetype }) {
                 </span>
                 <span
                   style={{
-                    fontFamily: "'IBM Plex Sans', sans-serif",
+                    fontFamily: "'Inter', system-ui, sans-serif",
                     fontSize: 13,
-                    color: "oklch(0.65 0.01 265)",
+                    color: "oklch(0.28 0 0)",
                   }}
                 >
                   {desc}
@@ -445,8 +445,8 @@ function WorkedExampleStep({
     <div>
       <div
         style={{
-          background: "oklch(0.17 0.012 265)",
-          border: "1px solid oklch(0.28 0.01 265)",
+          background: "oklch(1 0 0)",
+          border: "1px solid oklch(0.90 0.013 78)",
           borderRadius: 4,
           padding: 24,
           marginBottom: 12,
@@ -457,9 +457,9 @@ function WorkedExampleStep({
         </div>
         <p
           style={{
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 15,
-            color: "oklch(0.85 0.005 265)",
+            color: "oklch(0.21 0 0)",
             lineHeight: 1.7,
           }}
         >
@@ -475,20 +475,20 @@ function WorkedExampleStep({
             gap: 8,
             padding: "10px 18px",
             background: "transparent",
-            border: "1px solid oklch(0.35 0.01 265)",
+            border: "1px solid oklch(0.90 0.013 78)",
             borderRadius: 4,
-            color: "oklch(0.55 0.01 265)",
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            color: "oklch(0.28 0 0)",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 13,
             cursor: "pointer",
           }}
           onMouseEnter={e => {
-            e.currentTarget.style.borderColor = "oklch(0.78 0.17 65 / 0.5)";
-            e.currentTarget.style.color = "oklch(0.78 0.17 65)";
+            e.currentTarget.style.borderColor = "oklch(0.21 0 0 / 0.28)";
+            e.currentTarget.style.color = "oklch(0.21 0 0)";
           }}
           onMouseLeave={e => {
-            e.currentTarget.style.borderColor = "oklch(0.35 0.01 265)";
-            e.currentTarget.style.color = "oklch(0.55 0.01 265)";
+            e.currentTarget.style.borderColor = "oklch(0.90 0.013 78)";
+            e.currentTarget.style.color = "oklch(0.28 0 0)";
           }}
         >
           <Eye size={14} />
@@ -500,16 +500,16 @@ function WorkedExampleStep({
       ) : (
         <div
           style={{
-            background: "oklch(0.17 0.012 265)",
-            border: "1px solid oklch(0.72 0.14 185 / 0.3)",
-            borderLeft: "3px solid oklch(0.72 0.14 185)",
+            background: "oklch(1 0 0)",
+            border: "1px solid oklch(0.44 0.15 150 / 0.15)",
+            borderLeft: "3px solid oklch(0.44 0.15 150)",
             borderRadius: "0 4px 4px 0",
             padding: 20,
           }}
         >
           <div
             className="section-label"
-            style={{ marginBottom: 10, color: "oklch(0.72 0.14 185)" }}
+            style={{ marginBottom: 10, color: "oklch(0.44 0.15 150)" }}
           >
             SOLUTION
           </div>
@@ -517,7 +517,7 @@ function WorkedExampleStep({
             className="formula-display"
             style={{
               marginBottom: 16,
-              borderLeftColor: "oklch(0.72 0.14 185)",
+              borderLeftColor: "oklch(0.44 0.15 150)",
             }}
           >
             {ex.solution}
@@ -530,9 +530,9 @@ function WorkedExampleStep({
               <li
                 key={i}
                 style={{
-                  fontFamily: "'IBM Plex Sans', sans-serif",
+                  fontFamily: "'Inter', system-ui, sans-serif",
                   fontSize: 13,
-                  color: "oklch(0.70 0.01 265)",
+                  color: "oklch(0.28 0 0)",
                   marginBottom: 6,
                   lineHeight: 1.6,
                 }}
@@ -570,7 +570,7 @@ function ColdSolveStep({
   const stem = stems[0];
   if (!stem)
     return (
-      <div style={{ color: "oklch(0.40 0.01 265)" }}>
+      <div style={{ color: "oklch(0.51 0 0)" }}>
         No practice stem available.
       </div>
     );
@@ -578,8 +578,8 @@ function ColdSolveStep({
     <div>
       <div
         style={{
-          background: "oklch(0.17 0.012 265)",
-          border: "1px solid oklch(0.28 0.01 265)",
+          background: "oklch(1 0 0)",
+          border: "1px solid oklch(0.90 0.013 78)",
           borderRadius: 4,
           padding: 24,
           marginBottom: 12,
@@ -590,9 +590,9 @@ function ColdSolveStep({
         </div>
         <p
           style={{
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 15,
-            color: "oklch(0.85 0.005 265)",
+            color: "oklch(0.21 0 0)",
             lineHeight: 1.7,
             marginBottom: 16,
           }}
@@ -606,10 +606,10 @@ function ColdSolveStep({
           style={{
             width: "100%",
             minHeight: 80,
-            background: "oklch(0.13 0.01 265)",
-            border: "1px solid oklch(0.28 0.01 265)",
+            background: "oklch(0.97 0.003 87)",
+            border: "1px solid oklch(0.90 0.013 78)",
             borderRadius: 3,
-            color: "oklch(0.85 0.005 265)",
+            color: "oklch(0.21 0 0)",
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 13,
             padding: "10px 12px",
@@ -618,9 +618,9 @@ function ColdSolveStep({
             boxSizing: "border-box",
           }}
           onFocus={e =>
-            (e.target.style.borderColor = "oklch(0.78 0.17 65 / 0.5)")
+            (e.target.style.borderColor = "oklch(0.21 0 0 / 0.28)")
           }
-          onBlur={e => (e.target.style.borderColor = "oklch(0.28 0.01 265)")}
+          onBlur={e => (e.target.style.borderColor = "oklch(0.90 0.013 78)")}
         />
       </div>
       {!revealed ? (
@@ -632,20 +632,20 @@ function ColdSolveStep({
             gap: 8,
             padding: "10px 18px",
             background: "transparent",
-            border: "1px solid oklch(0.35 0.01 265)",
+            border: "1px solid oklch(0.90 0.013 78)",
             borderRadius: 4,
-            color: "oklch(0.55 0.01 265)",
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            color: "oklch(0.28 0 0)",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 13,
             cursor: "pointer",
           }}
           onMouseEnter={e => {
-            e.currentTarget.style.borderColor = "oklch(0.78 0.17 65 / 0.5)";
-            e.currentTarget.style.color = "oklch(0.78 0.17 65)";
+            e.currentTarget.style.borderColor = "oklch(0.21 0 0 / 0.28)";
+            e.currentTarget.style.color = "oklch(0.21 0 0)";
           }}
           onMouseLeave={e => {
-            e.currentTarget.style.borderColor = "oklch(0.35 0.01 265)";
-            e.currentTarget.style.color = "oklch(0.55 0.01 265)";
+            e.currentTarget.style.borderColor = "oklch(0.90 0.013 78)";
+            e.currentTarget.style.color = "oklch(0.28 0 0)";
           }}
         >
           <Eye size={14} />
@@ -657,16 +657,16 @@ function ColdSolveStep({
       ) : (
         <div
           style={{
-            background: "oklch(0.17 0.012 265)",
-            border: "1px solid oklch(0.72 0.14 185 / 0.3)",
-            borderLeft: "3px solid oklch(0.72 0.14 185)",
+            background: "oklch(1 0 0)",
+            border: "1px solid oklch(0.44 0.15 150 / 0.15)",
+            borderLeft: "3px solid oklch(0.44 0.15 150)",
             borderRadius: "0 4px 4px 0",
             padding: 20,
           }}
         >
           <div
             className="section-label"
-            style={{ marginBottom: 8, color: "oklch(0.72 0.14 185)" }}
+            style={{ marginBottom: 8, color: "oklch(0.44 0.15 150)" }}
           >
             ANSWER
           </div>
@@ -674,16 +674,16 @@ function ColdSolveStep({
             className="formula-display"
             style={{
               marginBottom: 12,
-              borderLeftColor: "oklch(0.72 0.14 185)",
+              borderLeftColor: "oklch(0.44 0.15 150)",
             }}
           >
             {stem.answer}
           </div>
           <p
             style={{
-              fontFamily: "'IBM Plex Sans', sans-serif",
+              fontFamily: "'Inter', system-ui, sans-serif",
               fontSize: 13,
-              color: "oklch(0.60 0.01 265)",
+              color: "oklch(0.28 0 0)",
             }}
           >
             {stem.explanation}
@@ -713,9 +713,9 @@ function TrapBoxStep({ arch }: { arch: Archetype }) {
   return (
     <div
       style={{
-        background: "oklch(0.17 0.012 265)",
-        border: "1px solid oklch(0.62 0.22 25 / 0.3)",
-        borderLeft: "3px solid oklch(0.62 0.22 25)",
+        background: "oklch(1 0 0)",
+        border: "1px solid oklch(0.38 0.20 22 / 0.15)",
+        borderLeft: "3px solid oklch(0.38 0.20 22)",
         borderRadius: "0 4px 4px 0",
         padding: 24,
       }}
@@ -728,8 +728,8 @@ function TrapBoxStep({ arch }: { arch: Archetype }) {
           marginBottom: 16,
         }}
       >
-        <AlertTriangle size={16} style={{ color: "oklch(0.62 0.22 25)" }} />
-        <div className="section-label" style={{ color: "oklch(0.62 0.22 25)" }}>
+        <AlertTriangle size={16} style={{ color: "oklch(0.38 0.20 22)" }} />
+        <div className="section-label" style={{ color: "oklch(0.38 0.20 22)" }}>
           TRAP BOX — COMMON MISTAKES
         </div>
       </div>
@@ -742,8 +742,8 @@ function TrapBoxStep({ arch }: { arch: Archetype }) {
               gap: 12,
               alignItems: "flex-start",
               padding: "10px 14px",
-              background: "oklch(0.62 0.22 25 / 0.05)",
-              border: "1px solid oklch(0.62 0.22 25 / 0.15)",
+              background: "oklch(0.38 0.20 22 / 0.06)",
+              border: "1px solid oklch(0.38 0.20 22 / 0.10)",
               borderRadius: 3,
             }}
           >
@@ -751,7 +751,7 @@ function TrapBoxStep({ arch }: { arch: Archetype }) {
               style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: 11,
-                color: "oklch(0.62 0.22 25)",
+                color: "oklch(0.38 0.20 22)",
                 flexShrink: 0,
                 marginTop: 1,
               }}
@@ -760,9 +760,9 @@ function TrapBoxStep({ arch }: { arch: Archetype }) {
             </span>
             <span
               style={{
-                fontFamily: "'IBM Plex Sans', sans-serif",
+                fontFamily: "'Inter', system-ui, sans-serif",
                 fontSize: 13,
-                color: "oklch(0.75 0.01 265)",
+                color: "oklch(0.28 0 0)",
                 lineHeight: 1.6,
               }}
             >
@@ -786,8 +786,8 @@ function SanityChecksStep({ arch }: { arch: Archetype }) {
   return (
     <div
       style={{
-        background: "oklch(0.17 0.012 265)",
-        border: "1px solid oklch(0.28 0.01 265)",
+        background: "oklch(1 0 0)",
+        border: "1px solid oklch(0.90 0.013 78)",
         borderRadius: 4,
         padding: 24,
       }}
@@ -804,16 +804,16 @@ function SanityChecksStep({ arch }: { arch: Archetype }) {
               gap: 10,
               alignItems: "flex-start",
               padding: "8px 12px",
-              background: "oklch(0.13 0.01 265)",
+              background: "oklch(0.97 0.003 87)",
               borderRadius: 3,
-              border: "1px solid oklch(0.22 0.01 265)",
+              border: "1px solid oklch(0.90 0.013 78)",
             }}
           >
             <span
               style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: 10,
-                color: "oklch(0.78 0.17 65)",
+                color: "oklch(0.21 0 0)",
                 flexShrink: 0,
                 marginTop: 2,
               }}
@@ -822,9 +822,9 @@ function SanityChecksStep({ arch }: { arch: Archetype }) {
             </span>
             <span
               style={{
-                fontFamily: "'IBM Plex Sans', sans-serif",
+                fontFamily: "'Inter', system-ui, sans-serif",
                 fontSize: 13,
-                color: "oklch(0.65 0.01 265)",
+                color: "oklch(0.28 0 0)",
                 lineHeight: 1.6,
               }}
             >

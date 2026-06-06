@@ -33,7 +33,7 @@ export default function ReviewMode() {
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 22,
             fontWeight: 700,
-            color: "oklch(0.91 0.005 265)",
+            color: "oklch(0.21 0 0)",
             marginBottom: 4,
           }}
         >
@@ -41,9 +41,9 @@ export default function ReviewMode() {
         </h1>
         <p
           style={{
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 14,
-            color: "oklch(0.55 0.01 265)",
+            color: "oklch(0.28 0 0)",
           }}
         >
           Analyze your errors, identify trap patterns, and work through the
@@ -57,10 +57,10 @@ export default function ReviewMode() {
           display: "flex",
           gap: 2,
           marginBottom: 24,
-          background: "oklch(0.17 0.012 265)",
+          background: "oklch(0.97 0.003 87)",
           padding: 4,
           borderRadius: 4,
-          border: "1px solid oklch(0.28 0.01 265)",
+          border: "1px solid oklch(0.90 0.013 78)",
           width: "fit-content",
         }}
       >
@@ -79,12 +79,12 @@ export default function ReviewMode() {
               alignItems: "center",
               gap: 6,
               padding: "6px 14px",
-              background: tab === t ? "oklch(0.78 0.17 65)" : "transparent",
+              background: tab === t ? "oklch(0.21 0 0)" : "transparent",
               border: "none",
               borderRadius: 3,
               color:
-                tab === t ? "oklch(0.13 0.01 265)" : "oklch(0.50 0.01 265)",
-              fontFamily: "'IBM Plex Sans', sans-serif",
+                tab === t ? "oklch(1 0 0)" : "oklch(0.51 0 0)",
+              fontFamily: "'Inter', system-ui, sans-serif",
               fontSize: 13,
               fontWeight: tab === t ? 600 : 400,
               cursor: "pointer",
@@ -124,8 +124,8 @@ function ErrorLog({ store }: { store: ReturnType<typeof loadStore> }) {
     return (
       <div
         style={{
-          background: "oklch(0.17 0.012 265)",
-          border: "1px solid oklch(0.28 0.01 265)",
+          background: "oklch(1 0 0)",
+          border: "1px solid oklch(0.90 0.013 78)",
           borderRadius: 4,
           padding: 32,
           textAlign: "center",
@@ -135,7 +135,7 @@ function ErrorLog({ store }: { store: ReturnType<typeof loadStore> }) {
           style={{
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 13,
-            color: "oklch(0.40 0.01 265)",
+            color: "oklch(0.51 0 0)",
           }}
         >
           No practice attempts yet. Start a Practice session to see your error
@@ -152,16 +152,16 @@ function ErrorLog({ store }: { store: ReturnType<typeof loadStore> }) {
         .map(({ arch, attempts, accuracy, recentAttempts }) => {
           const accuracyColor =
             accuracy >= 80
-              ? "oklch(0.72 0.14 185)"
+              ? "oklch(0.44 0.15 150)"
               : accuracy >= 60
-                ? "oklch(0.78 0.17 65)"
-                : "oklch(0.62 0.22 25)";
+                ? "oklch(0.48 0.16 68)"
+                : "oklch(0.38 0.20 22)";
           return (
             <div
               key={arch.id}
               style={{
-                background: "oklch(0.17 0.012 265)",
-                border: "1px solid oklch(0.28 0.01 265)",
+                background: "oklch(1 0 0)",
+                border: "1px solid oklch(0.90 0.013 78)",
                 borderRadius: 4,
                 padding: 16,
               }}
@@ -176,10 +176,10 @@ function ErrorLog({ store }: { store: ReturnType<typeof loadStore> }) {
               >
                 <div
                   style={{
-                    fontFamily: "'IBM Plex Sans', sans-serif",
+                    fontFamily: "'Inter', system-ui, sans-serif",
                     fontSize: 14,
                     fontWeight: 600,
-                    color: "oklch(0.91 0.005 265)",
+                    color: "oklch(0.21 0 0)",
                   }}
                 >
                   {arch.shortName}
@@ -199,7 +199,7 @@ function ErrorLog({ store }: { store: ReturnType<typeof loadStore> }) {
                     style={{
                       fontFamily: "'JetBrains Mono', monospace",
                       fontSize: 11,
-                      color: "oklch(0.40 0.01 265)",
+                      color: "oklch(0.51 0 0)",
                     }}
                   >
                     {attempts.length} attempts
@@ -210,7 +210,7 @@ function ErrorLog({ store }: { store: ReturnType<typeof loadStore> }) {
               <div
                 style={{
                   height: 4,
-                  background: "oklch(0.22 0.01 265)",
+                  background: "oklch(0.90 0.013 78)",
                   borderRadius: 2,
                   overflow: "hidden",
                 }}
@@ -236,10 +236,10 @@ function ErrorLog({ store }: { store: ReturnType<typeof loadStore> }) {
                       borderRadius: "50%",
                       background:
                         a.rating === "correct"
-                          ? "oklch(0.72 0.14 185)"
+                          ? "oklch(0.44 0.15 150)"
                           : a.rating === "partial"
-                            ? "oklch(0.78 0.17 65)"
-                            : "oklch(0.62 0.22 25)",
+                            ? "oklch(0.48 0.16 68)"
+                            : "oklch(0.38 0.20 22)",
                     }}
                     title={a.rating}
                   />
@@ -286,8 +286,8 @@ function TrapMap({ store }: { store: ReturnType<typeof loadStore> }) {
     return (
       <div
         style={{
-          background: "oklch(0.17 0.012 265)",
-          border: "1px solid oklch(0.28 0.01 265)",
+          background: "oklch(1 0 0)",
+          border: "1px solid oklch(0.90 0.013 78)",
           borderRadius: 4,
           padding: 32,
           textAlign: "center",
@@ -297,7 +297,7 @@ function TrapMap({ store }: { store: ReturnType<typeof loadStore> }) {
           style={{
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 13,
-            color: "oklch(0.40 0.01 265)",
+            color: "oklch(0.51 0 0)",
           }}
         >
           No root causes logged yet. Rate attempts as Incorrect and tag root
@@ -313,9 +313,9 @@ function TrapMap({ store }: { store: ReturnType<typeof loadStore> }) {
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       <div
         style={{
-          fontFamily: "'IBM Plex Sans', sans-serif",
+          fontFamily: "'Inter', system-ui, sans-serif",
           fontSize: 13,
-          color: "oklch(0.45 0.01 265)",
+          color: "oklch(0.51 0 0)",
           marginBottom: 8,
         }}
       >
@@ -328,8 +328,8 @@ function TrapMap({ store }: { store: ReturnType<typeof loadStore> }) {
           <div
             key={rcId}
             style={{
-              background: "oklch(0.17 0.012 265)",
-              border: "1px solid oklch(0.28 0.01 265)",
+              background: "oklch(1 0 0)",
+              border: "1px solid oklch(0.90 0.013 78)",
               borderRadius: 4,
               padding: 14,
             }}
@@ -345,10 +345,10 @@ function TrapMap({ store }: { store: ReturnType<typeof loadStore> }) {
               <div>
                 <span
                   style={{
-                    fontFamily: "'IBM Plex Sans', sans-serif",
+                    fontFamily: "'Inter', system-ui, sans-serif",
                     fontSize: 13,
                     fontWeight: 600,
-                    color: "oklch(0.85 0.005 265)",
+                    color: "oklch(0.21 0 0)",
                   }}
                 >
                   {label}
@@ -357,7 +357,7 @@ function TrapMap({ store }: { store: ReturnType<typeof loadStore> }) {
                   style={{
                     fontFamily: "'JetBrains Mono', monospace",
                     fontSize: 10,
-                    color: "oklch(0.40 0.01 265)",
+                    color: "oklch(0.51 0 0)",
                     marginLeft: 8,
                   }}
                 >
@@ -369,7 +369,7 @@ function TrapMap({ store }: { store: ReturnType<typeof loadStore> }) {
                   fontFamily: "'JetBrains Mono', monospace",
                   fontSize: 13,
                   fontWeight: 700,
-                  color: "oklch(0.62 0.22 25)",
+                  color: "oklch(0.38 0.20 22)",
                 }}
               >
                 {count}×
@@ -378,7 +378,7 @@ function TrapMap({ store }: { store: ReturnType<typeof loadStore> }) {
             <div
               style={{
                 height: 4,
-                background: "oklch(0.22 0.01 265)",
+                background: "oklch(0.90 0.013 78)",
                 borderRadius: 2,
                 overflow: "hidden",
               }}
@@ -387,7 +387,7 @@ function TrapMap({ store }: { store: ReturnType<typeof loadStore> }) {
                 style={{
                   height: "100%",
                   width: `${barWidth}%`,
-                  background: "oklch(0.62 0.22 25)",
+                  background: "oklch(0.38 0.20 22)",
                   borderRadius: 2,
                 }}
               />
@@ -449,9 +449,9 @@ function PatchQueue({
     return (
       <div
         style={{
-          background: "oklch(0.17 0.012 265)",
-          border: "1px solid oklch(0.72 0.14 185 / 0.3)",
-          borderLeft: "3px solid oklch(0.72 0.14 185)",
+          background: "oklch(1 0 0)",
+          border: "1px solid oklch(0.44 0.15 150 / 0.15)",
+          borderLeft: "3px solid oklch(0.44 0.15 150)",
           borderRadius: "0 4px 4px 0",
           padding: 24,
         }}
@@ -460,7 +460,7 @@ function PatchQueue({
           style={{
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 13,
-            color: "oklch(0.72 0.14 185)",
+            color: "oklch(0.44 0.15 150)",
           }}
         >
           ✓ Patch queue is empty — no open errors.
@@ -483,9 +483,9 @@ function PatchQueue({
       >
         <div
           style={{
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 13,
-            color: "oklch(0.45 0.01 265)",
+            color: "oklch(0.51 0 0)",
           }}
         >
           {dueItems.length} due now / {laterItems.length} due later
@@ -496,18 +496,18 @@ function PatchQueue({
           style={{
             padding: "8px 14px",
             background:
-              dueItems.length > 0 ? "oklch(0.78 0.17 65)" : "transparent",
+              dueItems.length > 0 ? "oklch(0.21 0 0)" : "transparent",
             border: `1px solid ${
               dueItems.length > 0
-                ? "oklch(0.78 0.17 65)"
-                : "oklch(0.28 0.01 265)"
+                ? "oklch(0.21 0 0)"
+                : "oklch(0.90 0.013 78)"
             }`,
             borderRadius: 4,
             color:
               dueItems.length > 0
-                ? "oklch(0.13 0.01 265)"
-                : "oklch(0.40 0.01 265)",
-            fontFamily: "'IBM Plex Sans', sans-serif",
+                ? "oklch(1 0 0)"
+                : "oklch(0.51 0 0)",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 13,
             fontWeight: 700,
             cursor: dueItems.length > 0 ? "pointer" : "not-allowed",
@@ -518,9 +518,9 @@ function PatchQueue({
       </div>
       <div
         style={{
-          fontFamily: "'IBM Plex Sans', sans-serif",
+          fontFamily: "'Inter', system-ui, sans-serif",
           fontSize: 13,
-          color: "oklch(0.45 0.01 265)",
+          color: "oklch(0.51 0 0)",
           marginBottom: 4,
         }}
       >
@@ -540,14 +540,14 @@ function PatchQueue({
           <div
             key={item.id}
             style={{
-              background: "oklch(0.17 0.012 265)",
+              background: "oklch(1 0 0)",
               border: `1px solid ${
                 dueNow
-                  ? "oklch(0.62 0.22 25 / 0.3)"
-                  : "oklch(0.78 0.17 65 / 0.25)"
+                  ? "oklch(0.38 0.20 22 / 0.15)"
+                  : "oklch(0.21 0 0 / 0.15)"
               }`,
               borderLeft: `3px solid ${
-                dueNow ? "oklch(0.62 0.22 25)" : "oklch(0.78 0.17 65)"
+                dueNow ? "oklch(0.38 0.20 22)" : "oklch(0.21 0 0)"
               }`,
               borderRadius: "0 4px 4px 0",
               padding: 16,
@@ -564,10 +564,10 @@ function PatchQueue({
               <div style={{ minWidth: 0 }}>
                 <div
                   style={{
-                    fontFamily: "'IBM Plex Sans', sans-serif",
+                    fontFamily: "'Inter', system-ui, sans-serif",
                     fontSize: 14,
                     fontWeight: 600,
-                    color: "oklch(0.91 0.005 265)",
+                    color: "oklch(0.21 0 0)",
                   }}
                 >
                   {arch?.shortName ?? item.archetypeId}
@@ -575,9 +575,9 @@ function PatchQueue({
                 <div
                   style={{
                     marginTop: 4,
-                    fontFamily: "'IBM Plex Sans', sans-serif",
+                    fontFamily: "'Inter', system-ui, sans-serif",
                     fontSize: 12,
-                    color: "oklch(0.55 0.01 265)",
+                    color: "oklch(0.28 0 0)",
                     lineHeight: 1.5,
                   }}
                 >
@@ -589,8 +589,8 @@ function PatchQueue({
                   fontFamily: "'JetBrains Mono', monospace",
                   fontSize: 10,
                   color: dueNow
-                    ? "oklch(0.62 0.22 25)"
-                    : "oklch(0.40 0.01 265)",
+                    ? "oklch(0.38 0.20 22)"
+                    : "oklch(0.51 0 0)",
                 }}
               >
                 {dueLabel}
@@ -618,7 +618,7 @@ function PatchQueue({
                 style={{
                   fontFamily: "'JetBrains Mono', monospace",
                   fontSize: 10,
-                  color: "oklch(0.40 0.01 265)",
+                  color: "oklch(0.51 0 0)",
                 }}
               >
                 Latest: {lastAttempt.rating}
@@ -628,13 +628,21 @@ function PatchQueue({
                 style={{
                   padding: "6px 10px",
                   background: "transparent",
-                  border: "1px solid oklch(0.78 0.17 65 / 0.45)",
+                  border: "1px solid oklch(0.21 0 0 / 0.25)",
                   borderRadius: 4,
-                  color: "oklch(0.78 0.17 65)",
-                  fontFamily: "'IBM Plex Sans', sans-serif",
+                  color: "oklch(0.21 0 0)",
+                  fontFamily: "'Inter', system-ui, sans-serif",
                   fontSize: 12,
                   fontWeight: 700,
                   cursor: "pointer",
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = "oklch(0.21 0 0 / 0.06)";
+                  e.currentTarget.style.borderColor = "oklch(0.21 0 0 / 0.22)";
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.borderColor = "oklch(0.21 0 0 / 0.25)";
                 }}
               >
                 Mark by retest

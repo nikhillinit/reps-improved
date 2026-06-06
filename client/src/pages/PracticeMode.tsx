@@ -312,13 +312,13 @@ export default function PracticeMode() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <Zap size={16} style={{ color: "oklch(0.78 0.17 65)" }} />
+          <Zap size={16} style={{ color: "oklch(0.21 0 0)" }} />
           <h1
             style={{
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 18,
               fontWeight: 700,
-              color: "oklch(0.91 0.005 265)",
+              color: "oklch(0.21 0 0)",
             }}
           >
             Practice
@@ -327,9 +327,9 @@ export default function PracticeMode() {
             style={{
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 12,
-              color: "oklch(0.40 0.01 265)",
+              color: "oklch(0.51 0 0)",
               padding: "2px 8px",
-              border: "1px solid oklch(0.28 0.01 265)",
+              border: "1px solid oklch(0.90 0.013 78)",
               borderRadius: 3,
             }}
           >
@@ -340,7 +340,7 @@ export default function PracticeMode() {
           style={{
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 12,
-            color: "oklch(0.40 0.01 265)",
+            color: "oklch(0.51 0 0)",
           }}
         >
           {currentIdx + 1} / {queue.length}
@@ -351,7 +351,7 @@ export default function PracticeMode() {
       <div
         style={{
           height: 3,
-          background: "oklch(0.22 0.01 265)",
+          background: "oklch(0.90 0.013 78)",
           borderRadius: 2,
           marginBottom: 28,
           overflow: "hidden",
@@ -361,7 +361,7 @@ export default function PracticeMode() {
           style={{
             height: "100%",
             width: `${progress}%`,
-            background: "oklch(0.78 0.17 65)",
+            background: "oklch(0.21 0 0)",
             borderRadius: 2,
             transition: "width 300ms ease-out",
           }}
@@ -371,8 +371,8 @@ export default function PracticeMode() {
       {/* Stem */}
       <div
         style={{
-          background: "oklch(0.17 0.012 265)",
-          border: "1px solid oklch(0.28 0.01 265)",
+          background: "oklch(1 0 0)",
+          border: "1px solid oklch(0.90 0.013 78)",
           borderRadius: 4,
           padding: 24,
           marginBottom: 16,
@@ -383,9 +383,9 @@ export default function PracticeMode() {
         </div>
         <p
           style={{
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 16,
-            color: "oklch(0.88 0.005 265)",
+            color: "oklch(0.21 0 0)",
             lineHeight: 1.75,
           }}
         >
@@ -403,21 +403,21 @@ export default function PracticeMode() {
             gap: 8,
             padding: "10px 18px",
             background: "transparent",
-            border: "1px solid oklch(0.35 0.01 265)",
+            border: "1px solid oklch(0.90 0.013 78)",
             borderRadius: 4,
-            color: "oklch(0.55 0.01 265)",
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            color: "oklch(0.28 0 0)",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 13,
             cursor: "pointer",
             marginBottom: 20,
           }}
           onMouseEnter={e => {
-            e.currentTarget.style.borderColor = "oklch(0.78 0.17 65 / 0.5)";
-            e.currentTarget.style.color = "oklch(0.78 0.17 65)";
+            e.currentTarget.style.borderColor = "oklch(0.21 0 0 / 0.28)";
+            e.currentTarget.style.color = "oklch(0.21 0 0)";
           }}
           onMouseLeave={e => {
-            e.currentTarget.style.borderColor = "oklch(0.35 0.01 265)";
-            e.currentTarget.style.color = "oklch(0.55 0.01 265)";
+            e.currentTarget.style.borderColor = "oklch(0.90 0.013 78)";
+            e.currentTarget.style.color = "oklch(0.28 0 0)";
           }}
         >
           <Eye size={14} />
@@ -430,9 +430,9 @@ export default function PracticeMode() {
         <div>
           <div
             style={{
-              background: "oklch(0.17 0.012 265)",
-              border: "1px solid oklch(0.72 0.14 185 / 0.3)",
-              borderLeft: "3px solid oklch(0.72 0.14 185)",
+              background: "oklch(1 0 0)",
+              border: "1px solid oklch(0.44 0.15 150 / 0.15)",
+              borderLeft: "3px solid oklch(0.44 0.15 150)",
               borderRadius: "0 4px 4px 0",
               padding: 20,
               marginBottom: 16,
@@ -440,7 +440,7 @@ export default function PracticeMode() {
           >
             <div
               className="section-label"
-              style={{ marginBottom: 8, color: "oklch(0.72 0.14 185)" }}
+              style={{ marginBottom: 8, color: "oklch(0.44 0.15 150)" }}
             >
               ANSWER
             </div>
@@ -448,16 +448,16 @@ export default function PracticeMode() {
               className="formula-display"
               style={{
                 marginBottom: 10,
-                borderLeftColor: "oklch(0.72 0.14 185)",
+                borderLeftColor: "oklch(0.44 0.15 150)",
               }}
             >
               {stem?.answer}
             </div>
             <p
               style={{
-                fontFamily: "'IBM Plex Sans', sans-serif",
+                fontFamily: "'Inter', system-ui, sans-serif",
                 fontSize: 13,
-                color: "oklch(0.60 0.01 265)",
+                color: "oklch(0.28 0 0)",
               }}
             >
               {stem?.explanation}
@@ -467,8 +467,8 @@ export default function PracticeMode() {
           {/* Root causes (shown for incorrect/partial) */}
           <div
             style={{
-              background: "oklch(0.17 0.012 265)",
-              border: "1px solid oklch(0.28 0.01 265)",
+              background: "oklch(1 0 0)",
+              border: "1px solid oklch(0.90 0.013 78)",
               borderRadius: 4,
               padding: 16,
               marginBottom: 16,
@@ -481,19 +481,19 @@ export default function PracticeMode() {
               <RateButton
                 icon={<CheckCircle2 size={14} />}
                 label="Correct"
-                color="oklch(0.72 0.14 185)"
+                color="oklch(0.44 0.15 150)"
                 onClick={() => handleRate("correct")}
               />
               <RateButton
                 icon={<MinusCircle size={14} />}
                 label="Partial"
-                color="oklch(0.78 0.17 65)"
+                color="oklch(0.48 0.16 68)"
                 onClick={() => handleRate("partial")}
               />
               <RateButton
                 icon={<XCircle size={14} />}
                 label="Incorrect"
-                color="oklch(0.62 0.22 25)"
+                color="oklch(0.38 0.20 22)"
                 onClick={() => handleRate("incorrect")}
               />
             </div>
@@ -503,7 +503,7 @@ export default function PracticeMode() {
                   style={{
                     fontFamily: "'JetBrains Mono', monospace",
                     fontSize: 10,
-                    color: "oklch(0.40 0.01 265)",
+                    color: "oklch(0.51 0 0)",
                     letterSpacing: "0.08em",
                     marginBottom: 8,
                   }}
@@ -528,14 +528,14 @@ export default function PracticeMode() {
                         style={{
                           padding: "4px 10px",
                           background: isSelected
-                            ? "oklch(0.62 0.22 25 / 0.15)"
+                            ? "oklch(0.38 0.20 22 / 0.10)"
                             : "transparent",
-                          border: `1px solid ${isSelected ? "oklch(0.62 0.22 25 / 0.5)" : "oklch(0.28 0.01 265)"}`,
+                          border: `1px solid ${isSelected ? "oklch(0.38 0.20 22 / 0.28)" : "oklch(0.90 0.013 78)"}`,
                           borderRadius: 3,
                           color: isSelected
-                            ? "oklch(0.62 0.22 25)"
-                            : "oklch(0.45 0.01 265)",
-                          fontFamily: "'IBM Plex Sans', sans-serif",
+                            ? "oklch(0.38 0.20 22)"
+                            : "oklch(0.51 0 0)",
+                          fontFamily: "'Inter', system-ui, sans-serif",
                           fontSize: 12,
                           cursor: "pointer",
                           transition: "all 150ms",
@@ -578,7 +578,7 @@ function RateButton({
         border: `1px solid ${color} / 0.4`,
         borderRadius: 4,
         color,
-        fontFamily: "'IBM Plex Sans', sans-serif",
+        fontFamily: "'Inter', system-ui, sans-serif",
         fontSize: 13,
         fontWeight: 600,
         cursor: "pointer",
@@ -586,7 +586,7 @@ function RateButton({
       }}
       onMouseEnter={e => {
         e.currentTarget.style.background = `${color}`;
-        e.currentTarget.style.color = "oklch(0.13 0.01 265)";
+        e.currentTarget.style.color = "oklch(1 0 0)";
       }}
       onMouseLeave={e => {
         e.currentTarget.style.background = `${color} / 0.1`;
@@ -612,7 +612,7 @@ function SetupScreen({ onStart }: { onStart: (count: number) => void }) {
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 22,
             fontWeight: 700,
-            color: "oklch(0.91 0.005 265)",
+            color: "oklch(0.21 0 0)",
             marginBottom: 8,
           }}
         >
@@ -620,9 +620,9 @@ function SetupScreen({ onStart }: { onStart: (count: number) => void }) {
         </h1>
         <p
           style={{
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 14,
-            color: "oklch(0.55 0.01 265)",
+            color: "oklch(0.28 0 0)",
           }}
         >
           SRS-based practice. Reveal the answer, rate yourself, log root causes
@@ -631,8 +631,8 @@ function SetupScreen({ onStart }: { onStart: (count: number) => void }) {
       </div>
       <div
         style={{
-          background: "oklch(0.17 0.012 265)",
-          border: "1px solid oklch(0.28 0.01 265)",
+          background: "oklch(1 0 0)",
+          border: "1px solid oklch(0.90 0.013 78)",
           borderRadius: 4,
           padding: 20,
           marginBottom: 20,
@@ -648,11 +648,11 @@ function SetupScreen({ onStart }: { onStart: (count: number) => void }) {
               onClick={() => setCount(n)}
               style={{
                 padding: "8px 16px",
-                background: count === n ? "oklch(0.78 0.17 65)" : "transparent",
-                border: `1px solid ${count === n ? "oklch(0.78 0.17 65)" : "oklch(0.28 0.01 265)"}`,
+                background: count === n ? "oklch(0.21 0 0)" : "transparent",
+                border: `1px solid ${count === n ? "oklch(0.21 0 0)" : "oklch(0.90 0.013 78)"}`,
                 borderRadius: 4,
                 color:
-                  count === n ? "oklch(0.13 0.01 265)" : "oklch(0.55 0.01 265)",
+                  count === n ? "oklch(1 0 0)" : "oklch(0.28 0 0)",
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: 13,
                 fontWeight: 600,
@@ -666,12 +666,12 @@ function SetupScreen({ onStart }: { onStart: (count: number) => void }) {
         {(duePatchCount > 0 || dueCount > 0) && (
           <div
             style={{
-              fontFamily: "'IBM Plex Sans', sans-serif",
+              fontFamily: "'Inter', system-ui, sans-serif",
               fontSize: 12,
               color:
                 duePatchCount > 0
-                  ? "oklch(0.62 0.22 25)"
-                  : "oklch(0.72 0.14 185)",
+                  ? "oklch(0.38 0.20 22)"
+                  : "oklch(0.44 0.15 150)",
               marginTop: 10,
             }}
           >
@@ -688,20 +688,20 @@ function SetupScreen({ onStart }: { onStart: (count: number) => void }) {
           alignItems: "center",
           gap: 8,
           padding: "12px 24px",
-          background: "oklch(0.78 0.17 65)",
+          background: "oklch(0.21 0 0)",
           border: "none",
           borderRadius: 4,
-          color: "oklch(0.13 0.01 265)",
-          fontFamily: "'IBM Plex Sans', sans-serif",
+          color: "oklch(1 0 0)",
+          fontFamily: "'Inter', system-ui, sans-serif",
           fontSize: 14,
           fontWeight: 700,
           cursor: "pointer",
         }}
         onMouseEnter={e =>
-          (e.currentTarget.style.background = "oklch(0.65 0.14 65)")
+          (e.currentTarget.style.background = "oklch(0.14 0 0)")
         }
         onMouseLeave={e =>
-          (e.currentTarget.style.background = "oklch(0.78 0.17 65)")
+          (e.currentTarget.style.background = "oklch(0.21 0 0)")
         }
       >
         <Zap size={16} />
@@ -733,7 +733,7 @@ function ResultScreen({
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 22,
             fontWeight: 700,
-            color: "oklch(0.91 0.005 265)",
+            color: "oklch(0.21 0 0)",
             marginBottom: 4,
           }}
         >
@@ -752,7 +752,7 @@ function ResultScreen({
           <div
             className="stat-value"
             style={{
-              color: pct >= 80 ? "oklch(0.72 0.14 185)" : "oklch(0.78 0.17 65)",
+              color: pct >= 80 ? "oklch(0.44 0.15 150)" : "oklch(0.48 0.16 68)",
             }}
           >
             {pct}%
@@ -760,19 +760,19 @@ function ResultScreen({
           <div className="stat-label">Accuracy</div>
         </div>
         <div className="stat-card">
-          <div className="stat-value" style={{ color: "oklch(0.72 0.14 185)" }}>
+          <div className="stat-value" style={{ color: "oklch(0.44 0.15 150)" }}>
             {correct}
           </div>
           <div className="stat-label">Correct</div>
         </div>
         <div className="stat-card">
-          <div className="stat-value" style={{ color: "oklch(0.78 0.17 65)" }}>
+          <div className="stat-value" style={{ color: "oklch(0.48 0.16 68)" }}>
             {partial}
           </div>
           <div className="stat-label">Partial</div>
         </div>
         <div className="stat-card">
-          <div className="stat-value" style={{ color: "oklch(0.62 0.22 25)" }}>
+          <div className="stat-value" style={{ color: "oklch(0.38 0.20 22)" }}>
             {incorrect}
           </div>
           <div className="stat-label">Incorrect</div>
@@ -786,15 +786,21 @@ function ResultScreen({
             alignItems: "center",
             gap: 6,
             padding: "10px 20px",
-            background: "oklch(0.78 0.17 65)",
+            background: "oklch(0.21 0 0)",
             border: "none",
             borderRadius: 4,
-            color: "oklch(0.13 0.01 265)",
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            color: "oklch(1 0 0)",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 13,
             fontWeight: 600,
             cursor: "pointer",
           }}
+          onMouseEnter={e =>
+            (e.currentTarget.style.background = "oklch(0.14 0 0)")
+          }
+          onMouseLeave={e =>
+            (e.currentTarget.style.background = "oklch(0.21 0 0)")
+          }
         >
           Retry
         </button>
@@ -803,10 +809,10 @@ function ResultScreen({
           style={{
             padding: "10px 20px",
             background: "transparent",
-            border: "1px solid oklch(0.28 0.01 265)",
+            border: "1px solid oklch(0.90 0.013 78)",
             borderRadius: 4,
-            color: "oklch(0.55 0.01 265)",
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            color: "oklch(0.28 0 0)",
+            fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 13,
             cursor: "pointer",
           }}
